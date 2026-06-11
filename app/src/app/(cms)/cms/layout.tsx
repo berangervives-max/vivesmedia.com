@@ -5,11 +5,12 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
-  BookOpen, Star, Mail, Settings, LogOut, ChevronRight, Menu, X, ExternalLink
+  BookOpen, Star, Mail, BarChart3, LogOut, Menu, X, ExternalLink
 } from 'lucide-react'
 
 const NAV = [
   { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/cms/stats', label: 'Statistiques', icon: BarChart3 },
   { href: '/cms/clients', label: 'Clients', icon: Users },
   { href: '/cms/devis', label: 'Devis', icon: FileText },
   { href: '/cms/factures', label: 'Factures', icon: Receipt },
@@ -21,6 +22,7 @@ const NAV = [
 
 const SECTION_LABELS: Record<string, string> = {
   '/cms/dashboard': 'Dashboard',
+  '/cms/stats': 'Statistiques',
   '/cms/clients': 'Clients',
   '/cms/devis': 'Devis',
   '/cms/factures': 'Factures',
