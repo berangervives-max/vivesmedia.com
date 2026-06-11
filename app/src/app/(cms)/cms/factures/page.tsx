@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { facturesService } from '@/services/supabase.service'
 import { sendFacture } from '@/services/email.service'
 import type { Facture, FactureLigne } from '@/types'
-import { Plus, Trash2, Send, Pencil } from 'lucide-react'
+import { Plus, Trash2, Send, Pencil, Download, ExternalLink } from 'lucide-react'
+import { genererFacturePdf } from '@/lib/facture-pdf'
 
 const STATUTS = ['brouillon','envoyee','payee','en_retard','annulee'] as const
 const COLORS: Record<string, string> = {
@@ -171,11 +172,18 @@ export default function CmsFacturesPage() {
             <span style={{ color: '#10B981', fontWeight: 600 }}>{totalEncaisse.toFixed(0)} € encaissés</span>
           </p>
         </div>
-        <button onClick={() => open()}
-          className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white"
-          style={{ background: '#F4521E' }}>
-          <Plus className="w-4 h-4" /> Nouvelle facture
-        </button>
+        <div className="flex items-center gap-2">
+          <a href="https://app.pennylane.com" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>
+            Pennylane <ExternalLink className="w-3.5 h-3.5" />
+          </a>
+          <button onClick={() => open()}
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white"
+            style={{ background: '#F4521E' }}>
+            <Plus className="w-4 h-4" /> Nouvelle facture
+          </button>
+        </div>
       </div>
 
       <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
@@ -208,6 +216,7 @@ export default function CmsFacturesPage() {
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
                     {[
+                      { icon: Download, onClick: () => genererFacturePdf(f), hoverBg: 'rgba(244,82,30,.08)', hoverColor: '#F4521E' },
                       { icon: Pencil, onClick: () => open(f), hoverBg: '#F3F4F6', hoverColor: '#374151' },
                       { icon: Send, onClick: () => sendEmail(f), hoverBg: '#EFF6FF', hoverColor: '#3B82F6' },
                       { icon: Trash2, onClick: () => facturesService.delete(f.id).then(load), hoverBg: '#FEF2F2', hoverColor: '#EF4444' },

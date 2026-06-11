@@ -16,6 +16,8 @@ export default function CampagnesPage() {
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState('')
   const [preview, setPreview] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
 
   useEffect(() => {
     newsletterService.getAll()
@@ -26,6 +28,27 @@ export default function CampagnesPage() {
   const applyTemplate = (t: typeof TEMPLATES[number]) => {
     setSubject(t.subject)
     setBody(t.body)
+  }
+
+  const handleSend = async () => {
+    if (!subject || !body) { setResult({ ok: false, msg: 'Objet et message requis.' }); return }
+    if (!confirm(`Envoyer cette campagne à ${abonnes} abonné(s) ? Cette action est irréversible.`)) return
+    setSending(true); setResult(null)
+    try {
+      const res = await fetch('/api/cms/campagne', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ subject, body }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Erreur envoi')
+      setResult({ ok: true, msg: `Campagne envoyée à ${data.sent} abonné(s) ✓` })
+      setSubject(''); setBody('')
+    } catch (err) {
+      setResult({ ok: false, msg: err instanceof Error ? err.message : 'Erreur envoi' })
+    } finally {
+      setSending(false)
+    }
   }
 
   return (
@@ -40,10 +63,10 @@ export default function CampagnesPage() {
           <p className="text-2xl font-bold" style={{ color: '#111827' }}>{abonnes ?? '—'}</p>
           <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Destinataires actifs</p>
         </div>
-        <div className="rounded-xl p-5 sm:col-span-2 flex items-center gap-3" style={{ background: 'rgba(244,82,30,.06)', border: '1px solid rgba(244,82,30,.2)' }}>
-          <Info className="w-4 h-4 shrink-0" style={{ color: ORANGE }} />
-          <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>
-            L'envoi groupé via Resend sera branché à la connexion finale. Tu peux déjà préparer et prévisualiser tes campagnes — rien ne part tant que la connexion n'est pas activée.
+        <div className="rounded-xl p-5 sm:col-span-2 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+          <Info className="w-4 h-4 shrink-0" style={{ color: '#16A34A' }} />
+          <p className="text-xs leading-relaxed" style={{ color: '#166534' }}>
+            <strong>Envoi Resend connecté.</strong> La campagne part depuis contact@vivesmedia.com avec le template aux couleurs vivesmedia. Confirmation demandée avant chaque envoi — rien ne part par accident.
           </p>
         </div>
       </div>
@@ -74,14 +97,21 @@ export default function CampagnesPage() {
               style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
               <Eye className="w-4 h-4" /> {preview ? 'Masquer' : 'Prévisualiser'}
             </button>
-            <button disabled
-              title="Disponible après connexion Resend broadcast"
-              className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-lg text-white opacity-40 cursor-not-allowed"
+            <button onClick={handleSend} disabled={sending || !subject || !body || !abonnes}
+              className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
               style={{ background: ORANGE }}>
-              <Send className="w-4 h-4" /> Envoyer à {abonnes ?? '…'} abonné{(abonnes ?? 0) > 1 ? 's' : ''}
+              <Send className="w-4 h-4" /> {sending ? 'Envoi en cours…' : `Envoyer à ${abonnes ?? '…'} abonné${(abonnes ?? 0) > 1 ? 's' : ''}`}
             </button>
-            <span className="text-xs" style={{ color: '#9CA3AF' }}>Connexion à venir</span>
           </div>
+
+          {result && (
+            <div className="rounded-lg px-4 py-3 text-sm"
+              style={result.ok
+                ? { background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#166534' }
+                : { background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>
+              {result.msg}
+            </div>
+          )}
 
           {/* Préview */}
           {preview && (

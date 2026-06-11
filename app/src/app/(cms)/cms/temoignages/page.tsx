@@ -2,7 +2,28 @@
 import { useState, useEffect } from 'react'
 import { temoignagesService } from '@/services/supabase.service'
 import type { Temoignage } from '@/types'
-import { Plus, Pencil, Trash2, Star } from 'lucide-react'
+import { Plus, Pencil, Trash2, Star, ExternalLink, MessageSquarePlus } from 'lucide-react'
+
+function getGoogleReviewUrl(): string {
+  try {
+    const raw = localStorage.getItem('vivesmedia-cms-settings')
+    if (raw) return JSON.parse(raw).googleReviewUrl || ''
+  } catch { /* pas de settings */ }
+  return ''
+}
+
+function demanderAvisGoogle() {
+  const url = getGoogleReviewUrl()
+  if (!url) {
+    alert('Ajoute d\'abord ton lien Google Reviews dans Paramètres → Liens connectés.')
+    return
+  }
+  const sujet = encodeURIComponent('Un petit avis sur notre collaboration ? ⭐')
+  const corps = encodeURIComponent(
+    `Bonjour,\n\nJ'espère que votre site vous donne entière satisfaction !\n\nSi vous avez 2 minutes, un avis Google m'aiderait énormément à développer mon activité :\n${url}\n\nMerci beaucoup,\nBéranger Vives · vivesmedia.com`
+  )
+  window.open(`mailto:?subject=${sujet}&body=${corps}`)
+}
 
 const EMPTY: Omit<Temoignage, 'id' | 'created_at'> = { nom: '', entreprise: '', texte: '', note: 5, actif: true }
 
@@ -87,9 +108,26 @@ export default function CmsTemoignagesPage() {
           <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Témoignages</h1>
           <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>{items.length} témoignage(s)</p>
         </div>
-        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#F4521E' }}>
-          <Plus className="w-4 h-4" /> Nouveau
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={demanderAvisGoogle}
+            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}
+            title="Ouvre un email pré-rempli avec ton lien Google Reviews">
+            <MessageSquarePlus className="w-4 h-4" /> Demander un avis
+          </button>
+          <button onClick={() => {
+            const url = getGoogleReviewUrl()
+            if (url) window.open(url.replace('/review', ''), '_blank')
+            else alert('Ajoute ton lien Google Reviews dans Paramètres → Liens connectés.')
+          }}
+            className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors"
+            style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>
+            Page Google <ExternalLink className="w-3.5 h-3.5" />
+          </button>
+          <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#F4521E' }}>
+            <Plus className="w-4 h-4" /> Nouveau
+          </button>
+        </div>
       </div>
 
       {items.length === 0 && (

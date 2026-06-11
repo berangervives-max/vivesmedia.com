@@ -24,6 +24,30 @@ export default function TraficPage() {
   return (
     <div className="space-y-6">
 
+      {/* Les 3 outils de mesure */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        {[
+          { name: 'PostHog', state: 'Tracking actif — données qui s\'accumulent', stateOk: true, action: 'Clé API à fournir pour affichage ici', href: 'https://eu.posthog.com', role: 'Comportement : sessions, heatmaps, funnels, conversions' },
+          { name: 'Google Analytics 4', state: 'Non installé sur ce site', stateOk: false, action: 'Créer la propriété GA4 → me donner l\'ID G-XXXX', href: 'https://analytics.google.com', role: 'Trafic global : sources, audiences, acquisitions' },
+          { name: 'Search Console', state: 'À vérifier après bascule du domaine', stateOk: false, action: 'Propriété vivesmedia.com → vérification DNS', href: 'https://search.google.com/search-console', role: 'SEO : positions Google, clics, impressions, indexation' },
+        ].map(tool => (
+          <div key={tool.name} className="rounded-xl p-5 flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold" style={{ color: '#111827' }}>{tool.name}</p>
+              <span className="w-2 h-2 rounded-full" style={{ background: tool.stateOk ? '#16A34A' : '#F59E0B' }} />
+            </div>
+            <p className="text-xs leading-relaxed mb-2" style={{ color: '#6B7280' }}>{tool.role}</p>
+            <p className="text-[11px] mb-1" style={{ color: tool.stateOk ? '#16A34A' : '#D97706' }}>{tool.state}</p>
+            <p className="text-[11px] flex-1" style={{ color: '#9CA3AF' }}>{tool.action}</p>
+            <a href={tool.href} target="_blank" rel="noopener noreferrer"
+              className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
+              style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              Ouvrir {tool.name} <ExternalLink className="w-3 h-3" />
+            </a>
+          </div>
+        ))}
+      </div>
+
       {/* Bandeau connexion */}
       {!connected && (
         <div className="rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4"
@@ -32,16 +56,11 @@ export default function TraficPage() {
             <Plug className="w-5 h-5" />
           </div>
           <div className="flex-1">
-            <p className="text-sm font-bold" style={{ color: '#111827' }}>Connexion PostHog en attente</p>
+            <p className="text-sm font-bold" style={{ color: '#111827' }}>Affichage des données dans cette page</p>
             <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>
-              Le tracking est déjà actif sur le site (chaque visite est enregistrée). Il manque une clé API personnelle pour afficher les données ici.
+              PostHog enregistre déjà chaque visite. Pour afficher les chiffres ici, il manque une clé API personnelle (guide ci-dessous). GA4 et Search Console s'ajouteront après création des propriétés.
             </p>
           </div>
-          <a href="https://eu.posthog.com" target="_blank" rel="noopener noreferrer"
-            className="shrink-0 flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
-            style={{ background: ORANGE }}>
-            Ouvrir PostHog <ExternalLink className="w-3 h-3" />
-          </a>
         </div>
       )}
 
