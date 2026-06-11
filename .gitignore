@@ -1,0 +1,10 @@
+node_modules/
+.next/
+.vercel/
+.env
+.env.local
+.env*.local
+*.log
+.DS_Store
+# Le dossier frontend a son propre repo (vivesmedia.comv4 - Base44)
+frontend/

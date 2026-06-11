@@ -1,0 +1,59 @@
+'use client'
+import Link from 'next/link'
+import { ArrowUpRight, Star } from 'lucide-react'
+import { motion } from 'framer-motion'
+
+export default function HeroSection() {
+  return (
+    <section className="relative min-h-screen flex items-center pt-32 pb-20 bg-gradient-to-b from-[#f0eeff] via-background to-background">
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/10 blur-[140px]" />
+        <div className="absolute top-20 right-10 w-[300px] h-[300px] rounded-full bg-orange-200/30 blur-[100px]" />
+      </div>
+      <div className="relative max-w-7xl mx-auto px-6 text-center">
+        <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
+          className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-bold text-foreground leading-[1.05] tracking-tight">
+          Des sites qui convertissent vos{' '}
+          <span className="font-heading italic font-normal text-foreground">visiteurs en clients</span>
+        </motion.h1>
+        <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
+          className="mt-7 text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+          Sites sur-mesure, rapides, pensés pour convertir. Livraison en 3 semaines, full remote, partout en France.
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
+          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg"
+            style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            Lancer mon projet <ArrowUpRight className="w-4 h-4" />
+          </Link>
+          <a href="https://g.page/r/CVrzNHW-E9f0EAE/review" target="_blank" rel="noopener noreferrer"
+            className="flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity">
+            <div className="flex -space-x-2">
+              {[
+                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/42247233d_6a15c44f5826e1ea74a830ea_Ellipse24.jpg',
+                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/9fcc2f99a_6a15c44f5826e1ea74a830eb_Ellipse23.jpg',
+                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/0c5e109b4_6a15c44f5826e1ea74a830ec_Ellipse21.jpg',
+                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/3d0d5b02d_6a15c44f5826e1ea74a830ed_Ellipse22.jpg',
+              ].map((src, i) => (
+                <img key={i} src={src} alt="client" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
+              ))}
+            </div>
+            <div className="text-left">
+              <div className="flex items-center gap-0.5">{[1,2,3,4,5].map((i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
+              <p className="text-xs text-muted-foreground mt-0.5">+10 clients satisfaits</p>
+            </div>
+          </a>
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
+          className="mt-16 flex flex-wrap justify-center gap-12">
+          {[{ value: '5+', label: "ans d'expérience" }, { value: '10+', label: 'projets livrés' }, { value: '100%', label: 'full remote · France' }].map((stat) => (
+            <div key={stat.label} className="text-center">
+              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+              <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  )
+}
