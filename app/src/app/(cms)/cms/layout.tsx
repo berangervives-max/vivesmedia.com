@@ -5,32 +5,50 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase'
 import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
-  BookOpen, Star, Mail, BarChart3, LogOut, Menu, X, ExternalLink
+  BookOpen, Star, Mail, BarChart3, Globe, CalendarDays, Send,
+  Zap, Settings, LogOut, Menu, X, ExternalLink
 } from 'lucide-react'
 
-const NAV = [
-  { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/cms/stats', label: 'Statistiques', icon: BarChart3 },
-  { href: '/cms/clients', label: 'Clients', icon: Users },
-  { href: '/cms/devis', label: 'Devis', icon: FileText },
-  { href: '/cms/factures', label: 'Factures', icon: Receipt },
-  { href: '/cms/commandes', label: 'Commandes', icon: ShoppingBag },
-  { href: '/cms/articles', label: 'Articles', icon: BookOpen },
-  { href: '/cms/temoignages', label: 'Témoignages', icon: Star },
-  { href: '/cms/newsletter', label: 'Newsletter', icon: Mail },
+const NAV_SECTIONS = [
+  {
+    label: 'Pilotage',
+    items: [
+      { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/cms/stats', label: 'Statistiques', icon: BarChart3 },
+      { href: '/cms/trafic', label: 'Trafic web', icon: Globe },
+    ],
+  },
+  {
+    label: 'Ventes',
+    items: [
+      { href: '/cms/devis', label: 'Devis', icon: FileText },
+      { href: '/cms/clients', label: 'Clients', icon: Users },
+      { href: '/cms/factures', label: 'Factures', icon: Receipt },
+      { href: '/cms/commandes', label: 'Commandes', icon: ShoppingBag },
+    ],
+  },
+  {
+    label: 'Marketing',
+    items: [
+      { href: '/cms/articles', label: 'Articles', icon: BookOpen },
+      { href: '/cms/temoignages', label: 'Témoignages', icon: Star },
+      { href: '/cms/newsletter', label: 'Newsletter', icon: Mail },
+      { href: '/cms/campagnes', label: 'Campagnes', icon: Send },
+    ],
+  },
+  {
+    label: 'Outils',
+    items: [
+      { href: '/cms/agenda', label: 'Agenda & RDV', icon: CalendarDays },
+      { href: '/cms/automations', label: 'Automatisations', icon: Zap },
+      { href: '/cms/settings', label: 'Paramètres', icon: Settings },
+    ],
+  },
 ]
 
-const SECTION_LABELS: Record<string, string> = {
-  '/cms/dashboard': 'Dashboard',
-  '/cms/stats': 'Statistiques',
-  '/cms/clients': 'Clients',
-  '/cms/devis': 'Devis',
-  '/cms/factures': 'Factures',
-  '/cms/commandes': 'Commandes',
-  '/cms/articles': 'Articles',
-  '/cms/temoignages': 'Témoignages',
-  '/cms/newsletter': 'Newsletter',
-}
+const SECTION_LABELS: Record<string, string> = Object.fromEntries(
+  NAV_SECTIONS.flatMap(s => s.items.map(i => [i.href, i.label]))
+)
 
 export default function CmsLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -79,29 +97,33 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
           </button>
         </div>
 
-        {/* Nav label */}
-        <div className="px-5 pt-5 pb-2">
-          <p className="text-xs font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,.25)' }}>Navigation</p>
-        </div>
-
-        {/* Nav items */}
-        <nav className="flex-1 px-3 space-y-0.5 overflow-y-auto pb-4">
-          {NAV.map(({ href, label, icon: Icon }) => {
-            const active = pathname === href
-            return (
-              <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
-                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-150"
-                style={{
-                  background: active ? 'rgba(244,82,30,.15)' : 'transparent',
-                  color: active ? '#F4521E' : 'rgba(255,255,255,.5)',
-                  fontWeight: active ? 600 : 400,
-                }}>
-                <Icon className="w-4 h-4 shrink-0" />
-                <span className="flex-1">{label}</span>
-                {active && <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#F4521E' }} />}
-              </Link>
-            )
-          })}
+        {/* Nav sections */}
+        <nav className="flex-1 px-3 overflow-y-auto pb-4 pt-2">
+          {NAV_SECTIONS.map(section => (
+            <div key={section.label} className="mb-1">
+              <p className="px-2 pt-4 pb-1.5 text-[10px] font-semibold uppercase tracking-widest" style={{ color: 'rgba(255,255,255,.25)' }}>
+                {section.label}
+              </p>
+              <div className="space-y-0.5">
+                {section.items.map(({ href, label, icon: Icon }) => {
+                  const active = pathname === href
+                  return (
+                    <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
+                      className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150"
+                      style={{
+                        background: active ? 'rgba(244,82,30,.15)' : 'transparent',
+                        color: active ? '#F4521E' : 'rgba(255,255,255,.5)',
+                        fontWeight: active ? 600 : 400,
+                      }}>
+                      <Icon className="w-4 h-4 shrink-0" />
+                      <span className="flex-1">{label}</span>
+                      {active && <div className="w-1.5 h-1.5 rounded-full" style={{ background: '#F4521E' }} />}
+                    </Link>
+                  )
+                })}
+              </div>
+            </div>
+          ))}
         </nav>
 
         {/* Footer */}
@@ -132,7 +154,6 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
             <Menu className="w-5 h-5" />
           </button>
 
-          {/* Breadcrumb */}
           <div className="flex items-center gap-2 text-sm">
             <span style={{ color: '#9CA3AF' }}>CMS</span>
             <span style={{ color: '#D1D5DB' }}>/</span>
@@ -148,14 +169,12 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
             Voir le site
           </Link>
 
-          {/* Avatar */}
           <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0"
             style={{ background: '#F4521E' }}>
             B
           </div>
         </header>
 
-        {/* PAGE CONTENT */}
         <main className="flex-1 p-6">{children}</main>
       </div>
     </div>
