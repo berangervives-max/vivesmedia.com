@@ -58,11 +58,13 @@ async function getAccessToken(scope: string): Promise<string | null> {
 }
 
 export type GscRow = { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }
+export type DayPoint = { date: string; [k: string]: number | string }
 export type GscData = {
   available: boolean
   totals: { clicks: number; impressions: number; ctr: number; position: number }
   topQueries: GscRow[]
   topPages: GscRow[]
+  series: DayPoint[]
 }
 
 function dateStr(daysAgo: number): string {
@@ -80,17 +82,18 @@ async function gscQuery(token: string, body: object): Promise<{ rows?: GscRow[] 
 
 /** Données Search Console sur les 28 derniers jours (J-3 → J-31, délai Google). */
 export async function getGscData(): Promise<GscData> {
-  const empty: GscData = { available: false, totals: { clicks: 0, impressions: 0, ctr: 0, position: 0 }, topQueries: [], topPages: [] }
+  const empty: GscData = { available: false, totals: { clicks: 0, impressions: 0, ctr: 0, position: 0 }, topQueries: [], topPages: [], series: [] }
   const token = await getAccessToken('https://www.googleapis.com/auth/webmasters.readonly')
   if (!token) return empty
 
   const startDate = dateStr(31)
   const endDate = dateStr(3)
 
-  const [totalsRes, queriesRes, pagesRes] = await Promise.all([
+  const [totalsRes, queriesRes, pagesRes, dateRes] = await Promise.all([
     gscQuery(token, { startDate, endDate }),
-    gscQuery(token, { startDate, endDate, dimensions: ['query'], rowLimit: 10 }),
+    gscQuery(token, { startDate, endDate, dimensions: ['query'], rowLimit: 25 }),
     gscQuery(token, { startDate, endDate, dimensions: ['page'], rowLimit: 10 }),
+    gscQuery(token, { startDate, endDate, dimensions: ['date'], rowLimit: 60 }),
   ])
 
   const t = totalsRes.rows?.[0]
@@ -101,6 +104,7 @@ export async function getGscData(): Promise<GscData> {
       : { clicks: 0, impressions: 0, ctr: 0, position: 0 },
     topQueries: queriesRes.rows ?? [],
     topPages: pagesRes.rows ?? [],
+    series: (dateRes.rows ?? []).map((r) => ({ date: r.keys[0].slice(5), clics: r.clicks, impressions: r.impressions })),
   }
 }
 
@@ -110,6 +114,8 @@ export type Ga4Data = {
   realtimeUsers: number
   last7: { activeUsers: number; sessions: number; pageViews: number }
   last30: { activeUsers: number; sessions: number; pageViews: number }
+  trendSessionsPct: number
+  series: DayPoint[]
   topSources: { source: string; sessions: number }[]
   topPages: { path: string; views: number }[]
 }
@@ -123,14 +129,15 @@ async function ga4Report(token: string, body: object): Promise<{ rows?: { dimens
 
 /** Données GA4 (trafic + temps réel). Renvoie available:false tant que la Data API n'est pas activée. */
 export async function getGa4Data(): Promise<Ga4Data> {
-  const empty: Ga4Data = { available: false, realtimeUsers: 0, last7: { activeUsers: 0, sessions: 0, pageViews: 0 }, last30: { activeUsers: 0, sessions: 0, pageViews: 0 }, topSources: [], topPages: [] }
+  const empty: Ga4Data = { available: false, realtimeUsers: 0, last7: { activeUsers: 0, sessions: 0, pageViews: 0 }, last30: { activeUsers: 0, sessions: 0, pageViews: 0 }, trendSessionsPct: 0, series: [], topSources: [], topPages: [] }
   const token = await getAccessToken('https://www.googleapis.com/auth/analytics.readonly')
   if (!token) return empty
 
   const metrics = [{ name: 'activeUsers' }, { name: 'sessions' }, { name: 'screenPageViews' }]
-  const [r7, r30, sources, pages, rt] = await Promise.all([
+  const [r7, r30, daily, sources, pages, rt] = await Promise.all([
     ga4Report(token, { dateRanges: [{ startDate: '7daysAgo', endDate: 'today' }], metrics }),
     ga4Report(token, { dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }], metrics }),
+    ga4Report(token, { dateRanges: [{ startDate: '29daysAgo', endDate: 'today' }], dimensions: [{ name: 'date' }], metrics: [{ name: 'sessions' }, { name: 'activeUsers' }], orderBys: [{ dimension: { dimensionName: 'date' } }] }),
     ga4Report(token, { dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }], dimensions: [{ name: 'sessionDefaultChannelGroup' }], metrics: [{ name: 'sessions' }], limit: 6 }),
     ga4Report(token, { dateRanges: [{ startDate: '30daysAgo', endDate: 'today' }], dimensions: [{ name: 'pagePath' }], metrics: [{ name: 'screenPageViews' }], limit: 8, orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }] }),
     fetch(`https://analyticsdata.googleapis.com/v1beta/properties/${GA4_PROPERTY_ID}:runRealtimeReport`, {
@@ -144,12 +151,165 @@ export async function getGa4Data(): Promise<Ga4Data> {
   }
 
   const m = (r: typeof r7, i: number) => Number(r.rows?.[0]?.metricValues?.[i]?.value ?? 0)
+  const series: DayPoint[] = (daily.rows ?? []).map((row) => {
+    const d = row.dimensionValues?.[0]?.value ?? '' // YYYYMMDD
+    return { date: `${d.slice(4, 6)}-${d.slice(6, 8)}`, sessions: Number(row.metricValues[0].value), visiteurs: Number(row.metricValues[1].value) }
+  })
+  // tendance : 7 derniers jours vs 7 précédents (sur la série)
+  const ses = series.map((p) => Number(p.sessions))
+  const last7 = ses.slice(-7).reduce((a, b) => a + b, 0)
+  const prev7 = ses.slice(-14, -7).reduce((a, b) => a + b, 0)
+  const trendSessionsPct = prev7 > 0 ? Math.round(((last7 - prev7) / prev7) * 100) : 0
+
   return {
     available: true,
     realtimeUsers: Number((rt as { rows?: { metricValues: { value: string }[] }[] }).rows?.[0]?.metricValues?.[0]?.value ?? 0),
     last7: { activeUsers: m(r7, 0), sessions: m(r7, 1), pageViews: m(r7, 2) },
     last30: { activeUsers: m(r30, 0), sessions: m(r30, 1), pageViews: m(r30, 2) },
+    trendSessionsPct,
+    series,
     topSources: (sources.rows ?? []).map((row) => ({ source: row.dimensionValues?.[0]?.value ?? '—', sessions: Number(row.metricValues[0].value) })),
     topPages: (pages.rows ?? []).map((row) => ({ path: row.dimensionValues?.[0]?.value ?? '—', views: Number(row.metricValues[0].value) })),
+  }
+}
+
+export type PostHogData = {
+  available: boolean
+  pageViews30: number
+  visitors30: number
+  events24h: number
+  viewsPerVisitor: number
+  topPages: { path: string; views: number }[]
+  topEvents: { event: string; count: number }[]
+  series: DayPoint[]
+  devices: { device: string; sessions: number }[]
+}
+
+async function hogql(sql: string): Promise<unknown[][] | null> {
+  const key = process.env.POSTHOG_PERSONAL_API_KEY
+  const pid = process.env.POSTHOG_PROJECT_ID
+  if (!key || !pid) return null
+  const res = await fetch(`https://eu.posthog.com/api/projects/${pid}/query/`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: { kind: 'HogQLQuery', query: sql } }),
+  })
+  if (!res.ok) return null
+  const json = (await res.json()) as { results?: unknown[][] }
+  return json.results ?? null
+}
+
+export type Insight = {
+  severity: 'opportunity' | 'warning' | 'good'
+  title: string
+  detail: string
+  action: string
+}
+
+/** Génère des axes d'amélioration concrets à partir des données réelles. */
+export function buildInsights(gsc: GscData, ga4: Ga4Data, ph: PostHogData): Insight[] {
+  const out: Insight[] = []
+
+  // 1. Mots-clés en page 2 (position 8-20) avec impressions = opportunités de remontée
+  const page2 = gsc.topQueries
+    .filter((q) => q.position > 7.5 && q.position <= 20 && q.impressions >= 3)
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 3)
+  for (const q of page2) {
+    out.push({
+      severity: 'opportunity',
+      title: `« ${q.keys[0]} » est en position ${q.position.toFixed(0)}`,
+      detail: `${q.impressions} impressions mais seulement ${q.clicks} clic(s). Tu es à la porte de la page 1.`,
+      action: `Crée/enrichis une page dédiée à « ${q.keys[0] }» (titre, H1, contenu) pour gagner des places.`,
+    })
+  }
+
+  // 2. Fort potentiel : beaucoup d'impressions, CTR faible, déjà en page 1
+  const lowCtr = gsc.topQueries
+    .filter((q) => q.position <= 10 && q.impressions >= 10 && q.ctr < 0.03)
+    .sort((a, b) => b.impressions - a.impressions)
+    .slice(0, 2)
+  for (const q of lowCtr) {
+    out.push({
+      severity: 'warning',
+      title: `CTR faible sur « ${q.keys[0]} »`,
+      detail: `Position ${q.position.toFixed(1)}, ${q.impressions} impressions, mais CTR de ${(q.ctr * 100).toFixed(1)} %.`,
+      action: `Réécris le titre et la meta description de la page pour donner plus envie de cliquer.`,
+    })
+  }
+
+  // 3. Tendance de trafic GA4
+  if (ga4.available) {
+    if (ga4.trendSessionsPct >= 15) {
+      out.push({ severity: 'good', title: `Trafic en hausse de ${ga4.trendSessionsPct} %`, detail: `Tes sessions des 7 derniers jours dépassent la semaine précédente.`, action: `Identifie quelle source/page a porté cette hausse et capitalise dessus.` })
+    } else if (ga4.trendSessionsPct <= -15) {
+      out.push({ severity: 'warning', title: `Trafic en baisse de ${Math.abs(ga4.trendSessionsPct)} %`, detail: `Tes sessions reculent vs la semaine précédente.`, action: `Publie un contenu/post LinkedIn et vérifie qu'aucune page clé n'a chuté dans Google.` })
+    }
+  }
+
+  // 4. Dépendance au trafic Direct (peu d'acquisition)
+  const total = ga4.topSources.reduce((a, s) => a + s.sessions, 0)
+  const direct = ga4.topSources.find((s) => /direct/i.test(s.source))
+  if (total > 0 && direct && direct.sessions / total > 0.7) {
+    out.push({
+      severity: 'opportunity',
+      title: 'Trafic très dépendant du « Direct »',
+      detail: `${Math.round((direct.sessions / total) * 100)} % de tes sessions sont en accès direct — peu d'acquisition SEO/réseaux.`,
+      action: `Travaille le SEO (contenus ciblés) et poste régulièrement sur LinkedIn/Instagram pour diversifier tes sources.`,
+    })
+  }
+
+  // 5. Page star à capitaliser
+  if (gsc.topPages[0] && gsc.topPages[0].clicks > 0) {
+    const p = gsc.topPages[0]
+    out.push({
+      severity: 'good',
+      title: `Ta page la plus performante`,
+      detail: `${p.keys[0].replace('https://vivesmedia.com', '') || '/'} génère ${p.clicks} clics et ${p.impressions} impressions.`,
+      action: `Ajoute des liens internes depuis cette page vers tes pages services pour diffuser son autorité.`,
+    })
+  }
+
+  // 6. Indexation jeune
+  if (gsc.totals.impressions < 50) {
+    out.push({
+      severity: 'opportunity',
+      title: 'Site récemment (ré)indexé',
+      detail: `Encore peu d'impressions Google — c'est normal après la bascule. Les données vont monter.`,
+      action: `Demande l'indexation de tes pages clés dans Search Console et publie 1 article de blog par semaine.`,
+    })
+  }
+
+  return out.slice(0, 6)
+}
+
+/** Stats PostHog (comportement) : KPIs, courbe d'activité, événements, devices. */
+export async function getPostHogData(): Promise<PostHogData> {
+  const empty: PostHogData = { available: false, pageViews30: 0, visitors30: 0, events24h: 0, viewsPerVisitor: 0, topPages: [], topEvents: [], series: [], devices: [] }
+  try {
+    const [totals, recent, top, events, daily, devices] = await Promise.all([
+      hogql("SELECT count() AS pv, count(DISTINCT person_id) AS v FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT count() AS c FROM events WHERE timestamp > now() - INTERVAL 24 HOUR"),
+      hogql("SELECT properties.$pathname AS path, count() AS views FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY path ORDER BY views DESC LIMIT 6"),
+      hogql("SELECT event, count() AS c FROM events WHERE timestamp > now() - INTERVAL 30 DAY GROUP BY event ORDER BY c DESC LIMIT 8"),
+      hogql("SELECT toDate(timestamp) AS d, count() AS pv, count(DISTINCT person_id) AS v FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY d ORDER BY d"),
+      hogql("SELECT properties.$device_type AS device, count(DISTINCT $session_id) AS s FROM events WHERE timestamp > now() - INTERVAL 30 DAY AND device != '' GROUP BY device ORDER BY s DESC LIMIT 4"),
+    ])
+    if (!totals) return empty
+    const pv = Number(totals[0]?.[0] ?? 0)
+    const v = Number(totals[0]?.[1] ?? 0)
+    return {
+      available: true,
+      pageViews30: pv,
+      visitors30: v,
+      events24h: Number(recent?.[0]?.[0] ?? 0),
+      viewsPerVisitor: v > 0 ? Math.round((pv / v) * 10) / 10 : 0,
+      topPages: (top ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', views: Number(row[1]) })),
+      topEvents: (events ?? []).map((row) => ({ event: String(row[0] ?? '').replace(/^\$/, ''), count: Number(row[1]) })),
+      series: (daily ?? []).map((row) => ({ date: String(row[0] ?? '').slice(5), vues: Number(row[1]), visiteurs: Number(row[2]) })),
+      devices: (devices ?? []).map((row) => ({ device: String(row[0] ?? '—') || '—', sessions: Number(row[1]) })),
+    }
+  } catch {
+    return empty
   }
 }
