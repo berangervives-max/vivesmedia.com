@@ -1,8 +1,16 @@
 'use client'
-import { CalendarDays, Video, Phone, ExternalLink, Clock, CheckCircle2 } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { CalendarDays, Video, Phone, ExternalLink, Clock, CheckCircle2, CalendarPlus } from 'lucide-react'
 
 const ORANGE = '#F4521E'
-const CALENDLY_URL = 'https://calendly.com/vivesmedia'
+
+type AgendaLinks = { calendlyUrl: string; calcomUrl: string; googleAgendaUrl: string }
+
+const DEFAULT_LINKS: AgendaLinks = {
+  calendlyUrl: 'https://calendly.com/vivesmedia',
+  calcomUrl: '',
+  googleAgendaUrl: 'https://calendar.google.com/calendar/r/eventedit?text=Appel%20d%C3%A9couverte%20vivesmedia&description=Appel%20d%C3%A9couverte%2030%20minutes%20avec%20vivesmedia.com%20-%20Full%20remote',
+}
 
 const RDV_TYPES = [
   { icon: Phone, label: 'Appel découverte', duree: '30 min', desc: 'Premier contact prospect — comprendre le besoin, qualifier le projet.' },
@@ -11,33 +19,83 @@ const RDV_TYPES = [
 ]
 
 export default function AgendaPage() {
+  const [links, setLinks] = useState<AgendaLinks>(DEFAULT_LINKS)
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('vivesmedia-cms-settings')
+      if (raw) {
+        const s = JSON.parse(raw)
+        setLinks({
+          calendlyUrl: s.calendlyUrl || DEFAULT_LINKS.calendlyUrl,
+          calcomUrl: s.calcomUrl || '',
+          googleAgendaUrl: s.googleAgendaUrl || DEFAULT_LINKS.googleAgendaUrl,
+        })
+      }
+    } catch { /* défauts conservés */ }
+  }, [])
+
+  const TOOLS = [
+    {
+      name: 'Calendly',
+      connected: Boolean(links.calendlyUrl),
+      role: 'Réservation publique — tes prospects choisissent leur créneau, le RDV tombe dans ton agenda. Visio Google Meet générée automatiquement.',
+      href: links.calendlyUrl,
+      manage: 'https://calendly.com/app/scheduled_events/user/me',
+      manageLabel: 'Mes RDV Calendly',
+    },
+    {
+      name: 'Google Agenda + Meet',
+      connected: Boolean(links.googleAgendaUrl),
+      role: 'Création directe d\'un RDV avec visio Google Meet — pour caler un rendez-vous toi-même avec un client (lien identique à celui de l\'ancien site).',
+      href: links.googleAgendaUrl,
+      manage: 'https://calendar.google.com',
+      manageLabel: 'Ouvrir mon agenda',
+    },
+    {
+      name: 'cal.com',
+      connected: Boolean(links.calcomUrl),
+      role: 'Alternative open-source à Calendly. Renseigne ton lien cal.com dans Paramètres → Liens connectés pour l\'activer ici.',
+      href: links.calcomUrl || 'https://app.cal.com',
+      manage: 'https://app.cal.com/bookings/upcoming',
+      manageLabel: 'Mes RDV cal.com',
+    },
+  ]
+
   return (
     <div className="space-y-6">
 
-      {/* Statut connecté */}
-      <div className="rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4"
-        style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#DCFCE7', color: '#16A34A' }}>
-          <CheckCircle2 className="w-5 h-5" />
-        </div>
-        <div className="flex-1">
-          <p className="text-sm font-bold" style={{ color: '#166534' }}>Calendly connecté — calendly.com/vivesmedia</p>
-          <p className="text-xs mt-0.5" style={{ color: '#15803D' }}>
-            Tes prospects peuvent réserver directement. Les RDV arrivent dans ton Google Agenda synchronisé à Calendly.
-          </p>
-        </div>
-        <div className="flex gap-2 shrink-0">
-          <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90"
-            style={{ background: ORANGE }}>
-            Page de réservation <ExternalLink className="w-3 h-3" />
-          </a>
-          <a href="https://calendly.com/app/scheduled_events/user/me" target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-2 text-xs font-semibold px-4 py-2.5 rounded-lg transition-colors"
-            style={{ border: '1px solid #BBF7D0', color: '#166534' }}>
-            Mes RDV Calendly <ExternalLink className="w-3 h-3" />
-          </a>
-        </div>
+      {/* Les 3 outils de réservation */}
+      <div className="grid sm:grid-cols-3 gap-4">
+        {TOOLS.map(tool => (
+          <div key={tool.name} className="rounded-xl p-5 flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-sm font-bold" style={{ color: '#111827' }}>{tool.name}</p>
+              {tool.connected ? (
+                <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#DCFCE7', color: '#16A34A' }}>
+                  <CheckCircle2 className="w-2.5 h-2.5" /> Connecté
+                </span>
+              ) : (
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#FEF3C7', color: '#D97706' }}>
+                  À configurer
+                </span>
+              )}
+            </div>
+            <p className="text-xs leading-relaxed flex-1 mb-3" style={{ color: '#6B7280' }}>{tool.role}</p>
+            <div className="flex flex-col gap-1.5">
+              <a href={tool.href} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
+                style={{ background: tool.connected ? ORANGE : '#9CA3AF' }}>
+                {tool.name === 'Google Agenda + Meet' ? <><CalendarPlus className="w-3 h-3" /> Créer un RDV</> : <>Page de réservation <ExternalLink className="w-3 h-3" /></>}
+              </a>
+              <a href={tool.manage} target="_blank" rel="noopener noreferrer"
+                className="flex items-center justify-center gap-2 text-xs font-medium px-4 py-2 rounded-lg transition-colors"
+                style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>
+                {tool.manageLabel} <ExternalLink className="w-3 h-3" />
+              </a>
+            </div>
+          </div>
+        ))}
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
@@ -47,12 +105,12 @@ export default function AgendaPage() {
           <div className="px-6 pt-5 pb-3">
             <div className="flex items-center gap-2">
               <CalendarDays className="w-4 h-4" style={{ color: ORANGE }} />
-              <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Ta page de réservation en direct</h2>
+              <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Ta page de réservation Calendly en direct</h2>
             </div>
             <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Exactement ce que voient tes prospects</p>
           </div>
           <iframe
-            src={`${CALENDLY_URL}?embed_domain=app-indol-kappa-58.vercel.app&embed_type=Inline&hide_gdpr_banner=1`}
+            src={`${links.calendlyUrl}?embed_type=Inline&hide_gdpr_banner=1`}
             className="w-full"
             style={{ height: 620, border: 'none' }}
             title="Calendly — réservation vivesmedia.com"
@@ -62,7 +120,7 @@ export default function AgendaPage() {
         {/* Types de RDV */}
         <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
           <h2 className="font-bold text-sm mb-1" style={{ color: '#111827' }}>Types de RDV recommandés</h2>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>À créer dans Calendly si absent</p>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>À créer dans tes outils si absent</p>
           <div className="space-y-3">
             {RDV_TYPES.map(t => (
               <div key={t.label} className="p-3.5 rounded-lg" style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
@@ -78,18 +136,10 @@ export default function AgendaPage() {
             ))}
           </div>
 
-          <div className="mt-5 pt-4 space-y-2" style={{ borderTop: '1px solid #F1F3F5' }}>
-            <p className="text-xs font-semibold" style={{ color: '#374151' }}>Raccourcis</p>
-            <a href="https://calendly.com/app/availability/schedules" target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-between text-xs p-2.5 rounded-lg transition-colors hover:bg-gray-50"
-              style={{ color: '#6B7280', border: '1px solid #F1F3F5' }}>
-              Gérer mes disponibilités <ExternalLink className="w-3 h-3" />
-            </a>
-            <a href="https://calendar.google.com" target="_blank" rel="noopener noreferrer"
-              className="flex items-center justify-between text-xs p-2.5 rounded-lg transition-colors hover:bg-gray-50"
-              style={{ color: '#6B7280', border: '1px solid #F1F3F5' }}>
-              Google Agenda <ExternalLink className="w-3 h-3" />
-            </a>
+          <div className="mt-5 pt-4" style={{ borderTop: '1px solid #F1F3F5' }}>
+            <p className="text-xs leading-relaxed" style={{ color: '#9CA3AF' }}>
+              💡 Les liens de ces 3 outils se modifient dans <strong>Paramètres → Liens connectés</strong>.
+            </p>
           </div>
         </div>
       </div>

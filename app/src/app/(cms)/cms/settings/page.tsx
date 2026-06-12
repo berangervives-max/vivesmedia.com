@@ -17,6 +17,8 @@ type Settings = {
   delaiPaiement: string
   googleReviewUrl: string
   calendlyUrl: string
+  calcomUrl: string
+  googleAgendaUrl: string
 }
 
 const DEFAULTS: Settings = {
@@ -30,7 +32,9 @@ const DEFAULTS: Settings = {
   mentionsFacture: 'Paiement à réception. Pénalités de retard : 3× le taux d\'intérêt légal. Indemnité forfaitaire de recouvrement : 40€.',
   delaiPaiement: '30',
   googleReviewUrl: '',
-  calendlyUrl: '',
+  calendlyUrl: 'https://calendly.com/vivesmedia',
+  calcomUrl: '',
+  googleAgendaUrl: 'https://calendar.google.com/calendar/r/eventedit?text=Appel%20d%C3%A9couverte%20vivesmedia&description=Appel%20d%C3%A9couverte%2030%20minutes%20avec%20vivesmedia.com%20-%20Full%20remote',
 }
 
 function Field({ label, value, onChange, placeholder, textarea }: {
@@ -111,7 +115,9 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-4">
           <Field label="Lien avis Google" value={s.googleReviewUrl} onChange={set('googleReviewUrl')} placeholder="https://g.page/r/XXXX/review" />
-          <Field label="Lien Calendly" value={s.calendlyUrl} onChange={set('calendlyUrl')} placeholder="https://calendly.com/berangervives/appel-decouverte" />
+          <Field label="Lien Calendly" value={s.calendlyUrl} onChange={set('calendlyUrl')} placeholder="https://calendly.com/vivesmedia" />
+          <Field label="Lien cal.com" value={s.calcomUrl} onChange={set('calcomUrl')} placeholder="https://cal.com/vivesmedia" />
+          <Field label="Lien Google Agenda (création RDV)" value={s.googleAgendaUrl} onChange={set('googleAgendaUrl')} placeholder="https://calendar.google.com/calendar/r/eventedit?..." />
         </div>
       </div>
 

@@ -37,6 +37,12 @@ const NAV_SECTIONS = [
     ],
   },
   {
+    label: 'Hub Clients',
+    items: [
+      { href: '/hub/admin', label: 'Projets clients', icon: Users },
+    ],
+  },
+  {
     label: 'Outils',
     items: [
       { href: '/cms/agenda', label: 'Agenda & RDV', icon: CalendarDays },
