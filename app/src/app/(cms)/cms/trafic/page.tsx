@@ -1,121 +1,198 @@
 'use client'
-import { useState } from 'react'
-import { Globe, Eye, MousePointerClick, Timer, ExternalLink, Plug, Check } from 'lucide-react'
+import { useEffect, useState } from 'react'
+import { Globe, Eye, MousePointerClick, Search, TrendingUp, Radio, ExternalLink, RefreshCw } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 
-const PLACEHOLDER_KPIS = [
-  { label: 'Visiteurs uniques (30j)', icon: Eye },
-  { label: 'Pages vues (30j)', icon: Globe },
-  { label: 'Taux de conversion devis', icon: MousePointerClick },
-  { label: 'Durée moyenne de session', icon: Timer },
-]
+type GscRow = { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }
+type Data = {
+  gsc: {
+    available: boolean
+    totals: { clicks: number; impressions: number; ctr: number; position: number }
+    topQueries: GscRow[]
+    topPages: GscRow[]
+  }
+  ga4: {
+    available: boolean
+    reason?: string
+    realtimeUsers: number
+    last7: { activeUsers: number; sessions: number; pageViews: number }
+    last30: { activeUsers: number; sessions: number; pageViews: number }
+    topSources: { source: string; sessions: number }[]
+    topPages: { path: string; views: number }[]
+  }
+  generatedAt: string
+}
 
-const CONNECT_STEPS = [
-  'Va sur eu.posthog.com → Settings → Personal API Keys',
-  'Crée une clé avec le scope "Query Read"',
-  'Envoie la clé à Claude Code (ou ajoute POSTHOG_PERSONAL_API_KEY dans Vercel)',
-  'Cette page affichera automatiquement les vraies données',
-]
+function Card({ children }: { children: React.ReactNode }) {
+  return <div className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>{children}</div>
+}
+
+function Kpi({ icon: Icon, label, value, accent }: { icon: typeof Eye; label: string; value: string; accent?: boolean }) {
+  return (
+    <Card>
+      <div className="flex items-center gap-2 mb-2">
+        <Icon className="w-4 h-4" style={{ color: accent ? ORANGE : '#9CA3AF' }} />
+        <p className="text-xs" style={{ color: '#6B7280' }}>{label}</p>
+      </div>
+      <p className="text-2xl font-bold" style={{ color: accent ? ORANGE : '#111827' }}>{value}</p>
+    </Card>
+  )
+}
 
 export default function TraficPage() {
-  const [connected] = useState(false)
+  const [data, setData] = useState<Data | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  const load = () => {
+    setLoading(true)
+    fetch('/api/cms/trafic')
+      .then(r => r.json())
+      .then(d => { if (d.error) setError(d.error); else setData(d) })
+      .catch(() => setError('Impossible de charger les données'))
+      .finally(() => setLoading(false))
+  }
+  useEffect(load, [])
+
+  if (loading) return <div className="flex items-center gap-2 text-sm" style={{ color: '#6B7280' }}><RefreshCw className="w-4 h-4 animate-spin" /> Chargement des données Google…</div>
+  if (error) return <div className="rounded-xl p-5 text-sm" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>{error}</div>
+  if (!data) return null
+
+  const pct = (n: number) => `${(n * 100).toFixed(1)} %`
+  const ga4 = data.ga4
+  const gsc = data.gsc
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Trafic & SEO</h1>
+          <p className="text-xs" style={{ color: '#9CA3AF' }}>Données live · GA4 + Search Console</p>
+        </div>
+        <button onClick={load} className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+          <RefreshCw className="w-3.5 h-3.5" /> Actualiser
+        </button>
+      </div>
 
-      {/* Les 3 outils de mesure */}
-      <div className="grid sm:grid-cols-3 gap-4">
-        {[
-          { name: 'PostHog', state: 'Tracking actif — données qui s\'accumulent', stateOk: true, action: 'Clé API à fournir pour affichage ici', href: 'https://eu.posthog.com', role: 'Comportement : sessions, heatmaps, funnels, conversions' },
-          { name: 'Google Analytics 4', state: 'Non installé sur ce site', stateOk: false, action: 'Créer la propriété GA4 → me donner l\'ID G-XXXX', href: 'https://analytics.google.com', role: 'Trafic global : sources, audiences, acquisitions' },
-          { name: 'Search Console', state: 'À vérifier après bascule du domaine', stateOk: false, action: 'Propriété vivesmedia.com → vérification DNS', href: 'https://search.google.com/search-console', role: 'SEO : positions Google, clics, impressions, indexation' },
-        ].map(tool => (
-          <div key={tool.name} className="rounded-xl p-5 flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-bold" style={{ color: '#111827' }}>{tool.name}</p>
-              <span className="w-2 h-2 rounded-full" style={{ background: tool.stateOk ? '#16A34A' : '#F59E0B' }} />
+      {/* GA4 */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
+          <h2 className="text-sm font-bold" style={{ color: '#111827' }}>Google Analytics 4</h2>
+          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#F0FDF4', color: '#16A34A' }}>connecté</span>
+        </div>
+
+        {ga4.available ? (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Kpi icon={Radio} label="Visiteurs en direct" value={String(ga4.realtimeUsers)} accent />
+              <Kpi icon={Eye} label="Utilisateurs (30j)" value={String(ga4.last30.activeUsers)} />
+              <Kpi icon={Globe} label="Sessions (30j)" value={String(ga4.last30.sessions)} />
+              <Kpi icon={MousePointerClick} label="Pages vues (30j)" value={String(ga4.last30.pageViews)} />
             </div>
-            <p className="text-xs leading-relaxed mb-2" style={{ color: '#6B7280' }}>{tool.role}</p>
-            <p className="text-[11px] mb-1" style={{ color: tool.stateOk ? '#16A34A' : '#D97706' }}>{tool.state}</p>
-            <p className="text-[11px] flex-1" style={{ color: '#9CA3AF' }}>{tool.action}</p>
-            <a href={tool.href} target="_blank" rel="noopener noreferrer"
-              className="mt-3 flex items-center justify-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg transition-colors"
-              style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
-              Ouvrir {tool.name} <ExternalLink className="w-3 h-3" />
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card>
+                <p className="text-xs font-semibold mb-3" style={{ color: '#6B7280' }}>Sources de trafic (30j)</p>
+                <ul className="space-y-2">
+                  {ga4.topSources.map((s, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm">
+                      <span style={{ color: '#374151' }}>{s.source}</span>
+                      <span className="font-semibold" style={{ color: '#111827' }}>{s.sessions}</span>
+                    </li>
+                  ))}
+                  {ga4.topSources.length === 0 && <li className="text-xs" style={{ color: '#9CA3AF' }}>Pas encore de données</li>}
+                </ul>
+              </Card>
+              <Card>
+                <p className="text-xs font-semibold mb-3" style={{ color: '#6B7280' }}>Pages les plus vues (30j)</p>
+                <ul className="space-y-2">
+                  {ga4.topPages.map((p, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm gap-3">
+                      <span className="truncate" style={{ color: '#374151' }}>{p.path}</span>
+                      <span className="font-semibold shrink-0" style={{ color: '#111827' }}>{p.views}</span>
+                    </li>
+                  ))}
+                  {ga4.topPages.length === 0 && <li className="text-xs" style={{ color: '#9CA3AF' }}>Pas encore de données</li>}
+                </ul>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Card>
+            <p className="text-sm" style={{ color: '#B45309' }}>
+              {ga4.reason === 'data-api-disabled'
+                ? 'GA4 connecté mais la « Google Analytics Data API » n\'est pas encore activée dans Google Cloud.'
+                : 'GA4 indisponible pour le moment.'}
+            </p>
+          </Card>
+        )}
+      </section>
+
+      {/* Search Console */}
+      <section className="space-y-4">
+        <div className="flex items-center gap-2">
+          <Search className="w-4 h-4" style={{ color: ORANGE }} />
+          <h2 className="text-sm font-bold" style={{ color: '#111827' }}>Search Console <span className="font-normal" style={{ color: '#9CA3AF' }}>· SEO (28 derniers jours, délai Google ~3j)</span></h2>
+          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#F0FDF4', color: '#16A34A' }}>connecté</span>
+        </div>
+
+        {gsc.available ? (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <Kpi icon={MousePointerClick} label="Clics" value={String(gsc.totals.clicks)} accent />
+              <Kpi icon={Eye} label="Impressions" value={String(gsc.totals.impressions)} />
+              <Kpi icon={TrendingUp} label="CTR moyen" value={pct(gsc.totals.ctr)} />
+              <Kpi icon={Search} label="Position moy." value={gsc.totals.position.toFixed(1)} />
+            </div>
+            <div className="grid md:grid-cols-2 gap-4">
+              <Card>
+                <p className="text-xs font-semibold mb-3" style={{ color: '#6B7280' }}>Top requêtes Google</p>
+                <ul className="space-y-2">
+                  {gsc.topQueries.map((q, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm gap-3">
+                      <span className="truncate" style={{ color: '#374151' }}>{q.keys[0]}</span>
+                      <span className="shrink-0 text-xs" style={{ color: '#9CA3AF' }}>{q.clicks} clics · pos {q.position.toFixed(0)}</span>
+                    </li>
+                  ))}
+                  {gsc.topQueries.length === 0 && <li className="text-xs" style={{ color: '#9CA3AF' }}>Pas encore de données (site récemment indexé)</li>}
+                </ul>
+              </Card>
+              <Card>
+                <p className="text-xs font-semibold mb-3" style={{ color: '#6B7280' }}>Pages les mieux classées</p>
+                <ul className="space-y-2">
+                  {gsc.topPages.map((p, i) => (
+                    <li key={i} className="flex items-center justify-between text-sm gap-3">
+                      <span className="truncate" style={{ color: '#374151' }}>{p.keys[0].replace('https://vivesmedia.com', '') || '/'}</span>
+                      <span className="shrink-0 text-xs" style={{ color: '#9CA3AF' }}>{p.clicks} clics · {p.impressions} impr.</span>
+                    </li>
+                  ))}
+                  {gsc.topPages.length === 0 && <li className="text-xs" style={{ color: '#9CA3AF' }}>Pas encore de données</li>}
+                </ul>
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Card><p className="text-sm" style={{ color: '#B45309' }}>Search Console indisponible.</p></Card>
+        )}
+      </section>
+
+      {/* PostHog */}
+      <section>
+        <Card>
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-bold" style={{ color: '#111827' }}>PostHog · comportement détaillé</p>
+              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Sessions, heatmaps, funnels, enregistrements — sur le dashboard PostHog</p>
+            </div>
+            <a href="https://eu.posthog.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              Ouvrir PostHog <ExternalLink className="w-3 h-3" />
             </a>
           </div>
-        ))}
-      </div>
+        </Card>
+      </section>
 
-      {/* Bandeau connexion */}
-      {!connected && (
-        <div className="rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-4"
-          style={{ background: 'rgba(244,82,30,.06)', border: '1px solid rgba(244,82,30,.2)' }}>
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(244,82,30,.12)', color: ORANGE }}>
-            <Plug className="w-5 h-5" />
-          </div>
-          <div className="flex-1">
-            <p className="text-sm font-bold" style={{ color: '#111827' }}>Affichage des données dans cette page</p>
-            <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>
-              PostHog enregistre déjà chaque visite. Pour afficher les chiffres ici, il manque une clé API personnelle (guide ci-dessous). GA4 et Search Console s'ajouteront après création des propriétés.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* KPIs placeholder */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {PLACEHOLDER_KPIS.map(k => (
-          <div key={k.label} className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: '#F8F9FA', color: '#9CA3AF' }}>
-              <k.icon className="w-4 h-4" />
-            </div>
-            <p className="text-2xl font-bold" style={{ color: '#D1D5DB' }}>—</p>
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>{k.label}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Zones graphiques placeholder */}
-      <div className="grid lg:grid-cols-2 gap-6">
-        {['Visiteurs par jour (30 derniers jours)', 'Pages les plus visitées'].map(title => (
-          <div key={title} className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-            <h2 className="font-bold text-sm mb-5" style={{ color: '#111827' }}>{title}</h2>
-            <div className="h-48 rounded-lg flex flex-col items-center justify-center gap-2"
-              style={{ background: '#F8F9FA', border: '1px dashed #E5E7EB' }}>
-              <Globe className="w-6 h-6" style={{ color: '#D1D5DB' }} />
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>Données disponibles après connexion PostHog</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Comment connecter */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-        <h2 className="font-bold text-sm mb-1" style={{ color: '#111827' }}>Comment connecter (2 minutes)</h2>
-        <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Une fois la clé fournie, tout s'affiche automatiquement — visiteurs, sources, pages, conversions.</p>
-        <ol className="space-y-3">
-          {CONNECT_STEPS.map((step, i) => (
-            <li key={step} className="flex items-start gap-3">
-              <span className="w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 mt-0.5"
-                style={{ background: 'rgba(244,82,30,.1)', color: ORANGE }}>
-                {i + 1}
-              </span>
-              <span className="text-sm" style={{ color: '#374151' }}>{step}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      {/* Déjà actif */}
-      <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-        <Check className="w-4 h-4 shrink-0" style={{ color: '#16A34A' }} />
-        <p className="text-sm" style={{ color: '#166534' }}>
-          Le script de tracking PostHog est <strong>déjà installé et actif</strong> sur toutes les pages du site — les données s'accumulent depuis le lancement.
-        </p>
-      </div>
-
+      <p className="text-[10px]" style={{ color: '#C0C4CC' }}>Données générées le {new Date(data.generatedAt).toLocaleString('fr-FR')}</p>
     </div>
   )
 }
