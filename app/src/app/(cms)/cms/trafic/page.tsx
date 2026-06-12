@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import {
   Globe, Eye, MousePointerClick, Search, TrendingUp, TrendingDown, Radio, ExternalLink,
-  RefreshCw, Lightbulb, AlertTriangle, CheckCircle2, ArrowUpRight,
+  RefreshCw, Lightbulb, AlertTriangle, CheckCircle2, ArrowUpRight, Clock, Flame, PlayCircle, MousePointer2,
 } from 'lucide-react'
 import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
@@ -16,7 +16,7 @@ type Insight = { severity: 'opportunity' | 'warning' | 'good'; title: string; de
 type Data = {
   gsc: { available: boolean; totals: { clicks: number; impressions: number; ctr: number; position: number }; topQueries: GscRow[]; topPages: GscRow[]; series: Day[] }
   ga4: { available: boolean; reason?: string; realtimeUsers: number; last30: { activeUsers: number; sessions: number; pageViews: number }; trendSessionsPct: number; series: Day[]; topSources: { source: string; sessions: number }[]; topPages: { path: string; views: number }[] }
-  posthog: { available: boolean; pageViews30: number; visitors30: number; events24h: number; viewsPerVisitor: number; topPages: { path: string; views: number }[]; topEvents: { event: string; count: number }[]; series: Day[]; devices: { device: string; sessions: number }[] }
+  posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[] }
   insights: Insight[]
   generatedAt: string
 }
@@ -226,62 +226,79 @@ export default function TraficPage() {
         </Card>
       </div>
 
-      {/* PostHog — comportement */}
+      {/* PostHog — comportement & UX */}
       <div>
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
-            <Radio className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>PostHog · comportement</h2>
+            <MousePointer2 className="w-4 h-4" style={{ color: ORANGE }} />
+            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>Comportement & UX <span className="font-normal" style={{ color: '#94A3B8' }}>· PostHog</span></h2>
             {posthog.available && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#F0FDF4', color: '#16A34A' }}>connecté</span>}
           </div>
-          <a href="https://eu.posthog.com" target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: ORANGE }}>Sessions & heatmaps <ExternalLink className="w-3 h-3" /></a>
         </div>
 
         {posthog.available ? (
           <div className="space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-              <Kpi icon={Eye} label="Pages vues (30j)" value={String(posthog.pageViews30)} accent />
-              <Kpi icon={Globe} label="Visiteurs uniques" value={String(posthog.visitors30)} />
-              <Kpi icon={MousePointerClick} label="Pages / visiteur" value={String(posthog.viewsPerVisitor)} sub={<span style={{ color: '#94A3B8' }}>engagement</span>} />
-              <Kpi icon={Radio} label="Events (24h)" value={String(posthog.events24h)} />
+              <Kpi icon={Clock} label="Durée moy. session" value={`${Math.floor(posthog.avgSessionSec / 60)}m ${posthog.avgSessionSec % 60}s`} accent />
+              <Kpi icon={TrendingDown} label="Taux de rebond" value={`${posthog.bounceRate} %`} sub={<span style={{ color: '#94A3B8' }}>sessions 1 page</span>} />
+              <Kpi icon={Flame} label="Rage clicks (30j)" value={String(posthog.rageClicks)} sub={<span style={{ color: '#94A3B8' }}>clics de frustration</span>} />
+              <Kpi icon={MousePointerClick} label="Dead clicks" value={String(posthog.deadClicks)} sub={<span style={{ color: '#94A3B8' }}>clics sans effet</span>} />
+            </div>
+
+            {/* Accès heatmaps & enregistrements (visuels → PostHog) */}
+            <div className="grid sm:grid-cols-2 gap-4">
+              <a href="https://eu.posthog.com/project/192676/heatmaps" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: '#0F172A' }}>
+                <div>
+                  <p className="text-sm font-bold text-white flex items-center gap-2"><Flame className="w-4 h-4" style={{ color: ORANGE }} /> Heatmaps</p>
+                  <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>Où les visiteurs cliquent & scrollent, page par page</p>
+                </div>
+                <ExternalLink className="w-4 h-4 text-white/60" />
+              </a>
+              <a href="https://eu.posthog.com/project/192676/replay" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: posthog.recordingsCount > 0 ? '#0F172A' : '#FFFBEB', border: posthog.recordingsCount > 0 ? 'none' : '1px solid #FDE68A' }}>
+                <div>
+                  <p className="text-sm font-bold flex items-center gap-2" style={{ color: posthog.recordingsCount > 0 ? '#fff' : '#B45309' }}><PlayCircle className="w-4 h-4" style={{ color: ORANGE }} /> Enregistrements de session</p>
+                  <p className="text-xs mt-1" style={{ color: posthog.recordingsCount > 0 ? '#94A3B8' : '#B45309' }}>{posthog.recordingsCount > 0 ? 'Regarde la navigation réelle des visiteurs' : 'À activer : PostHog → Settings → Session Replay'}</p>
+                </div>
+                <ExternalLink className="w-4 h-4" style={{ color: posthog.recordingsCount > 0 ? 'rgba(255,255,255,.6)' : '#B45309' }} />
+              </a>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-4">
               <Card className="lg:col-span-2">
-                <p className="text-sm font-bold mb-4" style={{ color: '#0F172A' }}>Activité — 30 derniers jours</p>
-                {posthog.series.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <AreaChart data={posthog.series} margin={{ left: -20, right: 8, top: 4 }}>
-                      <defs><linearGradient id="gPh" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={ORANGE} stopOpacity={0.2} /><stop offset="100%" stopColor={ORANGE} stopOpacity={0} /></linearGradient></defs>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                      <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} interval={3} tickLine={false} axisLine={false} />
-                      <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} width={32} />
-                      <Tooltip content={<ChartTooltip />} />
-                      <Area type="monotone" dataKey="vues" stroke={ORANGE} strokeWidth={2.5} fill="url(#gPh)" name="Pages vues" />
-                      <Area type="monotone" dataKey="visiteurs" stroke="#CBD5E1" strokeWidth={1.5} fill="none" name="Visiteurs" />
-                    </AreaChart>
-                  </ResponsiveContainer>
-                ) : <p className="text-xs py-10 text-center" style={{ color: '#94A3B8' }}>Pas encore de données</p>}
+                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Ce sur quoi les visiteurs cliquent</p>
+                <p className="text-[11px] mb-4" style={{ color: '#94A3B8' }}>Site public (hors back-office) · 30 jours</p>
+                {posthog.topClicks.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {posthog.topClicks.map((c, i) => {
+                      const max = posthog.topClicks[0]?.count || 1
+                      return (
+                        <li key={i}>
+                          <div className="flex items-center justify-between text-xs mb-1">
+                            <span className="truncate" style={{ color: '#334155' }}>{c.label}</span>
+                            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: '#0F172A' }}>{c.count}</span>
+                          </div>
+                          <div className="h-1.5 rounded-full" style={{ background: '#F1F5F9' }}><div className="h-1.5 rounded-full" style={{ width: `${(c.count / max) * 100}%`, background: i === 0 ? ORANGE : '#FBC4AC' }} /></div>
+                        </li>
+                      )
+                    })}
+                  </ul>
+                ) : <p className="text-xs py-8 text-center" style={{ color: '#94A3B8' }}>Encore peu de clics publics — ça se remplit avec les visiteurs.</p>}
               </Card>
 
               <Card>
-                <p className="text-sm font-bold mb-3" style={{ color: '#0F172A' }}>Événements (30j)</p>
-                <ul className="space-y-2.5">
-                  {posthog.topEvents.map((e, i) => {
-                    const max = posthog.topEvents[0]?.count || 1
-                    return (
-                      <li key={i}>
-                        <div className="flex items-center justify-between text-xs mb-1">
-                          <span style={{ color: '#334155' }}>{e.event}</span>
-                          <span className="tabular-nums font-semibold" style={{ color: '#0F172A' }}>{e.count}</span>
-                        </div>
-                        <div className="h-1.5 rounded-full" style={{ background: '#F1F5F9' }}><div className="h-1.5 rounded-full" style={{ width: `${(e.count / max) * 100}%`, background: i === 0 ? ORANGE : '#FBC4AC' }} /></div>
+                <p className="text-sm font-bold mb-3" style={{ color: '#0F172A' }}>Points de friction</p>
+                {posthog.frictionPages.length > 0 ? (
+                  <ul className="space-y-2.5">
+                    {posthog.frictionPages.map((f, i) => (
+                      <li key={i} className="flex items-center justify-between text-sm gap-2">
+                        <span className="truncate flex items-center gap-1.5" style={{ color: '#334155' }}><Flame className="w-3 h-3 shrink-0" style={{ color: '#EF4444' }} />{f.path}</span>
+                        <span className="shrink-0 text-xs font-semibold" style={{ color: '#EF4444' }}>{f.rage} rage</span>
                       </li>
-                    )
-                  })}
-                </ul>
+                    ))}
+                  </ul>
+                ) : <p className="text-xs" style={{ color: '#16A34A' }}>Aucune friction détectée 👌</p>}
                 {posthog.devices.length > 0 && (
-                  <div className="mt-4 pt-4 flex gap-4" style={{ borderTop: '1px solid #F1F5F9' }}>
+                  <div className="mt-4 pt-4 flex gap-5" style={{ borderTop: '1px solid #F1F5F9' }}>
                     {posthog.devices.map((d, i) => (
                       <div key={i}><p className="text-lg font-bold" style={{ color: '#0F172A' }}>{d.sessions}</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>{d.device}</p></div>
                     ))}

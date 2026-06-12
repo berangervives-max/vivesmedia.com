@@ -175,12 +175,13 @@ export async function getGa4Data(): Promise<Ga4Data> {
 
 export type PostHogData = {
   available: boolean
-  pageViews30: number
-  visitors30: number
-  events24h: number
-  viewsPerVisitor: number
-  topPages: { path: string; views: number }[]
-  topEvents: { event: string; count: number }[]
+  recordingsCount: number
+  avgSessionSec: number
+  bounceRate: number
+  rageClicks: number
+  deadClicks: number
+  topClicks: { label: string; count: number }[]
+  frictionPages: { path: string; rage: number }[]
   series: DayPoint[]
   devices: { device: string; sessions: number }[]
 }
@@ -283,29 +284,46 @@ export function buildInsights(gsc: GscData, ga4: Ga4Data, ph: PostHogData): Insi
   return out.slice(0, 6)
 }
 
-/** Stats PostHog (comportement) : KPIs, courbe d'activité, événements, devices. */
-export async function getPostHogData(): Promise<PostHogData> {
-  const empty: PostHogData = { available: false, pageViews30: 0, visitors30: 0, events24h: 0, viewsPerVisitor: 0, topPages: [], topEvents: [], series: [], devices: [] }
+async function phRecordingsCount(): Promise<number> {
+  const key = process.env.POSTHOG_PERSONAL_API_KEY
+  const pid = process.env.POSTHOG_PROJECT_ID
+  if (!key || !pid) return 0
   try {
-    const [totals, recent, top, events, daily, devices] = await Promise.all([
-      hogql("SELECT count() AS pv, count(DISTINCT person_id) AS v FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY"),
-      hogql("SELECT count() AS c FROM events WHERE timestamp > now() - INTERVAL 24 HOUR"),
-      hogql("SELECT properties.$pathname AS path, count() AS views FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY path ORDER BY views DESC LIMIT 6"),
-      hogql("SELECT event, count() AS c FROM events WHERE timestamp > now() - INTERVAL 30 DAY GROUP BY event ORDER BY c DESC LIMIT 8"),
+    const r = await fetch(`https://eu.posthog.com/api/projects/${pid}/session_recordings?limit=1`, { headers: { Authorization: `Bearer ${key}` } })
+    if (!r.ok) return 0
+    const j = (await r.json()) as { results?: unknown[] }
+    return (j.results ?? []).length
+  } catch {
+    return 0
+  }
+}
+
+/** Stats PostHog orientées COMPORTEMENT/UX (et non trafic, déjà couvert par GA4). */
+export async function getPostHogData(): Promise<PostHogData> {
+  const empty: PostHogData = { available: false, recordingsCount: 0, avgSessionSec: 0, bounceRate: 0, rageClicks: 0, deadClicks: 0, topClicks: [], frictionPages: [], series: [], devices: [] }
+  try {
+    const [sessions, rage, dead, clicks, friction, daily, devices, recCount] = await Promise.all([
+      hogql("SELECT avg(session.$session_duration) AS dur, count() AS n, countIf(session.$pageview_count <= 1) AS bounces FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT count() AS c FROM events WHERE event = '$rageclick' AND timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT count() AS c FROM events WHERE event = '$dead_click' AND timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT properties.$el_text AS el, count() AS c FROM events WHERE event = '$autocapture' AND properties.$event_type = 'click' AND isNotNull(properties.$el_text) AND properties.$el_text != '' AND properties.$pathname NOT LIKE '/cms%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY el ORDER BY c DESC LIMIT 8"),
+      hogql("SELECT properties.$pathname AS p, count() AS c FROM events WHERE event = '$rageclick' AND timestamp > now() - INTERVAL 30 DAY GROUP BY p ORDER BY c DESC LIMIT 5"),
       hogql("SELECT toDate(timestamp) AS d, count() AS pv, count(DISTINCT person_id) AS v FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY d ORDER BY d"),
       hogql("SELECT properties.$device_type AS device, count(DISTINCT $session_id) AS s FROM events WHERE timestamp > now() - INTERVAL 30 DAY AND device != '' GROUP BY device ORDER BY s DESC LIMIT 4"),
+      phRecordingsCount(),
     ])
-    if (!totals) return empty
-    const pv = Number(totals[0]?.[0] ?? 0)
-    const v = Number(totals[0]?.[1] ?? 0)
+    if (!sessions) return empty
+    const n = Number(sessions[0]?.[1] ?? 0)
+    const bounces = Number(sessions[0]?.[2] ?? 0)
     return {
       available: true,
-      pageViews30: pv,
-      visitors30: v,
-      events24h: Number(recent?.[0]?.[0] ?? 0),
-      viewsPerVisitor: v > 0 ? Math.round((pv / v) * 10) / 10 : 0,
-      topPages: (top ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', views: Number(row[1]) })),
-      topEvents: (events ?? []).map((row) => ({ event: String(row[0] ?? '').replace(/^\$/, ''), count: Number(row[1]) })),
+      recordingsCount: recCount,
+      avgSessionSec: Math.round(Number(sessions[0]?.[0] ?? 0)),
+      bounceRate: n > 0 ? Math.round((bounces / n) * 100) : 0,
+      rageClicks: Number(rage?.[0]?.[0] ?? 0),
+      deadClicks: Number(dead?.[0]?.[0] ?? 0),
+      topClicks: (clicks ?? []).map((row) => ({ label: String(row[0] ?? '').slice(0, 40), count: Number(row[1]) })),
+      frictionPages: (friction ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', rage: Number(row[1]) })),
       series: (daily ?? []).map((row) => ({ date: String(row[0] ?? '').slice(5), vues: Number(row[1]), visiteurs: Number(row[2]) })),
       devices: (devices ?? []).map((row) => ({ device: String(row[0] ?? '—') || '—', sessions: Number(row[1]) })),
     }
