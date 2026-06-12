@@ -10,9 +10,20 @@ const COLORS: Record<string, string> = {
   annule: 'bg-gray-100 text-gray-500',
 }
 
+type StripeLive = {
+  disponible: number
+  enRoute: number
+  paiements: { id: string; montant: number; statut: string; client: string; date: string; description: string }[]
+}
+
 export default function CmsCommandesPage() {
   const [commandes, setCommandes] = useState<Commande[]>([])
+  const [stripe, setStripe] = useState<StripeLive | null>(null)
+  const [stripeErr, setStripeErr] = useState(false)
   useEffect(() => { commandesService.getAll().then(setCommandes).catch(() => {}) }, [])
+  useEffect(() => {
+    fetch('/api/cms/stripe').then(r => r.ok ? r.json() : Promise.reject()).then(setStripe).catch(() => setStripeErr(true))
+  }, [])
   const total = commandes.filter(c => c.statut === 'paye').reduce((s, c) => s + c.montant, 0)
 
   return (
@@ -38,6 +49,44 @@ export default function CmsCommandesPage() {
             <p className="text-xs" style={{ color: '#9CA3AF' }}>En attente</p>
           </div>
         </div>
+      </div>
+
+      {/* ── STRIPE EN DIRECT ── */}
+      <div className="rounded-xl p-5 mb-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <span className="text-xs font-bold px-2 py-0.5 rounded" style={{ background: '#635BFF', color: '#fff' }}>Stripe</span>
+          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Compte en direct</h2>
+          <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: stripe ? '#DCFCE7' : '#FEF3C7', color: stripe ? '#16A34A' : '#D97706' }}>
+            {stripe ? 'Connecté ✓' : stripeErr ? 'Erreur' : 'Chargement…'}
+          </span>
+        </div>
+        {stripe && (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <div>
+              <p className="text-xl font-bold" style={{ color: '#111827' }}>{stripe.disponible.toLocaleString('fr-FR')} €</p>
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>Solde disponible</p>
+            </div>
+            <div>
+              <p className="text-xl font-bold" style={{ color: '#111827' }}>{stripe.enRoute.toLocaleString('fr-FR')} €</p>
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>En route vers ta banque</p>
+            </div>
+            <div className="col-span-2">
+              <p className="text-xs font-semibold mb-1" style={{ color: '#6B7280' }}>Derniers paiements Stripe</p>
+              {stripe.paiements.length === 0 ? (
+                <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucun paiement pour le moment</p>
+              ) : (
+                <div className="space-y-1">
+                  {stripe.paiements.slice(0, 3).map(pa => (
+                    <p key={pa.id} className="text-xs" style={{ color: '#6B7280' }}>
+                      <strong style={{ color: '#111827' }}>{pa.montant.toLocaleString('fr-FR')} €</strong> · {pa.client} · {new Date(pa.date).toLocaleDateString('fr-FR')} · {pa.statut === 'succeeded' ? '✓ réussi' : pa.statut}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {stripeErr && <p className="text-xs" style={{ color: '#B91C1C' }}>Impossible de joindre Stripe — vérifier la clé sur Vercel.</p>}
       </div>
 
       {/* Table */}
