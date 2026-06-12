@@ -3,6 +3,8 @@ import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import { articlesService } from '@/services/supabase.service'
+import JsonLd from '@/components/seo/JsonLd'
+import { breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 const STATIC: Record<string, any> = {
   'geo-shopify-zero-clic-strategie-2026': {
@@ -42,6 +44,26 @@ export default async function BlogArticlePage({ params }: Props) {
 
   return (
     <article className="min-h-screen bg-background pt-28 pb-20">
+      <JsonLd data={{
+        '@context': 'https://schema.org',
+        '@type': 'BlogPosting',
+        headline: article.titre,
+        description: article.extrait,
+        ...(article.image_url ? { image: article.image_url } : {}),
+        datePublished: article.date_pub,
+        dateModified: article.date_pub,
+        url: `${SITE_URL}/blog/${slug}`,
+        ...(article.categorie ? { articleSection: article.categorie } : {}),
+        inLanguage: 'fr-FR',
+        author: { '@type': 'Person', name: 'Béranger Vives' },
+        publisher: { '@id': `${SITE_URL}/#organization` },
+        mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${slug}` },
+      }} />
+      <JsonLd data={breadcrumbSchema([
+        { name: 'Accueil', url: SITE_URL },
+        { name: 'Blog', url: `${SITE_URL}/blog` },
+        { name: article.titre, url: `${SITE_URL}/blog/${slug}` },
+      ])} />
       <div className="max-w-3xl mx-auto px-6">
         <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
           <ArrowLeft className="w-4 h-4" /> Retour au blog

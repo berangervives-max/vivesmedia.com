@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, ArrowLeft, ExternalLink, Quote } from 'lucide-react'
 import { REALISATIONS_DATA, getRealisationBySlug } from '@/data/realisations-data'
+import JsonLd from '@/components/seo/JsonLd'
+import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export async function generateStaticParams() {
   return REALISATIONS_DATA.map(r => ({ slug: r.slug }))
@@ -16,6 +18,13 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     title: `${r.name} — ${r.type} | Réalisation vivesmedia.com`,
     description: r.intro,
     alternates: { canonical: `https://vivesmedia.com/realisations/${slug}` },
+    openGraph: {
+      type: 'article',
+      title: `${r.name} — ${r.type}`,
+      description: r.intro,
+      url: `https://vivesmedia.com/realisations/${slug}`,
+      images: r.heroImage ? [{ url: r.heroImage }] : undefined,
+    },
   }
 }
 
@@ -26,6 +35,12 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={realisationSchema(r)} />
+      <JsonLd data={breadcrumbSchema([
+        { name: 'Accueil', url: SITE_URL },
+        { name: 'Réalisations', url: `${SITE_URL}/realisations` },
+        { name: r.name, url: `${SITE_URL}/realisations/${r.slug}` },
+      ])} />
 
       {/* Back nav */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-0">

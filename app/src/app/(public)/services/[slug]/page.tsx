@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, Check, Star, Phone, CalendarDays, X } from 'lucide-react'
 import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
+import JsonLd from '@/components/seo/JsonLd'
+import { serviceSchema, faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export async function generateStaticParams() {
   return SERVICES_DATA.map(s => ({ slug: s.slug }))
@@ -27,6 +29,13 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen bg-background">
+      <JsonLd data={serviceSchema(s)} />
+      {s.faq && s.faq.length > 0 && <JsonLd data={faqSchema(s.faq)} />}
+      <JsonLd data={breadcrumbSchema([
+        { name: 'Accueil', url: SITE_URL },
+        { name: 'Services', url: `${SITE_URL}/services` },
+        { name: s.title, url: `${SITE_URL}/services/${s.slug}` },
+      ])} />
 
       {/* ── HERO ── */}
       <div className="bg-foreground pt-28 pb-16">
