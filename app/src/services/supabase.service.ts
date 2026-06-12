@@ -108,13 +108,17 @@ export const commandesService = {
 export const articlesService = {
   async getPublished(limit = 20) {
     const sb = createClient()
-    const { data, error } = await sb.from('articles').select('*').eq('publie', true).order('date_pub', { ascending: false }).limit(limit)
+    // Drip : un article ne devient visible qu'à partir de sa date_pub (programmation)
+    const today = new Date().toISOString().slice(0, 10)
+    const { data, error } = await sb.from('articles').select('*').eq('publie', true).lte('date_pub', today).order('date_pub', { ascending: false }).limit(limit)
     if (error) throw error
     return data as Article[]
   },
   async getBySlug(slug: string) {
     const sb = createClient()
-    const { data, error } = await sb.from('articles').select('*').eq('slug', slug).eq('publie', true).single()
+    // Un article programmé (date_pub future) reste inaccessible jusqu'au jour J
+    const today = new Date().toISOString().slice(0, 10)
+    const { data, error } = await sb.from('articles').select('*').eq('slug', slug).eq('publie', true).lte('date_pub', today).single()
     if (error) return null
     return data as Article
   },
