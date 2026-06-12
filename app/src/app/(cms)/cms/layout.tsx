@@ -60,7 +60,8 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
     if (pathname === '/cms/login') { setChecking(false); return }
     const sb = createClient()
     sb.auth.getSession().then(({ data: { session } }) => {
-      if (!session) router.replace('/cms/login')
+      // Seul l'admin accède au CMS — les clients du Hub partagent le même Supabase Auth
+      if (!session || session.user.email !== 'berangervives@gmail.com') router.replace('/cms/login')
       else setChecking(false)
     })
   }, [router, pathname])

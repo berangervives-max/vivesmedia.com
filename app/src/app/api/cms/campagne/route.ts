@@ -31,10 +31,13 @@ function campaignHtml(body: string) {
 
 export async function POST(req: NextRequest) {
   try {
-    // Auth : seul l'admin connecté au CMS peut envoyer
+    // Auth : seul l'admin peut envoyer — le projet Supabase est partagé avec le Hub,
+    // un simple check "authentifié" laisserait passer les clients du Hub
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    if (!user || user.email !== 'berangervives@gmail.com') {
+      return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
+    }
 
     const { subject, body } = await req.json()
     if (!subject || !body) return NextResponse.json({ error: 'Objet et message requis' }, { status: 400 })

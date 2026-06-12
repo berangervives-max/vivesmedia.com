@@ -1,6 +1,9 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-const FROM = 'VivesMedia <contact@vivesmedia.com>'
-const ADMIN = 'contact@vivesmedia.com'
+// TEMPORAIRE : tant que vivesmedia.com n'est pas vérifié dans Resend (DNS en attente),
+// envoi depuis onboarding@resend.dev — seul expéditeur autorisé sans domaine vérifié.
+// Une fois le domaine vérifié : remettre FROM = 'vivesmedia.com <contact@vivesmedia.com>' et ADMIN = 'contact@vivesmedia.com'
+const FROM = 'vivesmedia.com <onboarding@resend.dev>'
+const ADMIN = 'berangervives@gmail.com'
 
 async function send(to: string, subject: string, html: string) {
   if (!RESEND_API_KEY || RESEND_API_KEY === 're_PLACEHOLDER') {

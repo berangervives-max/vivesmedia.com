@@ -8,6 +8,11 @@ export async function POST(req: NextRequest) {
     const { nom, email, telephone, service, budget, message } = body
 
     if (!nom || !email) return NextResponse.json({ error: 'Nom et email requis' }, { status: 400 })
+    if (typeof nom !== 'string' || typeof email !== 'string') return NextResponse.json({ error: 'Format invalide' }, { status: 400 })
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return NextResponse.json({ error: 'Email invalide' }, { status: 400 })
+    if (nom.length > 120 || email.length > 254 || String(message ?? '').length > 5000 || String(telephone ?? '').length > 30) {
+      return NextResponse.json({ error: 'Contenu trop long' }, { status: 400 })
+    }
 
     const devis = await devisService.create({ nom, email, telephone: telephone || '', service: service || '', budget: budget || '', message: message || '', statut: 'nouveau', lu: false })
 
