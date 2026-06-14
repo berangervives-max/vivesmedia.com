@@ -85,22 +85,32 @@ export default function SesameInformatiquePage() {
         <p className="text-xs text-muted-foreground mt-3 text-center uppercase tracking-widest">Vue hero — desktop 1440px</p>
       </div>
 
-      {/* ── DESKTOP + MOBILE SPLIT ── */}
+      {/* ── DESKTOP + MOBILE SPLIT (aperçus pleine page, défilables) ── */}
       <div className="max-w-7xl mx-auto px-6 mb-24">
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Full desktop */}
+        <div className="grid md:grid-cols-2 gap-6 items-start">
+          {/* Full desktop — fenêtre navigateur défilable */}
           <div>
             <div className="rounded-2xl overflow-hidden border border-border shadow-md bg-white">
-              <img src="/thumbnails/sesame-desktop.png" alt="Sésame Informatique — page complète desktop" className="w-full" />
+              <div className="bg-secondary/50 px-4 py-2.5 flex items-center gap-2 border-b border-border">
+                <span className="w-2.5 h-2.5 rounded-full bg-red-400" />
+                <span className="w-2.5 h-2.5 rounded-full bg-yellow-400" />
+                <span className="w-2.5 h-2.5 rounded-full bg-green-400" />
+                <span className="flex-1 text-center text-[10px] text-muted-foreground font-mono">page complète</span>
+              </div>
+              <div className="h-[460px] overflow-y-auto">
+                <img src="/thumbnails/sesame-desktop.png" alt="Sésame Informatique — page complète desktop" className="w-full block" />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">Page complète · Desktop</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">Page complète · Desktop — faites défiler</p>
           </div>
-          {/* Mobile */}
+          {/* Mobile — cadre téléphone défilable */}
           <div className="flex flex-col items-center">
-            <div className="rounded-2xl overflow-hidden border border-border shadow-md bg-white w-full max-w-[300px] mx-auto">
-              <img src="/thumbnails/sesame-mobile.png" alt="Sésame Informatique — mobile" className="w-full" />
+            <div className="rounded-[2rem] overflow-hidden border-4 border-foreground/80 shadow-md bg-white w-full max-w-[260px] mx-auto">
+              <div className="h-[460px] overflow-y-auto">
+                <img src="/thumbnails/sesame-mobile.png" alt="Sésame Informatique — mobile" className="w-full block" />
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2 text-center">Mobile · 390px</p>
+            <p className="text-xs text-muted-foreground mt-2 text-center">Mobile · 390px — faites défiler</p>
           </div>
         </div>
       </div>

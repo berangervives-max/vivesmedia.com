@@ -2,17 +2,31 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, ArrowLeft, ExternalLink, Quote } from 'lucide-react'
-import { REALISATIONS_DATA, getRealisationBySlug } from '@/data/realisations-data'
+import { REALISATIONS_DATA, getRealisationBySlug, type RealisationData } from '@/data/realisations-data'
+import { realisationsService, dbToRealisationData, getPublishedRealisationsData } from '@/services/supabase.service'
 import JsonLd from '@/components/seo/JsonLd'
 import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
+// Les réalisations en base (back-office) peuvent être ajoutées sans rebuild.
+export const revalidate = 60
+export const dynamicParams = true
+
+/** Résout une réalisation par slug : d'abord les statiques (code), sinon la base. */
+async function resolveRealisation(slug: string): Promise<RealisationData | undefined> {
+  const staticR = getRealisationBySlug(slug)
+  if (staticR) return staticR
+  const dbR = await realisationsService.getBySlug(slug).catch(() => null)
+  return dbR ? dbToRealisationData(dbR) : undefined
+}
+
 export async function generateStaticParams() {
-  return REALISATIONS_DATA.map(r => ({ slug: r.slug }))
+  const dbRealisations = await getPublishedRealisationsData()
+  return [...REALISATIONS_DATA, ...dbRealisations].map(r => ({ slug: r.slug }))
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params
-  const r = getRealisationBySlug(slug)
+  const r = await resolveRealisation(slug)
   if (!r) return {}
   return {
     title: `${r.name} — ${r.type} | Réalisation vivesmedia.com`,
@@ -30,8 +44,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function RealisationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
-  const r = getRealisationBySlug(slug)
+  const r = await resolveRealisation(slug)
   if (!r) notFound()
+
+  const hasContext = Boolean(r.context.client || r.context.problem)
 
   return (
     <div className="min-h-screen bg-background">
@@ -80,61 +96,71 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
       </header>
 
       {/* ── 2. CONTEXTE CLIENT ── */}
-      <section className="py-16 sm:py-24 bg-secondary/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Le contexte</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-            Le client, <span className="font-heading italic font-normal">et son point de départ.</span>
-          </h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-              <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Le client</p>
-              <p className="text-foreground text-base leading-relaxed">{r.context.client}</p>
-            </div>
-            <div className="bg-white rounded-2xl border-l-4 border border-border p-6 sm:p-8" style={{ borderLeftColor: '#F4521E' }}>
-              <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Le problème</p>
-              <p className="text-foreground text-base leading-relaxed">{r.context.problem}</p>
+      {hasContext && (
+        <section className="py-16 sm:py-24 bg-secondary/30">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Le contexte</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
+              Le client, <span className="font-heading italic font-normal">et son point de départ.</span>
+            </h2>
+            <div className="grid md:grid-cols-2 gap-6">
+              {r.context.client && (
+                <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
+                  <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Le client</p>
+                  <p className="text-foreground text-base leading-relaxed">{r.context.client}</p>
+                </div>
+              )}
+              {r.context.problem && (
+                <div className="bg-white rounded-2xl border-l-4 border border-border p-6 sm:p-8" style={{ borderLeftColor: '#F4521E' }}>
+                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Le problème</p>
+                  <p className="text-foreground text-base leading-relaxed">{r.context.problem}</p>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── 3. LA SOLUTION ── */}
-      <section className="py-16 sm:py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>La solution</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-            Ce qui a été <span className="font-heading italic font-normal">conçu, et pourquoi.</span>
-          </h2>
-          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
-            {r.solution.map((sol, i) => (
-              <div key={sol.title} className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-                <span className="text-xs font-mono text-muted-foreground">0{i + 1}</span>
-                <h3 className="text-base sm:text-lg font-bold text-foreground mt-2 mb-2">{sol.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{sol.desc}</p>
-              </div>
-            ))}
+      {r.solution.length > 0 && (
+        <section className="py-16 sm:py-24 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>La solution</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
+              Ce qui a été <span className="font-heading italic font-normal">conçu, et pourquoi.</span>
+            </h2>
+            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+              {r.solution.map((sol, i) => (
+                <div key={sol.title} className="bg-white rounded-2xl border border-border p-6 sm:p-8">
+                  <span className="text-xs font-mono text-muted-foreground">0{i + 1}</span>
+                  <h3 className="text-base sm:text-lg font-bold text-foreground mt-2 mb-2">{sol.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{sol.desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── 4. RÉSULTATS ── */}
-      <section className="py-16 sm:py-24 bg-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Les résultats</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight max-w-2xl mb-12">
-            Des chiffres, <span className="font-heading italic font-normal text-white/60">pas des promesses.</span>
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-            {r.results.map(stat => (
-              <div key={stat.label} className="rounded-2xl border border-white/10 p-5 sm:p-8">
-                <p className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</p>
-                <p className="text-xs sm:text-sm text-white/50 mt-2 leading-snug">{stat.label}</p>
-              </div>
-            ))}
+      {r.results.length > 0 && (
+        <section className="py-16 sm:py-24 bg-foreground">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Les résultats</p>
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight max-w-2xl mb-12">
+              Des chiffres, <span className="font-heading italic font-normal text-white/60">pas des promesses.</span>
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {r.results.map(stat => (
+                <div key={stat.label} className="rounded-2xl border border-white/10 p-5 sm:p-8">
+                  <p className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</p>
+                  <p className="text-xs sm:text-sm text-white/50 mt-2 leading-snug">{stat.label}</p>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── 5. GALERIE ── */}
       {r.gallery.length > 0 && (
@@ -173,34 +199,40 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
       )}
 
       {/* ── 7. STACK & SERVICES ── */}
-      <section className="py-16 sm:py-24 bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="grid md:grid-cols-2 gap-12">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Technologies</p>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">La stack du projet</h2>
-              <div className="flex flex-wrap gap-2">
-                {r.stack.map(t => (
-                  <span key={t} className="text-sm px-4 py-2 rounded-full bg-secondary text-foreground">{t}</span>
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Services utilisés</p>
-              <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">Le même résultat pour votre projet</h2>
-              <div className="flex flex-col gap-3">
-                {r.services.map(svc => (
-                  <Link key={svc.href} href={svc.href}
-                    className="group flex items-center justify-between bg-white rounded-2xl border border-border px-5 py-4 hover:border-foreground/30 transition-colors">
-                    <span className="text-sm font-semibold text-foreground">{svc.label}</span>
-                    <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                  </Link>
-                ))}
-              </div>
+      {(r.stack.length > 0 || r.services.length > 0) && (
+        <section className="py-16 sm:py-24 bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6">
+            <div className="grid md:grid-cols-2 gap-12">
+              {r.stack.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Technologies</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">La stack du projet</h2>
+                  <div className="flex flex-wrap gap-2">
+                    {r.stack.map(t => (
+                      <span key={t} className="text-sm px-4 py-2 rounded-full bg-secondary text-foreground">{t}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {r.services.length > 0 && (
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Services utilisés</p>
+                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">Le même résultat pour votre projet</h2>
+                  <div className="flex flex-col gap-3">
+                    {r.services.map(svc => (
+                      <Link key={svc.href} href={svc.href}
+                        className="group flex items-center justify-between bg-white rounded-2xl border border-border px-5 py-4 hover:border-foreground/30 transition-colors">
+                        <span className="text-sm font-semibold text-foreground">{svc.label}</span>
+                        <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* ── 8. CTA ── */}
       <section className="pb-16 sm:pb-24 bg-background">

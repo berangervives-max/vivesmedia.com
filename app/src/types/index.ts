@@ -105,6 +105,34 @@ export interface Service {
   updated_at: string
 }
 
+export interface RealisationSolution { title: string; desc: string }
+export interface RealisationResult { value: string; label: string }
+export interface RealisationGalleryItem { src: string; caption: string; mobile?: boolean }
+export interface RealisationServiceLink { label: string; href: string }
+
+export interface Realisation {
+  id: string
+  slug: string
+  name: string
+  type?: string
+  year?: string
+  tags: string[]
+  hero_image?: string
+  live_url?: string
+  intro?: string
+  context_client?: string
+  context_problem?: string
+  solution: RealisationSolution[]
+  results: RealisationResult[]
+  gallery: RealisationGalleryItem[]
+  stack: string[]
+  services: RealisationServiceLink[]
+  publie: boolean
+  ordre: number
+  created_at: string
+  updated_at: string
+}
+
 export interface Temoignage {
   id: string
   nom: string

@@ -18,6 +18,43 @@ export type RealisationData = {
 
 export const REALISATIONS_DATA: RealisationData[] = [
   {
+    slug: 'yannis-amielh',
+    name: 'Yannis Amielh',
+    type: 'Portfolio · Mannequin Éditorial',
+    year: '2026',
+    tags: ['Portfolio', 'Direction Artistique', 'Animation', '3D'],
+    heroImage: '/images/realisations/yannis-amielh-desktop.jpg',
+    liveUrl: 'https://yannis-portfolio-xi.vercel.app',
+    intro: "Un portfolio haut de gamme pour un mannequin éditorial — pensé comme une expérience cinématographique. Objectif : convaincre agences et marques en quelques secondes et déclencher la prise de contact pour un booking.",
+    context: {
+      client: "Yannis Amielh est un mannequin basé entre Marseille et Paris (editorial, campagne, runway). Son univers mêle l'énergie Japon / manga / streetwear et l'art de vivre méditerranéen — une identité forte qu'aucune fiche d'agence standard ne pouvait restituer.",
+      problem: "Dans le mannequinat, les directeurs de casting décident en quelques secondes. Sans un site qui projette immédiatement une image premium et une vraie direction artistique, un profil se noie parmi des centaines de books génériques. Il fallait un objet web qui se démarque et inspire confiance instantanément.",
+    },
+    solution: [
+      { title: 'Direction artistique signature', desc: "Base sombre cinématographique, typographie editorial, accents rouge manga et soleil méditerranéen. Le site raconte une identité, pas seulement une galerie de photos." },
+      { title: 'Expérience animée premium', desc: "Animations au scroll (GSAP + Lenis), transitions fluides, signature 3D temps réel. Chaque interaction renforce l'impression de soin et de haut de gamme." },
+      { title: 'Mise en valeur des visuels', desc: "Photos hi-res plein écran, catégories editorial / campagne / runway / lifestyle. Le book respire et chaque cliché est présenté comme une pièce de campagne." },
+      { title: 'Conversion vers le booking', desc: "Parcours orienté prise de contact : formulaire de booking, accès direct Instagram et coordonnées agence. La découverte mène naturellement à la demande." },
+    ],
+    results: [
+      { value: '100%', label: 'photos originales hi-res' },
+      { value: '< 3s', label: 'pour saisir l\'univers de marque' },
+      { value: '3D', label: 'signature temps réel dans le navigateur' },
+      { value: 'Mobile', label: 'expérience pensée pouce d\'abord' },
+    ],
+    gallery: [
+      { src: '/images/realisations/yannis-amielh-desktop.jpg', caption: 'Page d\'accueil · Desktop' },
+      { src: '/images/realisations/yannis-amielh-editorial.jpg', caption: 'Série editorial' },
+      { src: '/images/realisations/yannis-amielh-digitals.jpg', caption: 'Digitals' },
+      { src: '/images/realisations/yannis-amielh-mobile.jpg', caption: 'Version mobile', mobile: true },
+    ],
+    stack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP / Lenis', 'React Three Fiber'],
+    services: [
+      { label: 'Site Vitrine', href: '/services/site-vitrine' },
+      { label: 'Référencement SEO', href: '/services/seo' },
+    ],
+  },
+  {
     slug: 'vives-reports',
     name: 'Vives Reports',
     type: 'Site Éditorial · Guide Touristique Rome',

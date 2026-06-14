@@ -1,5 +1,6 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
-import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter } from '@/types'
+import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation } from '@/types'
+import type { RealisationData } from '@/data/realisations-data'
 
 // ── CLIENTS ──────────────────────────────────────────────────
 export const clientsService = {
@@ -145,6 +146,75 @@ export const articlesService = {
     const { error } = await sb.from('articles').delete().eq('id', id)
     if (error) throw error
   },
+}
+
+// ── REALISATIONS ──────────────────────────────────────────────
+export const realisationsService = {
+  async getPublished() {
+    const sb = createClient()
+    const { data, error } = await sb.from('site_realisations').select('*').eq('publie', true).order('ordre', { ascending: true }).order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Realisation[]
+  },
+  async getAll() {
+    const sb = createClient()
+    const { data, error } = await sb.from('site_realisations').select('*').order('ordre', { ascending: true }).order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Realisation[]
+  },
+  async getBySlug(slug: string) {
+    const sb = createClient()
+    const { data, error } = await sb.from('site_realisations').select('*').eq('slug', slug).eq('publie', true).single()
+    if (error) return null
+    return data as Realisation
+  },
+  async create(payload: Omit<Realisation, 'id' | 'created_at' | 'updated_at'>) {
+    const sb = createClient()
+    const { data, error } = await sb.from('site_realisations').insert(payload).select().single()
+    if (error) throw error
+    return data as Realisation
+  },
+  async update(id: string, payload: Partial<Realisation>) {
+    const sb = createClient()
+    const { data, error } = await sb.from('site_realisations').update(payload).eq('id', id).select().single()
+    if (error) throw error
+    return data as Realisation
+  },
+  async delete(id: string) {
+    const sb = createClient()
+    const { error } = await sb.from('site_realisations').delete().eq('id', id)
+    if (error) throw error
+  },
+}
+
+/** Convertit une ligne DB en RealisationData (forme attendue par les pages publiques). */
+export function dbToRealisationData(r: Realisation): RealisationData {
+  return {
+    slug: r.slug,
+    name: r.name,
+    type: r.type || '',
+    year: r.year || '',
+    tags: r.tags || [],
+    heroImage: r.hero_image || '',
+    liveUrl: r.live_url || undefined,
+    intro: r.intro || '',
+    context: { client: r.context_client || '', problem: r.context_problem || '' },
+    solution: r.solution || [],
+    results: r.results || [],
+    gallery: r.gallery || [],
+    stack: r.stack || [],
+    services: r.services || [],
+  }
+}
+
+/** Réalisations publiées en base, mappées en RealisationData. Tolérant aux erreurs (DB vide / non migrée). */
+export async function getPublishedRealisationsData(): Promise<RealisationData[]> {
+  try {
+    const rows = await realisationsService.getPublished()
+    return rows.map(dbToRealisationData)
+  } catch {
+    return []
+  }
 }
 
 // ── SERVICES ──────────────────────────────────────────────────

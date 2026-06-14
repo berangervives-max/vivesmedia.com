@@ -1,5 +1,4 @@
 const LOGOS = [
-  { src: 'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/8abd0706b_Claude_AI_logosvg.png', alt: 'Claude AI' },
   { src: 'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/b59027bc3_ads-logo-horizontal.png', alt: 'Google Ads' },
   { src: 'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/e06138172_6a15c44f5826e1ea74a830f3_Companylogo1.png', alt: 'Shopify' },
   { src: 'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/fffde6f9d_6a15c44f5826e1ea74a830ef_Companylogo4-p-130x130q80.png', alt: 'Webflow' },

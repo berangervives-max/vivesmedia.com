@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase'
 import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
   BookOpen, Star, Mail, BarChart3, Globe, CalendarDays, Send,
-  Zap, Settings, LogOut, Menu, X, ExternalLink
+  Zap, Settings, LogOut, Menu, X, ExternalLink, Briefcase
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -30,6 +30,7 @@ const NAV_SECTIONS = [
   {
     label: 'Marketing',
     items: [
+      { href: '/cms/realisations', label: 'Réalisations', icon: Briefcase },
       { href: '/cms/articles', label: 'Articles', icon: BookOpen },
       { href: '/cms/temoignages', label: 'Témoignages', icon: Star },
       { href: '/cms/newsletter', label: 'Newsletter', icon: Mail },
