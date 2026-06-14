@@ -15,7 +15,8 @@ export const revalidate = 60
 type ProjectCard = { num: string; name: string; type: string; year: string; href: string; img: string; tags: string[]; featured?: boolean }
 
 const PROJECTS: ProjectCard[] = [
-  { num: '01', name: 'Stoop', type: 'Site Vitrine · Logistique & Transport', year: '2026', href: '/realisations/stoop', img: '/images/realisations/stoop-desktop.jpg', tags: ['Site Vitrine', 'Direction Artistique', 'SEO'], featured: true },
+  { num: '01', name: 'Marine Caro', type: 'Site Vitrine · Architecte en Provence', year: '2026', href: '/realisations/marine-caro', img: '/images/realisations/marine-desktop.jpg', tags: ['Site Vitrine', 'Architecture', 'SEO'], featured: true },
+  { num: '08', name: 'Stoop', type: 'Site Vitrine · Logistique & Transport', year: '2026', href: '/realisations/stoop', img: '/images/realisations/stoop-desktop.jpg', tags: ['Site Vitrine', 'Direction Artistique', 'SEO'] },
   { num: '07', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2025', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Framer', 'Conversion'] },
   { num: '02', name: 'Yannis Amielh', type: 'Portfolio · Mannequin Éditorial', year: '2026', href: '/realisations/yannis-amielh', img: '/images/realisations/yannis-amielh-desktop.jpg', tags: ['Portfolio', 'Direction Artistique', '3D'] },
   { num: '03', name: 'Vives Reports', type: 'Site Éditorial · Guide Touristique Rome', year: '2022', href: '/realisations/vives-reports', img: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/69399ee5f49ad57466b051e2/000074367_tourgarbatella-aubinvives_pmvillareal-27.png?width=800&quality=75&format=webp', tags: ['Éditorial', 'SEO', 'React'] },

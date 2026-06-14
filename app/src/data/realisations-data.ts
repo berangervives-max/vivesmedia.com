@@ -18,6 +18,47 @@ export type RealisationData = {
 
 export const REALISATIONS_DATA: RealisationData[] = [
   {
+    slug: 'marine-caro',
+    name: 'Marine Caro',
+    type: 'Site Vitrine · Architecte en Provence',
+    year: '2026',
+    tags: ['Site Vitrine', 'Architecture', 'Direction Artistique', 'SEO'],
+    heroImage: '/images/realisations/marine-desktop.jpg',
+    liveUrl: 'https://marine-caro.vercel.app',
+    intro: "Refonte du site d'une architecte en Provence — un portfolio premium qui révèle l'excellence de son travail et transforme le visiteur en prise de contact. Direction artistique éditoriale minimale, vidéo d'ambiance générée en IA et vraies photos de chantiers.",
+    context: {
+      client: "Marine Caro (Architecte Horizon) est architecte en Provence — Vaucluse, Gard, Bouches-du-Rhône. Elle conçoit des villas neuves, rénove des mas et restaure des bâtisses en secteur sauvegardé, dans le respect du patrimoine et des matériaux nobles (pierre, chaux, bois massif, travertin).",
+      problem: "Son ancien site WordPress, basique et daté, ne reflétait en rien la qualité de ses réalisations. Dans un métier où la confiance se gagne sur l'image, un site générique fait perdre des projets haut de gamme. Il fallait une vitrine à la hauteur de son travail, qui inspire et déclenche la demande.",
+    },
+    solution: [
+      { title: 'Direction artistique éditoriale', desc: "DA minimale et élégante (typographie Geist, beige doux & noir, grandes images), pensée comme un magazine d'architecture. Le site respire et met la pierre, la lumière et le paysage au premier plan." },
+      { title: 'Vidéo IA + vraies photos', desc: "Une vidéo d'ouverture cinématographique (mas provençal au coucher de soleil) générée et upscalée en IA, combinée aux véritables photographies des chantiers livrés de l'architecte." },
+      { title: 'Architecture multi-pages', desc: "Accueil, Projets et fiches détaillées, Agence, Services, Galerie et Contact — une structure claire qui valorise chaque réalisation et raconte la démarche." },
+      { title: 'Parcours vers le contact', desc: "Chaque page guide vers la prise de contact : CTA permanents, formulaire qualifié par type de projet, coordonnées directes. La découverte mène naturellement à l'échange." },
+    ],
+    results: [
+      { value: '100%', label: 'refonte sur-mesure (ex-WordPress basique)' },
+      { value: 'Vidéo IA', label: "d'ambiance 2K + vraies photos de chantiers" },
+      { value: 'Multi-pages', label: 'projets, agence, services, galerie, contact' },
+      { value: 'Geist', label: 'DA éditoriale minimale & responsive' },
+    ],
+    gallery: [
+      { src: '/images/realisations/marine-desktop.jpg', caption: "Page d'accueil · Desktop" },
+      { src: '/images/realisations/marine-projets.jpg', caption: "Réalisations · projets en Provence" },
+      { src: '/images/realisations/marine-mobile.jpg', caption: 'Version mobile · 390px', mobile: true },
+    ],
+    testimonial: {
+      text: "Une refonte qui change tout : le travail de Marine est enfin présenté avec l'élégance qu'il mérite. DA éditoriale, vidéo IA et vraies photos — conçu et déployé en un temps record.",
+      name: 'Béranger Vives',
+      role: 'Fondateur, vivesmedia.com',
+    },
+    stack: ['Next.js 16', 'TypeScript', 'Tailwind CSS', 'GSAP / Lenis', 'Higgsfield AI', 'Vercel'],
+    services: [
+      { label: 'Site Vitrine', href: '/services/site-vitrine' },
+      { label: 'Référencement SEO', href: '/services/seo' },
+    ],
+  },
+  {
     slug: 'stoop',
     name: 'Stoop',
     type: 'Site Vitrine · Logistique & Transport',

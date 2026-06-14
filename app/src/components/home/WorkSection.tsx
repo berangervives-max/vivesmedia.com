@@ -4,10 +4,10 @@ import { ArrowUpRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 const PROJECTS = [
-  { title: 'Sésame Informatique', tag: 'Refonte Site · ERP B2B Négoce', href: '/realisations/sesame-informatique', thumbnail: '/thumbnails/sesame-hero.png', featured: true },
+  { title: 'Marine Caro', tag: 'Site Vitrine · Architecte en Provence', href: '/realisations/marine-caro', thumbnail: '/images/realisations/marine-desktop.jpg', featured: true },
+  { title: 'Stoop', tag: 'Site Vitrine · Logistique & Transport', href: '/realisations/stoop', thumbnail: '/images/realisations/stoop-desktop.jpg' },
+  { title: 'Sésame Informatique', tag: 'Refonte Site · ERP B2B Négoce', href: '/realisations/sesame-informatique', thumbnail: '/thumbnails/sesame-hero.png' },
   { title: 'Yannis Amielh', tag: 'Portfolio · Mannequin Éditorial', href: '/realisations/yannis-amielh', thumbnail: '/images/realisations/yannis-amielh-desktop.jpg' },
-  { title: 'Vives Reports', tag: 'Site Éditorial · Guide Touristique Rome', href: '/realisations/vives-reports', thumbnail: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/69399ee5f49ad57466b051e2/000074367_tourgarbatella-aubinvives_pmvillareal-27.png?width=800&quality=75&format=webp' },
-  { title: 'Paul & Louis Sport', tag: 'Site Vitrine · Club Padel', href: '/realisations/paul-et-louis-sport', thumbnail: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png' },
 ]
 
 export default function WorkSection() {
