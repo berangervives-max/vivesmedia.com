@@ -105,7 +105,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
     type: 'Portfolio · Mannequin Éditorial',
     year: '2026',
     tags: ['Portfolio', 'Direction Artistique', 'Animation', '3D'],
-    heroImage: '/images/realisations/yannis-amielh-desktop.jpg',
+    heroImage: '/images/realisations/yannis-site-desktop.jpg',
     liveUrl: 'https://yannis-portfolio-xi.vercel.app',
     intro: "Un portfolio haut de gamme pour un mannequin éditorial — pensé comme une expérience cinématographique. Objectif : convaincre agences et marques en quelques secondes et déclencher la prise de contact pour un booking.",
     context: {
@@ -125,10 +125,9 @@ export const REALISATIONS_DATA: RealisationData[] = [
       { value: 'Mobile', label: 'expérience pensée pouce d\'abord' },
     ],
     gallery: [
-      { src: '/images/realisations/yannis-amielh-desktop.jpg', caption: 'Page d\'accueil · Desktop' },
-      { src: '/images/realisations/yannis-amielh-editorial.jpg', caption: 'Série editorial' },
-      { src: '/images/realisations/yannis-amielh-digitals.jpg', caption: 'Digitals' },
-      { src: '/images/realisations/yannis-amielh-mobile.jpg', caption: 'Version mobile', mobile: true },
+      { src: '/images/realisations/yannis-site-desktop.jpg', caption: 'Page d\'accueil · Desktop' },
+      { src: '/images/realisations/yannis-site-2.jpg', caption: 'Section Work · grille projets' },
+      { src: '/images/realisations/yannis-site-mobile.jpg', caption: 'Version mobile · 390px', mobile: true },
     ],
     stack: ['Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP / Lenis', 'React Three Fiber'],
     services: [
