@@ -141,7 +141,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
     type: 'Site Éditorial · Guide Touristique Rome',
     year: '2022',
     tags: ['Éditorial', 'SEO', 'React'],
-    heroImage: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/69399ee5f49ad57466b051e2/000074367_tourgarbatella-aubinvives_pmvillareal-27.png?width=1600&quality=80&format=webp',
+    heroImage: '/images/realisations/vivesreports-desktop.png',
     liveUrl: 'https://vivesreports.com',
     intro: "Un guide touristique de Rome pensé comme un média éditorial premium — articles longs, photos originales, itinéraires détaillés. Objectif : capter le trafic Google francophone sur les requêtes touristiques romaines et le monétiser.",
     context: {
@@ -219,7 +219,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
     type: 'Site Vitrine · Habitat Durable',
     year: '2024',
     tags: ['Site Vitrine', 'Green', 'SEO'],
-    heroImage: 'https://design-digest-adapt.lovable.app/assets/hero-greenhouse-D5yU2Vvh.jpg',
+    heroImage: '/images/realisations/ecoserre-desktop.png',
     intro: "Un site vitrine pour un spécialiste de l'habitat durable et des serres bioclimatiques — un secteur où la confiance et la pédagogie font la vente.",
     context: {
       client: "Ecoserre conçoit des serres bioclimatiques et des solutions d'habitat durable. Un produit d'investissement (plusieurs milliers d'euros) avec un cycle de décision long, où le client compare, se renseigne et mûrit son projet pendant des semaines.",
