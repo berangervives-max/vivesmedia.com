@@ -15,7 +15,8 @@ export const revalidate = 60
 type ProjectCard = { num: string; name: string; type: string; year: string; href: string; img: string; tags: string[]; featured?: boolean }
 
 const PROJECTS: ProjectCard[] = [
-  { num: '01', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2025', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Framer', 'Conversion'], featured: true },
+  { num: '01', name: 'Stoop', type: 'Site Vitrine · Logistique & Transport', year: '2026', href: '/realisations/stoop', img: '/images/realisations/stoop-desktop.jpg', tags: ['Site Vitrine', 'Direction Artistique', 'SEO'], featured: true },
+  { num: '07', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2025', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Framer', 'Conversion'] },
   { num: '02', name: 'Yannis Amielh', type: 'Portfolio · Mannequin Éditorial', year: '2026', href: '/realisations/yannis-amielh', img: '/images/realisations/yannis-amielh-desktop.jpg', tags: ['Portfolio', 'Direction Artistique', '3D'] },
   { num: '03', name: 'Vives Reports', type: 'Site Éditorial · Guide Touristique Rome', year: '2022', href: '/realisations/vives-reports', img: 'https://qtrypzzcjebvfcihiynt.supabase.co/storage/v1/render/image/public/base44-prod/public/69399ee5f49ad57466b051e2/000074367_tourgarbatella-aubinvives_pmvillareal-27.png?width=800&quality=75&format=webp', tags: ['Éditorial', 'SEO', 'React'] },
   { num: '04', name: 'Paul & Louis Sport', type: 'Site Vitrine · Club Padel', year: '2024', href: '/realisations/paul-et-louis-sport', img: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png', tags: ['Site Vitrine', 'Sport', 'Design'] },

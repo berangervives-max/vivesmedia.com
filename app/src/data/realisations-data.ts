@@ -18,6 +18,47 @@ export type RealisationData = {
 
 export const REALISATIONS_DATA: RealisationData[] = [
   {
+    slug: 'stoop',
+    name: 'Stoop',
+    type: 'Site Vitrine · Logistique & Transport',
+    year: '2026',
+    tags: ['Site Vitrine', 'Direction Artistique', 'Animation', 'SEO'],
+    heroImage: '/images/realisations/stoop-desktop.jpg',
+    liveUrl: 'https://stoop-logistics.vercel.app',
+    intro: "Un site vitrine premium pour une entreprise de logistique full-service — pensé pour inspirer confiance en quelques secondes et transformer le visiteur en demande de devis ou en rendez-vous. Direction artistique cinématographique, médias 100% générés en IA, et un tunnel de conversion complet.",
+    context: {
+      client: "Stoop est une marque de logistique full-service : entreposage, transport de fret, livraison dernier kilomètre et orchestration de supply-chain 4PL. Sa cible : des expéditeurs de toutes tailles, du petit e-commerce à l'industriel, qui choisissent leur prestataire logistique sur le professionnalisme et la confiance dégagés en ligne.",
+      problem: "En logistique B2B, la décision se joue sur la crédibilité perçue. Un site daté ou générique fait fuir des prospects à fort potentiel vers des concurrents mieux présentés. Il fallait un site qui projette immédiatement une image solide, pro et premium — et qui guide vers la prise de contact.",
+    },
+    solution: [
+      { title: 'Direction artistique industrielle premium', desc: "Base crème / ink / orange brûlé, typographie DM Sans, sections services pinnées au scroll et icônes fines. Une DA cinématographique qui inspire la confiance avant même la lecture." },
+      { title: 'Médias 100% générés en IA', desc: "Vidéos hero et CTA en boucle + visuels (entrepôt, fret, dernier kilomètre) créés puis upscalés en 4K via IA. Zéro banque d'images générique : chaque média est cohérent avec la marque." },
+      { title: 'Architecture multi-pages SEO', desc: "Plus de 10 pages (services + fiches détaillées, industries, tarifs, à propos, blog + articles, contact), metadata complètes et Schema.org, build 100% statique pour la performance." },
+      { title: 'Tunnel de conversion complet', desc: "Vraies offres tarifées, preuves sociales (statistiques animées, témoignages chiffrés, logos partenaires), formulaire qualifié et réservation d'appel — tout mène à la prise de contact." },
+    ],
+    results: [
+      { value: 'SEO 100', label: 'score Lighthouse SEO (Best Practices 100)' },
+      { value: '100%', label: 'médias générés en IA (vidéos + visuels 4K)' },
+      { value: '10+', label: 'pages, architecture multi-pages optimisée' },
+      { value: 'GSAP', label: 'animations scroll premium (Lenis)' },
+    ],
+    gallery: [
+      { src: '/images/realisations/stoop-desktop.jpg', caption: "Page d'accueil · Desktop" },
+      { src: '/images/realisations/stoop-services.jpg', caption: 'Section services · scroll horizontal' },
+      { src: '/images/realisations/stoop-mobile.jpg', caption: 'Version mobile · 390px', mobile: true },
+    ],
+    testimonial: {
+      text: "Ce projet incarne la promesse de l'agence : une direction artistique premium, des médias créés en IA et un tunnel de conversion complet — conçu, développé et déployé en un temps record.",
+      name: 'Béranger Vives',
+      role: 'Fondateur, vivesmedia.com',
+    },
+    stack: ['Next.js 16', 'TypeScript', 'Tailwind CSS', 'GSAP / Lenis', 'Higgsfield AI', 'Vercel'],
+    services: [
+      { label: 'Site Vitrine', href: '/services/site-vitrine' },
+      { label: 'Référencement SEO', href: '/services/seo' },
+    ],
+  },
+  {
     slug: 'yannis-amielh',
     name: 'Yannis Amielh',
     type: 'Portfolio · Mannequin Éditorial',

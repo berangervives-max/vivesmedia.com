@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
-import { articlesService } from '@/services/supabase.service'
+import { articlesService, getPublishedRealisationsData } from '@/services/supabase.service'
+import { REALISATIONS_DATA } from '@/data/realisations-data'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://vivesmedia.com'
@@ -27,5 +28,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     }))
   } catch {}
 
-  return [...staticPages, ...articlePages]
+  // Pages détail des réalisations (statiques + back-office)
+  const realisationSlugs = new Set<string>(REALISATIONS_DATA.map(r => r.slug))
+  try {
+    const dbR = await getPublishedRealisationsData()
+    dbR.forEach(r => realisationSlugs.add(r.slug))
+  } catch {}
+  const realisationPages: MetadataRoute.Sitemap = Array.from(realisationSlugs).map(slug => ({
+    url: `${base}/realisations/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.7,
+  }))
+
+  return [...staticPages, ...articlePages, ...realisationPages]
 }
