@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, ArrowLeft, ExternalLink, Quote } from 'lucide-react'
 import { REALISATIONS_DATA, getRealisationBySlug, type RealisationData } from '@/data/realisations-data'
+import { getProcess } from '@/data/realisation-process'
 import { realisationsService, dbToRealisationData, getPublishedRealisationsData } from '@/services/supabase.service'
 import JsonLd from '@/components/seo/JsonLd'
 import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
@@ -140,6 +141,25 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
           </div>
         </section>
       )}
+
+      {/* ── LA DÉMARCHE ── */}
+      <section className="py-16 sm:py-24 bg-secondary/30">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>La démarche</p>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
+            Comment on a <span className="font-heading italic font-normal">travaillé.</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+            {getProcess(slug).map(step => (
+              <div key={step.step} className="bg-white rounded-2xl border border-border p-6 sm:p-8">
+                <span className="text-xs font-mono" style={{ color: '#F4521E' }}>{step.step}</span>
+                <h3 className="text-base sm:text-lg font-bold text-foreground mt-2 mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── 4. RÉSULTATS ── */}
       {r.results.length > 0 && (
