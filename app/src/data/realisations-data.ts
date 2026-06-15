@@ -200,7 +200,8 @@ export const REALISATIONS_DATA: RealisationData[] = [
       { value: 'Top 3', label: 'Google Maps sur "padel" dans la zone' },
     ],
     gallery: [
-      { src: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png', caption: 'Page d\'accueil — immersion terrain' },
+      { src: '/images/realisations/paul-live-1.jpeg', caption: 'Page d\'accueil · Desktop' },
+      { src: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png', caption: 'Hero — immersion terrain' },
     ],
     testimonial: {
       text: "Le site donne exactement l'image qu'on voulait : moderne, sportive, pro. Les nouvelles têtes nous disent souvent qu'elles nous ont trouvés sur Google.",
