@@ -26,7 +26,7 @@ export const SERVICES_DATA: ServiceData[] = [
     title: 'Site E-Commerce',
     heroImage: '/images/services/hero-ecommerce.png',
     price: 'dès 3 840€',
-    priceNote: 'paiement unique · livraison en 3 semaines',
+    priceNote: 'paiement unique ou en abonnement dès 149€/mois · livraison en 3 semaines',
     tagline: 'Votre boutique en ligne prête à vendre dès le premier jour.',
     problem: 'Vous voulez vendre en ligne, mais Shopify en autonomie semble compliqué, les agences demandent 8 000€ minimum, et vous ne savez pas par où commencer. Résultat : vous attendez, vos concurrents vendent.',
     description:
@@ -54,6 +54,34 @@ export const SERVICES_DATA: ServiceData[] = [
         { text: 'Vous voulez présenter sans vendre → voir Site Catalogue', link: '/services/site-catalogue' },
       ],
     },
+    pricing: [
+      {
+        name: 'Paiement unique',
+        price: 'dès 3 840€',
+        note: 'une seule fois · vous possédez la boutique',
+        features: [
+          'Boutique e-commerce complète sur-mesure',
+          'Paiement Stripe & PayPal, gestion des stocks',
+          'Jusqu’à 50 produits inclus',
+          '6 mois de support inclus',
+          'Aucun frais mensuel',
+        ],
+      },
+      {
+        name: 'En abonnement',
+        price: '149€/mois',
+        note: 'Acompte 790€ au démarrage · engagement 24 mois minimum',
+        highlighted: true,
+        features: [
+          'La même boutique, sans gros budget de départ',
+          'Hébergement + nom de domaine inclus',
+          'Mises à jour & maintenance incluses',
+          '1h de modifications/mois incluse',
+          'Support prioritaire continu',
+          'Le site reste actif tant que l’abonnement court',
+        ],
+      },
+    ],
     process: [
       { step: '01', title: 'Appel découverte', desc: "30 minutes pour comprendre votre activité, vos produits et vos objectifs. Gratuit, sans engagement. Devis sous 24h." },
       { step: '02', title: 'Maquette & validation', desc: "Je vous présente le design de votre boutique. Vous validez avant que j'écrive la première ligne de code. 2 rounds de corrections inclus." },
@@ -143,7 +171,7 @@ export const SERVICES_DATA: ServiceData[] = [
     title: 'Site Vitrine',
     heroImage: '/images/services/hero-site-vitrine.png',
     price: 'dès 1 800€',
-    priceNote: 'paiement unique · livraison en 10 jours',
+    priceNote: 'paiement unique ou en abonnement dès 89€/mois · livraison en 10 jours',
     tagline: 'Votre première impression en ligne, irréprochable.',
     problem: 'Votre site actuel ne vous rapporte rien. Les visiteurs arrivent, ne comprennent pas ce que vous faites, et repartent. Vous perdez des devis tous les jours — sans même le savoir.',
     description:
@@ -171,6 +199,34 @@ export const SERVICES_DATA: ServiceData[] = [
         { text: 'Vous avez des centaines de références → voir Site Catalogue', link: '/services/site-catalogue' },
       ],
     },
+    pricing: [
+      {
+        name: 'Paiement unique',
+        price: 'dès 1 800€',
+        note: 'une seule fois · vous possédez le site',
+        features: [
+          '5 pages sur-mesure + SEO local',
+          'Hébergement 1 an offert',
+          'Formation admin incluse',
+          '30 jours de corrections après livraison',
+          'Aucun frais mensuel',
+        ],
+      },
+      {
+        name: 'En abonnement',
+        price: '89€/mois',
+        note: 'Acompte 490€ au démarrage · engagement 24 mois minimum',
+        highlighted: true,
+        features: [
+          'Le même site vitrine, sans gros budget de départ',
+          'Hébergement + nom de domaine inclus',
+          'Maintenance & mises à jour sécurité incluses',
+          '1h de modifications/mois incluse',
+          'Support sous 24h',
+          'Le site reste actif tant que l’abonnement court',
+        ],
+      },
+    ],
     process: [
       { step: '01', title: 'Brief en 30 minutes', desc: 'Appel pour comprendre votre activité, vos clients et ce qui vous différencie. Devis sous 24h.' },
       { step: '02', title: 'Maquette en 48h', desc: 'Je vous présente le design. Vous me donnez vos retours. 2 rounds de corrections inclus.' },
