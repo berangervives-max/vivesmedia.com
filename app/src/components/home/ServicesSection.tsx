@@ -20,8 +20,8 @@ const GROUPS: ServiceGroup[] = [
   {
     label: 'Créer',
     services: [
-      { num: '01', slug: 'site-ecommerce', title: 'Site E-Commerce', price: 'dès 3 840€', badge: 'Populaire' },
-      { num: '02', slug: 'site-vitrine', title: 'Site Vitrine', price: 'dès 1 800€' },
+      { num: '01', slug: 'site-ecommerce', title: 'Site E-Commerce', price: 'dès 3 840€ ou 149€/mois', badge: 'Populaire' },
+      { num: '02', slug: 'site-vitrine', title: 'Site Vitrine', price: 'dès 1 800€ ou 89€/mois' },
       { num: '03', slug: 'site-catalogue', title: 'Site Catalogue', price: 'dès 2 740€' },
     ],
   },

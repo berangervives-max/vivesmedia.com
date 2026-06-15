@@ -37,7 +37,8 @@ export default function ServicesPage() {
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Site E-Commerce</h2>
               <p className="text-4xl sm:text-5xl font-bold text-white mb-1">3 840€</p>
-              <p className="text-white/40 text-sm mb-6">paiement unique</p>
+              <p className="text-white/40 text-sm mb-1">paiement unique</p>
+              <p className="text-sm mb-6"><span className="text-white/70">ou </span><span className="font-semibold text-white">149€/mois</span><span className="text-white/70"> en abonnement · acompte 790€ · engagement 24 mois min.</span></p>
               <p className="text-white/70 text-sm leading-relaxed max-w-md mb-8">
                 Boutique en ligne complète avec paiement Stripe, gestion des stocks temps réel et dashboard admin complet. Prête à vendre dès le premier jour.
               </p>
@@ -65,15 +66,16 @@ export default function ServicesPage() {
         {/* Catalogue + Vitrine — 2 colonnes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
           {[
-            { slug: 'site-catalogue', num: '02', title: 'Site Catalogue', price: '2 740€', desc: "Présentez jusqu'à 250 produits avec filtres avancés et fiches techniques PDF. Idéal pour les artisans et fabricants.", features: ['250 produits maximum', 'Filtres de recherche avancés', 'Fiches techniques PDF', 'SEO optimisé', 'Design responsive premium', 'Support prioritaire'] },
-            { slug: 'site-vitrine', num: '03', title: 'Site Vitrine', price: '1 800€', desc: '5 pages sur-mesure, design responsive premium, SEO local optimisé, formulaire de contact. Hébergement 1 an offert.', features: ['Design 100% sur-mesure', 'SEO local optimisé', '5 pages professionnelles', 'Formulaire de contact', 'Hébergement 1 an offert', 'Formation admin incluse'] },
+            { slug: 'site-catalogue', num: '02', title: 'Site Catalogue', price: '2 740€', sub: '', desc: "Présentez jusqu'à 250 produits avec filtres avancés et fiches techniques PDF. Idéal pour les artisans et fabricants.", features: ['250 produits maximum', 'Filtres de recherche avancés', 'Fiches techniques PDF', 'SEO optimisé', 'Design responsive premium', 'Support prioritaire'] },
+            { slug: 'site-vitrine', num: '03', title: 'Site Vitrine', price: '1 800€', sub: 'ou 89€/mois en abonnement · acompte 490€ · 24 mois min.', desc: '5 pages sur-mesure, design responsive premium, SEO local optimisé, formulaire de contact. Hébergement 1 an offert.', features: ['Design 100% sur-mesure', 'SEO local optimisé', '5 pages professionnelles', 'Formulaire de contact', 'Hébergement 1 an offert', 'Formation admin incluse'] },
           ].map(s => (
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <span className="text-xs font-mono text-muted-foreground mb-4">{s.num}</span>
               <h2 className="text-xl font-bold text-foreground mb-1">{s.title}</h2>
               <p className="text-2xl font-bold mb-1" style={{ color: '#F4521E' }}>{s.price}</p>
-              <p className="text-xs text-muted-foreground mb-4">paiement unique</p>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">{s.desc}</p>
+              <p className="text-xs text-muted-foreground">paiement unique</p>
+              {s.sub && <p className="text-xs font-medium mt-1" style={{ color: '#F4521E' }}>{s.sub}</p>}
+              <p className="text-sm text-muted-foreground leading-relaxed mt-4 mb-6 flex-1">{s.desc}</p>
               <ul className="space-y-2 mb-6">
                 {s.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
