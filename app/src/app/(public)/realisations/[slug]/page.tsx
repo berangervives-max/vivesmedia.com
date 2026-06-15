@@ -11,12 +11,11 @@ import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 export const revalidate = 60
 export const dynamicParams = true
 
-/** Résout une réalisation par slug : d'abord les statiques (code), sinon la base. */
+/** Résout une réalisation par slug : d'abord la base (éditable via /cms), sinon les statiques (code, secours). */
 async function resolveRealisation(slug: string): Promise<RealisationData | undefined> {
-  const staticR = getRealisationBySlug(slug)
-  if (staticR) return staticR
   const dbR = await realisationsService.getBySlug(slug).catch(() => null)
-  return dbR ? dbToRealisationData(dbR) : undefined
+  if (dbR) return dbToRealisationData(dbR)
+  return getRealisationBySlug(slug)
 }
 
 export async function generateStaticParams() {

@@ -25,21 +25,25 @@ const PROJECTS: ProjectCard[] = [
   { num: '06', name: 'Wood Design', type: 'Site Catalogue · Artisan Bois', year: '2024', href: '/realisations/wood-design', img: 'https://images.unsplash.com/photo-1504148455328-c376907d081c?w=800&q=80', tags: ['Catalogue', 'Artisan', 'Design'] },
 ]
 
+// Projet mis en avant (pleine largeur). Choix éditorial gardé en code.
+const FEATURED_SLUGS = ['marine-caro']
+
 export default async function RealisationsPage() {
-  // Réalisations du back-office (publiées), mappées en cartes et ajoutées à la grille.
+  // La base (back-office /cms) pilote l'affichage et l'ordre (champ `ordre`).
+  // Le tableau PROJECTS codé en dur ne sert plus que de secours si la base est vide/indisponible.
   const dbRealisations = await getPublishedRealisationsData()
-  const dbCards: ProjectCard[] = dbRealisations
-    .filter(r => !PROJECTS.some(p => p.href === `/realisations/${r.slug}`))
-    .map((r, i) => ({
-      num: String(PROJECTS.length + i + 1).padStart(2, '0'),
-      name: r.name,
-      type: r.type,
-      year: r.year,
-      href: `/realisations/${r.slug}`,
-      img: r.heroImage,
-      tags: r.tags.slice(0, 3),
-    }))
-  const allProjects: ProjectCard[] = [...PROJECTS, ...dbCards]
+  const allProjects: ProjectCard[] = dbRealisations.length > 0
+    ? dbRealisations.map((r, i) => ({
+        num: String(i + 1).padStart(2, '0'),
+        name: r.name,
+        type: r.type,
+        year: r.year,
+        href: `/realisations/${r.slug}`,
+        img: r.heroImage,
+        tags: r.tags.slice(0, 3),
+        featured: FEATURED_SLUGS.includes(r.slug),
+      }))
+    : PROJECTS
 
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
