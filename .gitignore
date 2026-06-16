@@ -8,3 +8,5 @@ node_modules/
 .DS_Store
 # Le dossier frontend a son propre repo (vivesmedia.comv4 - Base44)
 frontend/
+
+.vercel

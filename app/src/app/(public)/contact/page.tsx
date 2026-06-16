@@ -29,12 +29,16 @@ export default function ContactPage() {
   const [form, setForm] = useState(EMPTY)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
 
-  // Présélectionne le service passé en ?service= par les boutons "Demander un devis"
+  // Présélectionne le service (?service=) et la formule choisie (?formule=) passés par les boutons "Choisir"
   useEffect(() => {
-    const param = new URLSearchParams(window.location.search).get('service')
-    if (param && PROJECT_TYPES.some(t => t.id === param)) {
-      setForm(p => ({ ...p, service: param }))
-    }
+    const params = new URLSearchParams(window.location.search)
+    const param = params.get('service')
+    const formule = params.get('formule')
+    setForm(p => ({
+      ...p,
+      service: param && PROJECT_TYPES.some(t => t.id === param) ? param : p.service,
+      message: formule ? `Formule souhaitée : ${formule}.\n\n${p.message}` : p.message,
+    }))
   }, [])
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))

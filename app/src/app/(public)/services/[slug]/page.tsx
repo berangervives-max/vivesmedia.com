@@ -184,10 +184,10 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                     ))}
                   </ul>
                   <Link
-                    href={`/contact?service=${s.slug}`}
+                    href={`/contact?service=${s.slug}&formule=${encodeURIComponent(`${plan.name} · ${plan.price}`)}`}
                     className={`mt-6 flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-full text-sm transition-colors ${plan.highlighted ? 'bg-white text-foreground hover:bg-white/90' : 'border border-border text-foreground hover:border-foreground'}`}
                   >
-                    Commencer →
+                    Choisir cette formule →
                   </Link>
                 </div>
               ))}
