@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { articlesService } from '@/services/supabase.service'
 import type { Article } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock } from 'lucide-react'
 
 const EMPTY: Omit<Article, 'id' | 'created_at' | 'updated_at'> = {
   titre: '', slug: '', extrait: '', contenu: '', categorie: '', tags: '',
@@ -11,6 +11,21 @@ const EMPTY: Omit<Article, 'id' | 'created_at' | 'updated_at'> = {
 
 function toSlug(s: string) {
   return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')
+}
+
+const STATUS = {
+  publie: { label: 'Publié', cls: 'bg-green-100 text-green-700' },
+  programme: { label: 'Programmé', cls: 'bg-amber-100 text-amber-700' },
+  brouillon: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-500' },
+} as const
+
+// Statut réel : Programmé = date de publication dans le futur (pas encore en ligne) ;
+// Publié = en ligne (publie + date passée) ; Brouillon = non publié, sans date future.
+function statusOf(a: { publie: boolean; date_pub?: string | null }): keyof typeof STATUS {
+  const today = new Date().toISOString().slice(0, 10)
+  const d = (a.date_pub || '').slice(0, 10)
+  if (d && d > today) return 'programme'
+  return a.publie ? 'publie' : 'brouillon'
 }
 
 const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none"
@@ -109,7 +124,7 @@ export default function CmsArticlesPage() {
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Articles</h1>
           <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>
-            {articles.length} article(s) · {articles.filter(a => a.publie).length} publié(s)
+            {articles.length} article(s) · {articles.filter(a => statusOf(a) === 'publie').length} publié(s) · {articles.filter(a => statusOf(a) === 'programme').length} programmé(s)
           </p>
         </div>
         <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#F4521E' }}>
@@ -122,6 +137,38 @@ export default function CmsArticlesPage() {
           Aucun article
         </div>
       )}
+      {(() => {
+        const upcoming = articles
+          .filter(a => statusOf(a) === 'programme')
+          .sort((x, y) => (x.date_pub || '').localeCompare(y.date_pub || ''))
+        if (!upcoming.length) return null
+        return (
+          <div className="rounded-xl p-5 mb-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+            <div className="flex items-center gap-2 mb-3">
+              <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} />
+              <h2 className="text-sm font-bold" style={{ color: '#111827' }}>
+                Planning éditorial — {upcoming.length} article(s) à venir
+              </h2>
+            </div>
+            <div className="space-y-1.5">
+              {upcoming.map(a => {
+                const d = new Date(a.date_pub as string)
+                const days = Math.max(0, Math.ceil((d.getTime() - Date.now()) / 86400000))
+                return (
+                  <div key={a.id} className="flex items-center gap-3 text-sm">
+                    <span className="font-mono text-xs px-2 py-0.5 rounded shrink-0" style={{ background: '#FFF4ED', color: '#F4521E' }}>
+                      {d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
+                    </span>
+                    <span className="flex-1 truncate" style={{ color: '#374151' }}>{a.titre}</span>
+                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>dans {days} j</span>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
+
       <div className="space-y-2">
         {articles.map(a => (
           <div key={a.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
@@ -139,8 +186,8 @@ export default function CmsArticlesPage() {
                 {a.date_pub}
               </p>
             </div>
-            <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${a.publie ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-              {a.publie ? 'Publié' : 'Brouillon'}
+            <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${STATUS[statusOf(a)].cls}`}>
+              {STATUS[statusOf(a)].label}
             </span>
             <div className="flex gap-1 shrink-0">
               <button onClick={() => toggle(a)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
