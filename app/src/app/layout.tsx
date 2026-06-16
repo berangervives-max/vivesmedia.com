@@ -10,9 +10,9 @@ const interTight = Inter_Tight({ subsets: ['latin'], variable: '--font-inter-tig
 const instrumentSerif = Instrument_Serif({ subsets: ['latin'], variable: '--font-instrument-serif', weight: '400', style: ['normal', 'italic'] })
 
 export const metadata: Metadata = {
-  title: { default: 'vivesmedia.com — Agence web sur-mesure', template: '%s | vivesmedia.com' },
-  description: 'Agence web spécialisée dans la création de sites sur-mesure, pensés pour convertir. Originaire d’Avignon · Full remote · Partout en France.',
-  keywords: ['agence web', 'création site internet', 'Avignon', 'site sur-mesure', 'SEO', 'e-commerce', 'site vitrine'],
+  title: { default: 'vivesmedia.com — Freelance web, design & marketing', template: '%s | vivesmedia.com' },
+  description: 'Freelance web, design et marketing : création de sites sur-mesure, identité visuelle et stratégie digitale, pensés pour convertir. Originaire d’Avignon · Full remote · Partout en France.',
+  keywords: ['freelance web', 'création site internet', 'design', 'marketing digital', 'Avignon', 'site sur-mesure', 'SEO', 'e-commerce', 'site vitrine'],
   authors: [{ name: 'Béranger Vives', url: 'https://vivesmedia.com' }],
   creator: 'vivesmedia.com',
   publisher: 'vivesmedia.com',
@@ -23,11 +23,11 @@ export const metadata: Metadata = {
     locale: 'fr_FR',
     url: 'https://vivesmedia.com',
     siteName: 'vivesmedia.com',
-    title: 'vivesmedia.com — Agence web sur-mesure',
+    title: 'vivesmedia.com — Freelance web, design & marketing',
     description: 'Sites sur-mesure, pensés pour convertir. Originaire d’Avignon · Full remote · Partout en France.',
-    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'vivesmedia.com — Agence web sur-mesure' }],
+    images: [{ url: '/og-image.jpg', width: 1200, height: 630, alt: 'vivesmedia.com — Freelance web, design & marketing' }],
   },
-  twitter: { card: 'summary_large_image', title: 'vivesmedia.com — Agence web sur-mesure', description: 'Sites sur-mesure, pensés pour convertir. Full remote · France.', images: ['/og-image.jpg'] },
+  twitter: { card: 'summary_large_image', title: 'vivesmedia.com — Freelance web, design & marketing', description: 'Sites sur-mesure, pensés pour convertir. Full remote · France.', images: ['/og-image.jpg'] },
   robots: { index: true, follow: true, googleBot: { index: true, follow: true, 'max-image-preview': 'large', 'max-snippet': -1 } },
 }
 

@@ -89,7 +89,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
       { src: '/images/realisations/stoop-mobile.jpg', caption: 'Version mobile · 390px', mobile: true },
     ],
     testimonial: {
-      text: "Ce projet incarne la promesse de l'agence : une direction artistique premium, des médias créés en IA et un tunnel de conversion complet — conçu, développé et déployé en un temps record.",
+      text: "Ce projet incarne ma promesse : une direction artistique premium, des médias créés en IA et un tunnel de conversion complet — conçu, développé et déployé en un temps record.",
       name: 'Béranger Vives',
       role: 'Fondateur, vivesmedia.com',
     },

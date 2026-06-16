@@ -32,7 +32,7 @@ export const SITE_SCHEMA = {
       image: `${SITE_URL}/og-image.jpg`,
       email: 'contact@vivesmedia.com',
       description:
-        'Agence web spécialisée dans la création de sites sur-mesure, pensés pour convertir. Originaire d’Avignon, full remote, partout en France.',
+        'Freelance web, design et marketing, spécialisé dans la création de sites sur-mesure pensés pour convertir. Originaire d’Avignon, full remote, partout en France.',
       founder: FOUNDER,
       foundingDate: '2025',
       areaServed: { '@type': 'Country', name: 'France' },

@@ -10,7 +10,7 @@ import CtaSection from '@/components/home/CtaSection'
 
 export const metadata: Metadata = {
   title: 'vivesmedia.com — Création de sites web sur-mesure · Devis gratuit',
-  description: 'Agence web freelance basée à Avignon. Sites vitrines, e-commerce, SEO et CRM IA sur-mesure. Full remote partout en France. Devis gratuit sous 24h.',
+  description: 'Freelance web, design & marketing basé à Avignon. Sites vitrines, e-commerce, SEO et CRM IA sur-mesure. Full remote partout en France. Devis gratuit sous 24h.',
   alternates: { canonical: 'https://vivesmedia.com/' },
 }
 

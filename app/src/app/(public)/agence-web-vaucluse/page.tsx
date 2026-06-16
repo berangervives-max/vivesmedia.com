@@ -5,14 +5,14 @@ import JsonLd from '@/components/seo/JsonLd'
 import { faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export const metadata: Metadata = {
-  title: 'Agence web dans le Vaucluse (84) — Création de site internet sur-mesure',
+  title: 'Freelance web, design & marketing — Vaucluse (84) | vivesmedia.com',
   description:
-    'Création de sites internet sur-mesure dans le Vaucluse : sites vitrines, e-commerce et UX/UI à Avignon, Carpentras, Orange et tout le 84. Design, SEO et automatisation inclus. Devis gratuit sous 24h.',
+    'Freelance web, design et marketing dans le Vaucluse : création de sites internet sur-mesure (vitrine, e-commerce Shopify), identité visuelle et stratégie digitale à Avignon, Carpentras, Orange et tout le 84. Devis gratuit sous 24h.',
   alternates: { canonical: 'https://vivesmedia.com/agence-web-vaucluse' },
   openGraph: {
     type: 'website',
-    title: 'Agence web dans le Vaucluse (84) — Sites internet sur-mesure',
-    description: 'Création de sites internet sur-mesure dans le Vaucluse — vitrine, e-commerce, UX/UI, SEO. Devis gratuit sous 24h.',
+    title: 'Freelance web, design & marketing — Vaucluse (84)',
+    description: 'Freelance web, design et marketing dans le Vaucluse — création de site internet sur-mesure, e-commerce Shopify, identité visuelle, SEO. Devis gratuit sous 24h.',
     url: 'https://vivesmedia.com/agence-web-vaucluse',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
@@ -53,7 +53,7 @@ export default function AgenceWebVauclusePage() {
       <JsonLd data={faqSchema(FAQ)} />
       <JsonLd data={breadcrumbSchema([
         { name: 'Accueil', url: SITE_URL },
-        { name: 'Agence web Vaucluse', url: `${SITE_URL}/agence-web-vaucluse` },
+        { name: 'Freelance web Vaucluse', url: `${SITE_URL}/agence-web-vaucluse` },
       ])} />
 
       {/* Hero */}
@@ -64,8 +64,8 @@ export default function AgenceWebVauclusePage() {
             <MapPin className="w-3.5 h-3.5" /> Vaucluse · Avignon · 84
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.07] tracking-tight">
-            Agence web dans le Vaucluse —{' '}
-            <span className="font-heading italic font-normal">sites sur-mesure</span>
+            Freelance web, design & marketing dans le Vaucluse —{' '}
+            <span className="font-heading italic font-normal">sur-mesure</span>
           </h1>
           <p className="mt-6 text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Création de sites internet sur-mesure — vitrine, e-commerce, UX/UI — pour les entreprises et indépendants
@@ -88,10 +88,10 @@ export default function AgenceWebVauclusePage() {
         <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-5">Votre site internet sur-mesure dans le Vaucluse</h2>
         <div className="space-y-4 text-muted-foreground leading-relaxed">
           <p>
-            Vous cherchez une <strong className="text-foreground">agence web dans le Vaucluse</strong> pour créer ou refondre le site internet
+            Vous cherchez un <strong className="text-foreground">freelance web dans le Vaucluse</strong> pour créer ou refondre le site internet
             de votre entreprise ? Basé à <strong className="text-foreground">Avignon</strong>, j&apos;accompagne les artisans, commerçants, indépendants et PME
-            du département (84) dans la <strong className="text-foreground">création de sites web sur-mesure</strong>, rapides, modernes et pensés pour
-            transformer vos visiteurs en clients.
+            du département (84) dans la <strong className="text-foreground">création de sites web sur-mesure</strong>, du design à la mise en ligne — rapides,
+            modernes et pensés pour transformer vos visiteurs en clients.
           </p>
           <p>
             Pas de template générique : chaque projet est conçu sur-mesure côté <strong className="text-foreground">design UX/UI</strong>, du
@@ -118,7 +118,7 @@ export default function AgenceWebVauclusePage() {
 
       {/* Pourquoi local */}
       <section className="max-w-3xl mx-auto px-6 py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">Pourquoi choisir une agence web locale dans le Vaucluse ?</h2>
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-6">Pourquoi travailler avec un freelance web local dans le Vaucluse ?</h2>
         <ul className="space-y-3">
           {[
             'Un interlocuteur unique et réactif, qui connaît le tissu économique local',
