@@ -51,12 +51,25 @@ export default function CmsArticlesPage() {
     try {
       if (editing === 'new') await articlesService.create(form)
       else if (editing) await articlesService.update(editing, form)
+      if (form.publie) pingIndex(form.slug)
       setEditing(null); load()
     } catch (err: any) { alert(err.message) }
     finally { setSaving(false) }
   }
 
-  const toggle = async (a: Article) => { await articlesService.update(a.id, { publie: !a.publie }); load() }
+  // Ping Google Indexing API + IndexNow (Bing) — indexation automatique à la publication
+  const pingIndex = (slug: string) =>
+    fetch('/api/cms/index-article', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: `https://vivesmedia.com/blog/${slug}` }),
+    }).catch(() => {})
+
+  const toggle = async (a: Article) => {
+    const publishing = !a.publie
+    await articlesService.update(a.id, { publie: !a.publie })
+    if (publishing) pingIndex(a.slug)
+    load()
+  }
 
   if (editing) return (
     <div>
