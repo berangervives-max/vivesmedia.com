@@ -5,15 +5,15 @@ import JsonLd from '@/components/seo/JsonLd'
 import { faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export const metadata: Metadata = {
-  title: 'Freelance web, design & marketing — Vaucluse (84) | vivesmedia.com',
+  title: 'Freelance web, design & marketing dans le Vaucluse (84)',
   description:
     'Freelance web, design et marketing dans le Vaucluse : création de sites internet sur-mesure (vitrine, e-commerce Shopify), identité visuelle et stratégie digitale à Avignon, Carpentras, Orange et tout le 84. Devis gratuit sous 24h.',
-  alternates: { canonical: 'https://vivesmedia.com/agence-web-vaucluse' },
+  alternates: { canonical: 'https://vivesmedia.com/freelance-web-vaucluse' },
   openGraph: {
     type: 'website',
     title: 'Freelance web, design & marketing — Vaucluse (84)',
     description: 'Freelance web, design et marketing dans le Vaucluse — création de site internet sur-mesure, e-commerce Shopify, identité visuelle, SEO. Devis gratuit sous 24h.',
-    url: 'https://vivesmedia.com/agence-web-vaucluse',
+    url: 'https://vivesmedia.com/freelance-web-vaucluse',
     images: [{ url: '/og-image.jpg', width: 1200, height: 630 }],
   },
 }
@@ -42,7 +42,7 @@ const serviceSchema = {
   serviceType: 'Création de site internet',
   provider: { '@id': `${SITE_URL}/#organization` },
   areaServed: { '@type': 'AdministrativeArea', name: 'Vaucluse', containedInPlace: { '@type': 'Country', name: 'France' } },
-  url: `${SITE_URL}/agence-web-vaucluse`,
+  url: `${SITE_URL}/freelance-web-vaucluse`,
   description: 'Création de sites internet vitrines, e-commerce et sur-mesure pour les entreprises du Vaucluse (84) : design UX/UI, SEO et automatisation inclus.',
 }
 
@@ -53,7 +53,7 @@ export default function AgenceWebVauclusePage() {
       <JsonLd data={faqSchema(FAQ)} />
       <JsonLd data={breadcrumbSchema([
         { name: 'Accueil', url: SITE_URL },
-        { name: 'Freelance web Vaucluse', url: `${SITE_URL}/agence-web-vaucluse` },
+        { name: 'Freelance web Vaucluse', url: `${SITE_URL}/freelance-web-vaucluse` },
       ])} />
 
       {/* Hero */}
