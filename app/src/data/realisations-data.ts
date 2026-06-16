@@ -182,7 +182,6 @@ export const REALISATIONS_DATA: RealisationData[] = [
     year: '2024',
     tags: ['Site Vitrine', 'Sport', 'Design'],
     heroImage: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png',
-    liveUrl: 'https://paul-louis-sport.vercel.app',
     intro: "Un site vitrine pour un club de padel qui devait faire deux choses : donner envie de jouer dès la première seconde, et transformer cette envie en réservation de terrain.",
     context: {
       client: "Paul & Louis Sport est un club de padel en pleine croissance, porté par l'explosion de ce sport en France. Terrains neufs, ambiance conviviale, mais aucune présence en ligne à la hauteur.",

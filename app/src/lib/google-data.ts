@@ -108,6 +108,14 @@ export async function getGscData(): Promise<GscData> {
   }
 }
 
+/** Stats Search Console par page (URL) sur ~90 jours — pour les stats par article. */
+export async function getGscPages(rowLimit = 200): Promise<GscRow[]> {
+  const token = await getAccessToken('https://www.googleapis.com/auth/webmasters.readonly')
+  if (!token) return []
+  const res = await gscQuery(token, { startDate: dateStr(90), endDate: dateStr(3), dimensions: ['page'], rowLimit })
+  return res.rows ?? []
+}
+
 export type Ga4Data = {
   available: boolean
   reason?: string

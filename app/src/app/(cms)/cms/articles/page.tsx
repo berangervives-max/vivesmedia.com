@@ -37,9 +37,14 @@ export default function CmsArticlesPage() {
   const [editing, setEditing] = useState<string | null>(null)
   const [form, setForm] = useState<Omit<Article, 'id' | 'created_at' | 'updated_at'>>({ ...EMPTY })
   const [saving, setSaving] = useState(false)
+  const [stats, setStats] = useState<Record<string, { clicks: number; impressions: number; position: number }>>({})
 
   const load = () => articlesService.getAll().then(setArticles).catch(() => {})
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    // Stats Search Console par article (clics / impressions / position)
+    fetch('/api/cms/article-stats').then(r => r.json()).then(d => setStats(d.stats || {})).catch(() => {})
+  }, [])
 
   const open = (a?: Article) => {
     setEditing(a?.id || 'new')
@@ -199,6 +204,16 @@ export default function CmsArticlesPage() {
                 {a.date_pub}
               </p>
             </div>
+            {(() => {
+              const s = stats[`/blog/${a.slug}`]
+              if (!s || (!s.impressions && !s.clicks)) return null
+              return (
+                <div className="hidden sm:flex flex-col items-end text-xs shrink-0 mr-1 leading-tight" style={{ color: '#6B7280' }} title="Search Console · 90 derniers jours">
+                  <span><strong style={{ color: '#111827' }}>{s.impressions}</strong> impr · <strong style={{ color: '#111827' }}>{s.clicks}</strong> clics</span>
+                  <span>pos. moy. <strong style={{ color: '#F4521E' }}>{s.position}</strong></span>
+                </div>
+              )
+            })()}
             <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${STATUS[statusOf(a)].cls}`}>
               {STATUS[statusOf(a)].label}
             </span>
