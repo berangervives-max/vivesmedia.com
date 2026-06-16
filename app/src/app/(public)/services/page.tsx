@@ -1,6 +1,11 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
+import { creationFormules, iaServices, recurrentServices, maintenancePlans } from '@/data/tarifs-data'
+
+// Source de vérité partagée avec /tarifs (cf. src/data/tarifs-data.ts).
+const ecommerce = creationFormules[0]
+const catalogueVitrine = creationFormules.slice(1)
 
 export const metadata: Metadata = {
   title: 'Services & Tarifs — Création de sites web sur-mesure',
@@ -35,12 +40,12 @@ export default function ServicesPage() {
                 <span className="text-xs font-mono text-white/40">01</span>
                 <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Le plus populaire</span>
               </div>
-              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Site E-Commerce</h2>
-              <p className="text-4xl sm:text-5xl font-bold text-white mb-1">3 840€</p>
-              <p className="text-white/40 text-sm mb-1">paiement unique</p>
-              <p className="text-sm mb-6"><span className="text-white/70">ou </span><span className="font-semibold text-white">149€/mois</span><span className="text-white/70"> en abonnement · acompte 790€ · engagement 24 mois min.</span></p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{ecommerce.title}</h2>
+              <p className="text-4xl sm:text-5xl font-bold text-white mb-1">{ecommerce.price}</p>
+              <p className="text-white/40 text-sm mb-1">{ecommerce.priceNote}</p>
+              <p className="text-sm mb-6 text-white/70">{ecommerce.sub}</p>
               <p className="text-white/70 text-sm leading-relaxed max-w-md mb-8">
-                Boutique en ligne complète avec paiement Stripe, gestion des stocks temps réel et dashboard admin complet. Prête à vendre dès le premier jour.
+                {ecommerce.desc}
               </p>
               <div className="flex flex-wrap gap-3">
                 <Link href="/services/site-ecommerce" className="flex items-center gap-2 bg-white text-foreground font-semibold px-6 py-3 rounded-full text-sm hover:bg-white/90 transition-colors">
@@ -53,7 +58,7 @@ export default function ServicesPage() {
             </div>
             <div className="md:w-64 shrink-0">
               <ul className="space-y-3">
-                {['Stripe / PayPal / Klarna', 'Gestion des stocks temps réel', 'Dashboard admin complet', "Jusqu'à 50 produits", 'Blog intégré', 'Support 6 mois inclus'].map(f => (
+                {ecommerce.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-white/70">
                     <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} /> {f}
                   </li>
@@ -65,10 +70,7 @@ export default function ServicesPage() {
 
         {/* Catalogue + Vitrine — 2 colonnes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-16">
-          {[
-            { slug: 'site-catalogue', num: '02', title: 'Site Catalogue', price: '2 740€', sub: '', desc: "Présentez jusqu'à 250 produits avec filtres avancés et fiches techniques PDF. Idéal pour les artisans et fabricants.", features: ['250 produits maximum', 'Filtres de recherche avancés', 'Fiches techniques PDF', 'SEO optimisé', 'Design responsive premium', 'Support prioritaire'] },
-            { slug: 'site-vitrine', num: '03', title: 'Site Vitrine', price: '1 800€', sub: 'ou 89€/mois en abonnement · acompte 490€ · 24 mois min.', desc: '5 pages sur-mesure, design responsive premium, SEO local optimisé, formulaire de contact. Hébergement 1 an offert.', features: ['Design 100% sur-mesure', 'SEO local optimisé', '5 pages professionnelles', 'Formulaire de contact', 'Hébergement 1 an offert', 'Formation admin incluse'] },
-          ].map(s => (
+          {catalogueVitrine.map(s => (
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <span className="text-xs font-mono text-muted-foreground mb-4">{s.num}</span>
               <h2 className="text-xl font-bold text-foreground mb-1">{s.title}</h2>
@@ -102,11 +104,7 @@ export default function ServicesPage() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
-          {[
-            { slug: 'video-contenu-ia', num: '04', title: 'Vidéo & Contenu IA', price: '490€/mois', desc: 'Reels Instagram, vidéos produit et backgrounds cinématiques générés par IA. Livraison hebdomadaire, prêts à publier.', features: ['8 à 16 vidéos/mois', 'Format Reels 9:16', 'Format desktop 16:9', 'Calendrier éditorial', 'Copywriting inclus'] },
-            { slug: 'visibilite-ia', num: '05', title: 'Visibilité IA (AEO/GEO)', price: '490€/mois', desc: "Être cité par ChatGPT, Perplexity et Gemini. Audit, plan d'action et tracking mensuel.", features: ['Audit citations IA', 'Tracking mensuel', 'Optimisation contenu AEO', 'Rapport Brand Radar', 'Schema.org implémenté'] },
-            { slug: 'formation-ia', num: '06', title: 'Formation IA', price: 'dès 290€/session', desc: 'Apprenez à utiliser Claude et les agents IA. Sessions Zoom individuelles, workbooks et replays inclus.', features: ['Sessions Zoom 2h', 'Workbook exercices', 'Cheat sheet prompts', 'Replay vidéo', 'Pack 5 sessions dispo'] },
-          ].map(s => (
+          {iaServices.map(s => (
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono text-muted-foreground">{s.num}</span>
@@ -141,11 +139,7 @@ export default function ServicesPage() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
-          {[
-            { slug: 'seo', num: '07', title: 'Référencement SEO', price: '274€/mois', desc: "Audit technique, optimisation on-page, articles ciblés. Du trafic qualifié, durablement.", features: ['Audit SEO complet', 'Optimisation technique', 'Stratégie de contenu', 'Suivi rankings', 'Rapport mensuel'] },
-            { slug: 'crm-automatisation', num: '08', title: 'CRM & Automatisation IA', price: 'Sur Devis', desc: 'Agents IA autonomes 24/7, workflows automatisés, prospection sur pilote automatique.', features: ['Agents IA 24/7', 'Workflows automatisés', 'CRM sur-mesure', 'Intégration Stripe', 'Tableau de bord'] },
-            { slug: 'maintenance', num: '09', title: 'Maintenance', price: 'dès 55€/mois', desc: 'Mises à jour, sauvegardes quotidiennes, monitoring uptime. Votre site entre de bonnes mains.', features: ['Mises à jour sécurité', 'Sauvegardes régulières', 'Monitoring 24/7', 'Support prioritaire', 'Rapport mensuel'] },
-          ].map(s => (
+          {recurrentServices.map(s => (
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <span className="text-xs font-mono text-muted-foreground mb-4">{s.num}</span>
               <h2 className="text-lg font-bold text-foreground mb-1">{s.title}</h2>
@@ -177,11 +171,7 @@ export default function ServicesPage() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
-          {[
-            { name: 'Essentiel', price: '55€/mois', recommended: false, features: ['Mises à jour sécurité', 'Sauvegarde mensuelle', '1h modifications/mois', 'Support email 48h'] },
-            { name: 'Pro', price: '110€/mois', recommended: true, features: ['Sauvegarde hebdomadaire', '3h modifications/mois', 'Support prioritaire 24h', 'Monitoring Uptime 24/7'] },
-            { name: 'Premium', price: '165€/mois', recommended: false, features: ['Sauvegarde quotidienne', '5h modifications/mois', 'Support Visio dédié', 'Audit sécurité mensuel'] },
-          ].map(m => (
+          {maintenancePlans.map(m => (
             <div key={m.name} className={`rounded-2xl border p-7 bg-white flex flex-col ${m.recommended ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}>
               {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Recommandé</span>}
               <p className="font-bold text-foreground text-lg">{m.name}</p>
