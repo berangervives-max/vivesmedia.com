@@ -40,6 +40,7 @@ export const creationFormules: Formule[] = [
     title: 'Site Catalogue',
     price: '2 740€',
     priceNote: 'paiement unique',
+    sub: 'ou 119€/mois en abonnement · acompte 640€ · 24 mois min.',
     desc: "Présentez jusqu'à 250 produits avec filtres avancés et fiches techniques PDF. Idéal pour les artisans et fabricants.",
     features: ['250 produits maximum', 'Filtres de recherche avancés', 'Fiches techniques PDF', 'SEO optimisé', 'Design responsive premium', 'Support prioritaire'],
   },
@@ -129,7 +130,7 @@ export const tarifsFaq: { q: string; a: string }[] = [
   },
   {
     q: 'Peut-on payer son site en plusieurs fois ?',
-    a: "Oui. En plus du paiement unique, la formule abonnement permet d'étaler le coût : un acompte à la commande puis des mensualités (89€/mois pour un site vitrine, 149€/mois pour un e-commerce), avec un engagement de 24 mois minimum.",
+    a: "Oui, sur tous les types de sites. En plus du paiement unique, la formule abonnement permet d'étaler le coût : un acompte à la commande puis des mensualités (89€/mois pour un site vitrine, 119€/mois pour un site catalogue, 149€/mois pour un e-commerce), avec un engagement de 24 mois minimum.",
   },
   {
     q: "L'hébergement est-il compris dans le prix ?",
