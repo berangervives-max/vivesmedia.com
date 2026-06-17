@@ -96,6 +96,7 @@ export default function Footer() {
             {['Mentions légales', 'CGV'].map((label) => (
               <span key={label} className="text-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{label}</span>
             ))}
+            <Link href="/divulgation" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Divulgation d&apos;affiliation</Link>
           </div>
         </div>
       </div>
