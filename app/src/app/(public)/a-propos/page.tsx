@@ -1,19 +1,13 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import Timeline from '@/components/about/Timeline'
 
 export const metadata: Metadata = {
   title: 'À propos — Studio web freelance Avignon',
   description: 'vivesmedia.com, studio web freelance basé à Avignon. Expert en création de sites sur-mesure, SEO, CRM et automatisation IA. 5 ans d\'expérience, 100% full remote.',
   alternates: { canonical: 'https://vivesmedia.com/a-propos' },
 }
-
-const TIMELINE = [
-  { num: '01', year: '2019', title: 'BTS NDRC — Négociation & Relation Client', desc: 'Premières armes en vente, prospection et relation client. Apprentissage des fondamentaux commerciaux.' },
-  { num: '02', year: '2020–2022', title: 'Digital Manager — Automobile & E-Commerce', desc: "Animation de points de vente, campagnes Google Ads & Meta, gestion de sites e-commerce. Bachelor Marketing & Digital (BAC+3)." },
-  { num: '03', year: '2022–2023', title: 'MBA Expert Marketing Digital — BAC+5', desc: "Stratégie digitale avancée, architecture web, automatisation marketing. Premier site publié : Vives Reports (Rome)." },
-  { num: '04', year: '2024–2025', title: 'Fondation de vivesmedia.com', desc: "Lancement du studio freelance. Sites livrés de A à Z : Ecoserre, Paul & Louis Sport, Wood Design. Développement full-stack avec CRM, Stripe et IA." },
-]
 
 const PILLARS = [
   { num: '01', title: 'Clarté', desc: 'Zéro jargon. Vous comprenez chaque décision prise pour votre projet.' },
@@ -49,24 +43,7 @@ export default function AProposPage() {
           ))}
         </div>
 
-        <div className="mb-20">
-          <h2 className="text-2xl font-bold text-foreground mb-10">Parcours</h2>
-          <div className="space-y-8">
-            {TIMELINE.map((t, i) => (
-              <div key={t.num} className="flex gap-6">
-                <div className="flex-shrink-0 w-16 text-right">
-                  <span className="text-xs font-mono text-muted-foreground">{t.num}</span>
-                </div>
-                <div className="flex-shrink-0 w-px bg-border" />
-                <div className="pb-8">
-                  <p className="text-xs text-muted-foreground mb-1">{t.year}</p>
-                  <h3 className="font-semibold text-foreground">{t.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-2 leading-relaxed">{t.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <Timeline />
 
         <div className="rounded-2xl bg-foreground p-10 text-center">
           <h3 className="text-2xl font-bold text-white mb-3">Travaillons ensemble</h3>
