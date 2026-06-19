@@ -1,8 +1,8 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY
-// TEMPORAIRE : tant que vivesmedia.com n'est pas vérifié dans Resend (DNS en attente),
-// envoi depuis onboarding@resend.dev — seul expéditeur autorisé sans domaine vérifié.
-// Une fois le domaine vérifié : remettre FROM = 'vivesmedia.com <contact@vivesmedia.com>' et ADMIN = 'contact@vivesmedia.com'
-const FROM = 'vivesmedia.com <onboarding@resend.dev>'
+// Domaine vivesmedia.com vérifié dans Resend (DKIM + SPF + DMARC, 20/06/2026)
+// → envoi possible vers n'importe quel destinataire depuis contact@vivesmedia.com.
+const FROM = 'vivesmedia.com <contact@vivesmedia.com>'
+// ADMIN reste sur le Gmail : c'est la boîte de RÉCEPTION réelle (pas de mailbox sur le domaine).
 const ADMIN = 'berangervives@gmail.com'
 
 async function send(to: string, subject: string, html: string) {
