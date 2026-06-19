@@ -29,14 +29,13 @@ export default function MentionsLegalesPage() {
         <Section title="1. Éditeur du site">
           <p>Le site <strong>vivesmedia.com</strong> est édité par :</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li><strong>Béranger Vives</strong></li>
-            <li>Forme juridique : {A_COMPLETER} (ex. entreprise individuelle / micro-entreprise)</li>
-            <li>Adresse : {A_COMPLETER}, Avignon (84), France</li>
+            <li><strong>Béranger Vives</strong>, entrepreneur individuel</li>
             <li>SIRET : {A_COMPLETER}</li>
-            <li>Immatriculation (RCS / Répertoire des métiers) : {A_COMPLETER}</li>
             <li>TVA : non applicable, art. 293 B du CGI (franchise en base de TVA)</li>
-            <li>Email : <a href="mailto:contact@vivesmedia.com" className="underline hover:text-foreground">contact@vivesmedia.com</a></li>
+            <li>Lieu d'exercice : Avignon (84), France — activité 100&nbsp;% à distance</li>
+            <li>Contact : <a href="mailto:contact@vivesmedia.com" className="underline hover:text-foreground">contact@vivesmedia.com</a></li>
           </ul>
+          <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>Adresse postale complète communiquée sur simple demande par email.</p>
         </Section>
 
         <Section title="2. Directeur de la publication">

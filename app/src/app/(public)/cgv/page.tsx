@@ -31,7 +31,7 @@ export default function CgvPage() {
         </div>
 
         <Section n="1" title="Identification du prestataire">
-          <p>Les présentes CGV régissent les prestations fournies par <strong>Béranger Vives</strong> (marque « vivesmedia.com »), {A_COMPLETER} (forme juridique), SIRET {A_COMPLETER}, dont le siège est situé à Avignon (84), France — ci-après « le Prestataire ».</p>
+          <p>Les présentes CGV régissent les prestations fournies par <strong>Béranger Vives</strong>, entrepreneur individuel exerçant sous la marque « vivesmedia.com » (SIRET {A_COMPLETER}), Avignon (84), France — ci-après « le Prestataire ». Activité exercée 100&nbsp;% à distance ; adresse postale communiquée sur demande.</p>
         </Section>
 
         <Section n="2" title="Objet et champ d'application">
