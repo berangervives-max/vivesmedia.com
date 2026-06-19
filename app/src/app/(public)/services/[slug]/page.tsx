@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, Check, Star, Phone, CalendarDays, X } from 'lucide-react'
 import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
+import { getServiceDetail } from '@/data/services-detail'
 import JsonLd from '@/components/seo/JsonLd'
 import { serviceSchema, faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
@@ -26,6 +27,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const { slug } = await params
   const s = getServiceBySlug(slug)
   if (!s) notFound()
+  const detail = getServiceDetail(slug)
 
   return (
     <div className="min-h-screen bg-background">
@@ -121,6 +123,35 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             </ul>
           </div>
         </div>
+
+        {/* ── EN DÉTAIL (deep dive) ── */}
+        {detail && detail.length > 0 && (
+          <div className="mb-16">
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>En détail</p>
+            <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">Comment ça marche, concrètement</h2>
+            <div className="space-y-6">
+              {detail.map(sec => (
+                <div key={sec.title} className="bg-white rounded-2xl border border-border p-6 md:p-8">
+                  <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">{sec.title}</h3>
+                  {sec.intro && <p className="text-muted-foreground leading-relaxed mb-5">{sec.intro}</p>}
+                  {sec.points && sec.points.length > 0 && (
+                    <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
+                      {sec.points.map(p => (
+                        <div key={p.title} className="flex gap-3">
+                          <Check className="w-4 h-4 shrink-0 mt-1" style={{ color: '#F4521E' }} />
+                          <div>
+                            <p className="text-sm font-semibold text-foreground">{p.title}</p>
+                            <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* ── POUR QUI ── */}
         {s.forWhom && (
