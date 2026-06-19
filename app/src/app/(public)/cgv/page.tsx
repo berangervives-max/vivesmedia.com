@@ -43,7 +43,7 @@ export default function CgvPage() {
         </Section>
 
         <Section n="4" title="Prix et modalités de paiement">
-          <p>Les prix sont indiqués en euros. Selon le régime fiscal du Prestataire, ils s'entendent hors taxes (« TVA non applicable, art. 293 B du CGI ») ou TTC — voir devis.</p>
+          <p>Les prix sont indiqués en euros et s'entendent net de taxe : « TVA non applicable, art. 293 B du CGI » (franchise en base de TVA).</p>
           <p>Deux modes de facturation sont proposés :</p>
           <ul className="list-disc pl-5 space-y-1">
             <li><strong>Paiement unique</strong> : acompte à la commande, solde à la livraison.</li>

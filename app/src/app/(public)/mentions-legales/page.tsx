@@ -34,7 +34,7 @@ export default function MentionsLegalesPage() {
             <li>Adresse : {A_COMPLETER}, Avignon (84), France</li>
             <li>SIRET : {A_COMPLETER}</li>
             <li>Immatriculation (RCS / Répertoire des métiers) : {A_COMPLETER}</li>
-            <li>N° TVA intracommunautaire : {A_COMPLETER} (ou « TVA non applicable, art. 293 B du CGI » si franchise en base)</li>
+            <li>TVA : non applicable, art. 293 B du CGI (franchise en base de TVA)</li>
             <li>Email : <a href="mailto:contact@vivesmedia.com" className="underline hover:text-foreground">contact@vivesmedia.com</a></li>
           </ul>
         </Section>
