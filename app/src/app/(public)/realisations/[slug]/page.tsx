@@ -86,7 +86,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               ))}
             </div>
             {r.liveUrl && (
-              <a href={r.liveUrl} target="_blank" rel="noopener noreferrer"
+              <a href={r.liveUrl} target="_blank" rel="nofollow noopener noreferrer"
                 className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-border hover:border-foreground/30 transition-colors text-muted-foreground hover:text-foreground w-fit">
                 Voir le site <ExternalLink className="w-3 h-3" />
               </a>

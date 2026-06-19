@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react'
 import { articlesService } from '@/services/supabase.service'
 import type { Article } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X } from 'lucide-react'
 
 const EMPTY: Omit<Article, 'id' | 'created_at' | 'updated_at'> = {
   titre: '', slug: '', extrait: '', contenu: '', categorie: '', tags: '',
@@ -37,9 +37,14 @@ export default function CmsArticlesPage() {
   const [editing, setEditing] = useState<string | null>(null)
   const [form, setForm] = useState<Omit<Article, 'id' | 'created_at' | 'updated_at'>>({ ...EMPTY })
   const [saving, setSaving] = useState(false)
+  const [stats, setStats] = useState<Record<string, { clicks: number; impressions: number; position: number }>>({})
 
   const load = () => articlesService.getAll().then(setArticles).catch(() => {})
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    // Stats Search Console par article (clics / impressions / position)
+    fetch('/api/cms/article-stats').then(r => r.json()).then(d => setStats(d.stats || {})).catch(() => {})
+  }, [])
 
   const open = (a?: Article) => {
     setEditing(a?.id || 'new')
@@ -69,6 +74,23 @@ export default function CmsArticlesPage() {
     await articlesService.update(a.id, { publie: !a.publie })
     if (publishing) pingIndex(a.slug)
     load()
+  }
+
+  // Demande d'indexation manuelle (Google + Bing), avec retour visuel
+  const [indexing, setIndexing] = useState<Record<string, 'busy' | 'ok' | 'err'>>({})
+  const requestIndex = async (slug: string) => {
+    setIndexing(p => ({ ...p, [slug]: 'busy' }))
+    try {
+      const r = await fetch('/api/cms/index-article', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: `https://vivesmedia.com/blog/${slug}` }),
+      })
+      const d = await r.json()
+      setIndexing(p => ({ ...p, [slug]: d?.google?.ok || d?.indexnow?.ok ? 'ok' : 'err' }))
+    } catch {
+      setIndexing(p => ({ ...p, [slug]: 'err' }))
+    }
+    setTimeout(() => setIndexing(p => { const n = { ...p }; delete n[slug]; return n }), 4000)
   }
 
   if (editing) return (
@@ -199,10 +221,31 @@ export default function CmsArticlesPage() {
                 {a.date_pub}
               </p>
             </div>
+            {(() => {
+              const s = stats[`/blog/${a.slug}`]
+              if (!s || (!s.impressions && !s.clicks)) return null
+              return (
+                <div className="hidden sm:flex flex-col items-end text-xs shrink-0 mr-1 leading-tight" style={{ color: '#6B7280' }} title="Search Console · 90 derniers jours">
+                  <span><strong style={{ color: '#111827' }}>{s.impressions}</strong> impr · <strong style={{ color: '#111827' }}>{s.clicks}</strong> clics</span>
+                  <span>pos. moy. <strong style={{ color: '#F4521E' }}>{s.position}</strong></span>
+                </div>
+              )
+            })()}
             <span className={`text-xs px-2.5 py-1 rounded-full font-medium shrink-0 ${STATUS[statusOf(a)].cls}`}>
               {STATUS[statusOf(a)].label}
             </span>
             <div className="flex gap-1 shrink-0">
+              {a.publie && (
+                <button onClick={() => requestIndex(a.slug)} disabled={indexing[a.slug] === 'busy'} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FFF4ED'; (e.currentTarget as HTMLElement).style.color = '#F4521E' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}
+                  title="Demander l'indexation (Google + Bing)">
+                  {indexing[a.slug] === 'busy' ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    : indexing[a.slug] === 'ok' ? <Check className="w-3.5 h-3.5" style={{ color: '#16a34a' }} />
+                    : indexing[a.slug] === 'err' ? <X className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+                    : <Send className="w-3.5 h-3.5" />}
+                </button>
+              )}
               <button onClick={() => toggle(a)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
                 onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
                 onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}

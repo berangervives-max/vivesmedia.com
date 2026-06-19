@@ -122,6 +122,16 @@ export default function ServicesSection() {
           >
             Pas d'agence intermédiaire, pas de template revendu. Chaque projet est fait à la main, de A à Z.
           </motion.p>
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.25, ease }}
+            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full"
+            style={{ background: '#FFF4ED', color: '#F4521E' }}
+          >
+            💳 Paiement en 1 fois ou en abonnement dès 89 €/mois — sur tous les types de sites
+          </motion.div>
         </div>
 
         {/* Liste par groupe */}

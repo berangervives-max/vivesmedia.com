@@ -114,7 +114,7 @@ export const SERVICES_DATA: ServiceData[] = [
     title: 'Site Catalogue',
     heroImage: '/images/services/hero-site-catalogue.png',
     price: 'dès 2 740€',
-    priceNote: 'paiement unique · livraison en 2 semaines',
+    priceNote: 'paiement unique ou en abonnement dès 119€/mois · livraison en 2 semaines',
     tagline: 'Présentez vos produits professionnellement, sans vendre en ligne.',
     problem: 'Vous avez des dizaines ou centaines de références, mais aucun moyen de les présenter en ligne de façon professionnelle sans ouvrir une vraie boutique e-commerce. Vos commerciaux perdent du temps à envoyer des PDF de catalogues par email.',
     description:
@@ -140,6 +140,34 @@ export const SERVICES_DATA: ServiceData[] = [
         { text: 'Vous souhaitez vendre directement en ligne → voir Site E-Commerce', link: '/services/site-ecommerce' },
       ],
     },
+    pricing: [
+      {
+        name: 'Paiement unique',
+        price: 'dès 2 740€',
+        note: 'une seule fois · vous possédez le site',
+        features: [
+          'Jusqu’à 250 fiches produits + filtres avancés',
+          'Fiches techniques PDF + formulaire de devis',
+          'Hébergement 1 an offert',
+          'Formation admin incluse',
+          'Aucun frais mensuel',
+        ],
+      },
+      {
+        name: 'En abonnement',
+        price: '119€/mois',
+        note: 'Acompte 640€ au démarrage · engagement 24 mois minimum',
+        highlighted: true,
+        features: [
+          'Le même site catalogue, sans gros budget de départ',
+          'Hébergement + nom de domaine inclus',
+          'Maintenance & mises à jour sécurité incluses',
+          '1h de modifications/mois incluse',
+          'Support sous 24h',
+          'Le site reste actif tant que l’abonnement court',
+        ],
+      },
+    ],
     process: [
       { step: '01', title: 'Appel découverte', desc: 'On définit ensemble les filtres, les catégories, la structure et le nombre de références. Devis sous 24h.' },
       { step: '02', title: 'Design & validation', desc: 'Maquette de la page produit type et de la navigation. Vous validez avant développement.' },

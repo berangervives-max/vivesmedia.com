@@ -17,6 +17,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/a-propos`, lastModified: now, changeFrequency: 'yearly', priority: 0.6 },
     { url: `${base}/mentions-legales`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/cgv`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${base}/divulgation`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
 
   let articlePages: MetadataRoute.Sitemap = []
