@@ -91,11 +91,10 @@ export default function Footer() {
         </div>
 
         <div className="mt-16 pt-8 border-t border-border flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-xs text-muted-foreground">©2025 vivesmedia.com — Tous droits réservés. Full remote · France.</p>
+          <p className="text-xs text-muted-foreground">©{new Date().getFullYear()} vivesmedia.com — Tous droits réservés. Full remote · France.</p>
           <div className="flex gap-6">
-            {['Mentions légales', 'CGV'].map((label) => (
-              <span key={label} className="text-xs text-muted-foreground hover:text-foreground cursor-pointer transition-colors">{label}</span>
-            ))}
+            <Link href="/mentions-legales" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Mentions légales</Link>
+            <Link href="/cgv" className="text-xs text-muted-foreground hover:text-foreground transition-colors">CGV</Link>
           </div>
         </div>
       </div>
