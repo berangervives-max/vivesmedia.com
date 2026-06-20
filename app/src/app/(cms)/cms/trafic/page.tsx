@@ -13,12 +13,44 @@ const ORANGE = '#F4521E'
 type GscRow = { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }
 type Day = { date: string; [k: string]: number | string }
 type Insight = { severity: 'opportunity' | 'warning' | 'good'; title: string; detail: string; action: string }
+type FunnelStep = { key: string; label: string; count: number }
 type Data = {
   gsc: { available: boolean; totals: { clicks: number; impressions: number; ctr: number; position: number }; topQueries: GscRow[]; topPages: GscRow[]; series: Day[] }
   ga4: { available: boolean; reason?: string; realtimeUsers: number; last30: { activeUsers: number; sessions: number; pageViews: number }; trendSessionsPct: number; series: Day[]; topSources: { source: string; sessions: number }[]; topPages: { path: string; views: number }[] }
   posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[] }
+  funnel?: { available: boolean; periodDays: number; conseil: FunnelStep[]; achat: FunnelStep[]; events: Record<string, number> }
   insights: Insight[]
   generatedAt: string
+}
+
+function Funnel({ title, steps }: { title: string; steps: FunnelStep[] }) {
+  const max = Math.max(1, steps[0]?.count ?? 0)
+  return (
+    <div>
+      <p className="text-xs font-semibold mb-3" style={{ color: '#475569' }}>{title}</p>
+      <div className="space-y-2.5">
+        {steps.map((s, i) => {
+          const prev = i > 0 ? steps[i - 1].count : s.count
+          const dropPct = i > 0 && prev > 0 ? Math.round((1 - s.count / prev) * 100) : 0
+          const widthPct = Math.max(3, Math.round((s.count / max) * 100))
+          return (
+            <div key={s.key + i}>
+              <div className="flex items-center justify-between text-xs mb-1">
+                <span style={{ color: '#334155' }}>{s.label}</span>
+                <span className="font-semibold" style={{ color: '#0F172A' }}>
+                  {s.count}
+                  {i > 0 && <span className="ml-2 font-normal" style={{ color: dropPct > 60 ? '#DC2626' : '#94A3B8' }}>−{dropPct}%</span>}
+                </span>
+              </div>
+              <div className="h-2 rounded-full" style={{ background: '#F1F5F9' }}>
+                <div className="h-2 rounded-full" style={{ width: `${widthPct}%`, background: '#F4521E' }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
 }
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
@@ -74,7 +106,7 @@ export default function TraficPage() {
   if (error) return <div className="rounded-xl p-5 text-sm" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>{error}</div>
   if (!data) return null
 
-  const { ga4, gsc, posthog, insights } = data
+  const { ga4, gsc, posthog, insights, funnel } = data
   const pct = (n: number) => `${(n * 100).toFixed(1)} %`
   const trendUp = ga4.trendSessionsPct >= 0
 
@@ -98,6 +130,24 @@ export default function TraficPage() {
           </button>
         </div>
       </div>
+
+      {/* Funnel de conversion */}
+      {funnel?.available && (
+        <Card>
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
+            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>Tunnel de conversion</h2>
+            <span className="text-xs" style={{ color: '#94A3B8' }}>· {funnel.periodDays} derniers jours</span>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Funnel title="Voie devis (conseil)" steps={funnel.conseil} />
+            <Funnel title="Voie achat en ligne" steps={funnel.achat} />
+          </div>
+          <p className="text-[11px] mt-4" style={{ color: '#94A3B8' }}>
+            Le % indique la perte à chaque étape. Une grosse chute = l'étape à corriger en priorité.
+          </p>
+        </Card>
+      )}
 
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

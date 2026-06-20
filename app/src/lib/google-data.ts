@@ -208,6 +208,45 @@ async function hogql(sql: string): Promise<unknown[][] | null> {
   return json.results ?? null
 }
 
+export type FunnelStep = { key: string; label: string; count: number }
+export type FunnelData = {
+  available: boolean
+  periodDays: number
+  conseil: FunnelStep[]
+  achat: FunnelStep[]
+  events: Record<string, number>
+}
+
+/** Funnel de conversion (30 j) à partir des events PostHog — pour voir où ça décroche. */
+export async function getFunnelData(): Promise<FunnelData> {
+  const empty: FunnelData = { available: false, periodDays: 30, conseil: [], achat: [], events: {} }
+  const rows = await hogql(
+    `SELECT event, count() FROM events
+     WHERE timestamp > now() - INTERVAL 30 DAY
+     AND event IN ('$pageview','service_viewed','pricing_viewed','devis_started','devis_submitted','checkout_started','checkout_completed','newsletter_subscribed','cta_clicked')
+     GROUP BY event`
+  )
+  if (!rows) return empty
+  const m: Record<string, number> = {}
+  for (const r of rows) m[String(r[0])] = Number(r[1]) || 0
+  return {
+    available: true,
+    periodDays: 30,
+    conseil: [
+      { key: '$pageview', label: 'Visites', count: m['$pageview'] || 0 },
+      { key: 'service_viewed', label: 'Pages services vues', count: m['service_viewed'] || 0 },
+      { key: 'devis_started', label: 'Devis commencés', count: m['devis_started'] || 0 },
+      { key: 'devis_submitted', label: 'Devis envoyés', count: m['devis_submitted'] || 0 },
+    ],
+    achat: [
+      { key: 'service_viewed', label: 'Pages services vues', count: m['service_viewed'] || 0 },
+      { key: 'checkout_started', label: 'Paiements démarrés', count: m['checkout_started'] || 0 },
+      { key: 'checkout_completed', label: 'Achats finalisés', count: m['checkout_completed'] || 0 },
+    ],
+    events: m,
+  }
+}
+
 export type Insight = {
   severity: 'opportunity' | 'warning' | 'good'
   title: string

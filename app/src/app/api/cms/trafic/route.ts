@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
-import { getGscData, getGa4Data, getPostHogData, buildInsights } from '@/lib/google-data'
+import { getGscData, getGa4Data, getPostHogData, getFunnelData, buildInsights } from '@/lib/google-data'
 
 // Données GA4 + Search Console pour le back-office. Admin uniquement.
 export async function GET() {
@@ -12,9 +12,9 @@ export async function GET() {
   }
 
   try {
-    const [gsc, ga4, posthog] = await Promise.all([getGscData(), getGa4Data(), getPostHogData()])
+    const [gsc, ga4, posthog, funnel] = await Promise.all([getGscData(), getGa4Data(), getPostHogData(), getFunnelData()])
     const insights = buildInsights(gsc, ga4, posthog)
-    return NextResponse.json({ gsc, ga4, posthog, insights, generatedAt: new Date().toISOString() })
+    return NextResponse.json({ gsc, ga4, posthog, funnel, insights, generatedAt: new Date().toISOString() })
   } catch (e) {
     return NextResponse.json({ error: 'Erreur récupération données', detail: String(e) }, { status: 500 })
   }
