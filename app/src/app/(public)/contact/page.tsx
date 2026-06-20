@@ -42,6 +42,8 @@ export default function ContactPage() {
   }, [])
 
   const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))
+  const filledCount = [form.service, form.budget, form.nom, form.email].filter(Boolean).length
+  const progress = Math.round((filledCount / 4) * 100)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -77,6 +79,17 @@ export default function ContactPage() {
           </h1>
           <p className="text-muted-foreground mb-10">Réponse garantie sous 24h, sans engagement.</p>
         </motion.div>
+
+        <div className="mb-8">
+          <div className="flex justify-between items-center text-xs mb-1.5">
+            <span className="text-muted-foreground">Progression de votre demande</span>
+            <span className="font-semibold" style={{ color: '#F4521E' }}>{progress}%</span>
+          </div>
+          <div className="h-1.5 rounded-full overflow-hidden bg-foreground/10">
+            <motion.div className="h-full rounded-full" style={{ backgroundColor: '#F4521E' }}
+              animate={{ width: `${progress}%` }} transition={{ duration: 0.4 }} />
+          </div>
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           <div className="bg-white rounded-2xl border border-border p-8">
@@ -131,6 +144,12 @@ export default function ContactPage() {
               <AlertCircle className="w-4 h-4 flex-shrink-0" /> Une erreur est survenue. Réessayez ou écrivez à contact@vivesmedia.com
             </div>
           )}
+
+          <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
+            {['Réponse sous 24 h', 'Sans engagement', '100 % gratuit'].map(t => (
+              <span key={t} className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" style={{ color: '#F4521E' }} /> {t}</span>
+            ))}
+          </div>
 
           <button type="submit" disabled={status === 'loading' || !form.nom || !form.email}
             className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
