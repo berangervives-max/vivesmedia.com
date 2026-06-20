@@ -34,7 +34,7 @@ export default function Navbar() {
             ))}
           </ul>
           <div className="flex items-center gap-3">
-            <button onClick={() => setMobileOpen(true)} className="lg:hidden p-2 text-foreground/60 hover:text-foreground">
+            <button onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu" className="lg:hidden p-2 text-foreground/60 hover:text-foreground">
               <Menu className="w-5 h-5" />
             </button>
             <Link href="/contact" className="hidden sm:flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: '#F4521E' }}>
@@ -50,7 +50,7 @@ export default function Navbar() {
             <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="absolute right-0 top-0 h-full w-80 bg-white border-l border-border p-8" onClick={(e) => e.stopPropagation()}>
               <div className="flex justify-between items-center mb-10">
                 <span className="font-bold text-lg text-foreground">vivesmedia<span style={{ color: '#F4521E' }}>.com</span></span>
-                <button onClick={() => setMobileOpen(false)} className="text-foreground/60 hover:text-foreground"><X className="w-5 h-5" /></button>
+                <button onClick={() => setMobileOpen(false)} aria-label="Fermer le menu" className="text-foreground/60 hover:text-foreground"><X className="w-5 h-5" /></button>
               </div>
               <ul className="space-y-1">
                 {NAV_LINKS.map((link) => (
