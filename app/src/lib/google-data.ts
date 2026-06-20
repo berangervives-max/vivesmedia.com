@@ -194,6 +194,9 @@ export type PostHogData = {
   devices: { device: string; sessions: number }[]
   errors: { message: string; type: string; page: string; count: number }[]
   vitals: { lcp: number; cls: number; inp: number; fcp: number; slowest: { path: string; lcp: number }[] }
+  entryPages: { path: string; count: number }[]
+  exitPages: { path: string; count: number }[]
+  channels: { channel: string; count: number }[]
 }
 
 async function hogql(sql: string): Promise<unknown[][] | null> {
@@ -349,9 +352,9 @@ async function phRecordingsCount(): Promise<number> {
 
 /** Stats PostHog orientées COMPORTEMENT/UX (et non trafic, déjà couvert par GA4). */
 export async function getPostHogData(): Promise<PostHogData> {
-  const empty: PostHogData = { available: false, recordingsCount: 0, avgSessionSec: 0, bounceRate: 0, rageClicks: 0, deadClicks: 0, topClicks: [], frictionPages: [], series: [], devices: [], errors: [], vitals: { lcp: 0, cls: 0, inp: 0, fcp: 0, slowest: [] } }
+  const empty: PostHogData = { available: false, recordingsCount: 0, avgSessionSec: 0, bounceRate: 0, rageClicks: 0, deadClicks: 0, topClicks: [], frictionPages: [], series: [], devices: [], errors: [], vitals: { lcp: 0, cls: 0, inp: 0, fcp: 0, slowest: [] }, entryPages: [], exitPages: [], channels: [] }
   try {
-    const [sessions, rage, dead, clicks, friction, daily, devices, recCount, errs, vitG, vitSlow] = await Promise.all([
+    const [sessions, rage, dead, clicks, friction, daily, devices, recCount, errs, vitG, vitSlow, entry, exit, channels] = await Promise.all([
       hogql("SELECT avg(session.$session_duration) AS dur, count() AS n, countIf(session.$pageview_count <= 1) AS bounces FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY"),
       hogql("SELECT count() AS c FROM events WHERE event = '$rageclick' AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY"),
       hogql("SELECT count() AS c FROM events WHERE event = '$dead_click' AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY"),
@@ -363,6 +366,9 @@ export async function getPostHogData(): Promise<PostHogData> {
       hogql("SELECT properties.$exception_message AS msg, properties.$exception_type AS typ, properties.$pathname AS page, count() AS c FROM events WHERE event = '$exception' AND properties.$pathname NOT LIKE '/cms%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY msg, typ, page ORDER BY c DESC LIMIT 8"),
       hogql("SELECT round(quantile(0.75)(properties.$web_vitals_LCP_value)) AS lcp, round(quantile(0.75)(properties.$web_vitals_CLS_value), 3) AS cls, round(quantile(0.75)(properties.$web_vitals_INP_value)) AS inp, round(quantile(0.75)(properties.$web_vitals_FCP_value)) AS fcp FROM events WHERE event = '$web_vitals' AND timestamp > now() - INTERVAL 30 DAY"),
       hogql("SELECT properties.$pathname AS p, round(quantile(0.75)(properties.$web_vitals_LCP_value)) AS lcp FROM events WHERE event = '$web_vitals' AND properties.$web_vitals_LCP_value > 0 AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY p ORDER BY lcp DESC LIMIT 6"),
+      hogql("SELECT session.$entry_pathname AS p, count() AS c FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY AND session.$entry_pathname NOT LIKE '/cms%' AND session.$entry_pathname NOT LIKE '/hub%' GROUP BY p ORDER BY c DESC LIMIT 6"),
+      hogql("SELECT session.$end_pathname AS p, count() AS c FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY AND session.$end_pathname NOT LIKE '/cms%' AND session.$end_pathname NOT LIKE '/hub%' GROUP BY p ORDER BY c DESC LIMIT 6"),
+      hogql("SELECT session.$channel_type AS ch, count() AS c FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY AND ch != '' GROUP BY ch ORDER BY c DESC LIMIT 8"),
     ])
     if (!sessions) return empty
     const n = Number(sessions[0]?.[1] ?? 0)
@@ -386,6 +392,9 @@ export async function getPostHogData(): Promise<PostHogData> {
         fcp: Number(vitG?.[0]?.[3] ?? 0),
         slowest: (vitSlow ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', lcp: Number(row[1]) })),
       },
+      entryPages: (entry ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', count: Number(row[1]) })),
+      exitPages: (exit ?? []).map((row) => ({ path: String(row[0] ?? '/') || '/', count: Number(row[1]) })),
+      channels: (channels ?? []).map((row) => ({ channel: String(row[0] ?? '—') || '—', count: Number(row[1]) })),
     }
   } catch {
     return empty

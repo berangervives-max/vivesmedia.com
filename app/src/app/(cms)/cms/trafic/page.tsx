@@ -17,7 +17,7 @@ type FunnelStep = { key: string; label: string; count: number }
 type Data = {
   gsc: { available: boolean; totals: { clicks: number; impressions: number; ctr: number; position: number }; topQueries: GscRow[]; topPages: GscRow[]; series: Day[] }
   ga4: { available: boolean; reason?: string; realtimeUsers: number; last30: { activeUsers: number; sessions: number; pageViews: number }; trendSessionsPct: number; series: Day[]; topSources: { source: string; sessions: number }[]; topPages: { path: string; views: number }[] }
-  posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[]; errors: { message: string; type: string; page: string; count: number }[]; vitals: { lcp: number; cls: number; inp: number; fcp: number; slowest: { path: string; lcp: number }[] } }
+  posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[]; errors: { message: string; type: string; page: string; count: number }[]; vitals: { lcp: number; cls: number; inp: number; fcp: number; slowest: { path: string; lcp: number }[] }; entryPages: { path: string; count: number }[]; exitPages: { path: string; count: number }[]; channels: { channel: string; count: number }[] }
   funnel?: { available: boolean; periodDays: number; conseil: FunnelStep[]; achat: FunnelStep[]; events: Record<string, number> }
   insights: Insight[]
   generatedAt: string
@@ -50,6 +50,24 @@ function Funnel({ title, steps }: { title: string; steps: FunnelStep[] }) {
         })}
       </div>
     </div>
+  )
+}
+
+function RankList({ items, empty }: { items: { label: string; count: number }[]; empty?: string }) {
+  if (!items.length) return <p className="text-xs" style={{ color: '#94A3B8' }}>{empty || 'Pas encore de données'}</p>
+  const max = items[0]?.count || 1
+  return (
+    <ul className="space-y-2">
+      {items.map((it, i) => (
+        <li key={i}>
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span className="truncate" style={{ color: '#334155' }}>{it.label}</span>
+            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: '#0F172A' }}>{it.count}</span>
+          </div>
+          <div className="h-1.5 rounded-full" style={{ background: '#F1F5F9' }}><div className="h-1.5 rounded-full" style={{ width: `${(it.count / max) * 100}%`, background: i === 0 ? '#F4521E' : '#FBC4AC' }} /></div>
+        </li>
+      ))}
+    </ul>
   )
 }
 
@@ -405,6 +423,25 @@ export default function TraficPage() {
                     </ul>
                   </div>
                 )}
+              </Card>
+            </div>
+
+            {/* Parcours & sources — analyse du trafic */}
+            <div className="grid lg:grid-cols-3 gap-4 mt-4">
+              <Card>
+                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Pages d'entrée</p>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Où les visiteurs arrivent (30j) — tes portes d'entrée</p>
+                <RankList items={posthog.entryPages.map(p => ({ label: p.path, count: p.count }))} empty="Pas encore de visites" />
+              </Card>
+              <Card>
+                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Pages de sortie</p>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Où ils quittent le site — à renforcer en priorité</p>
+                <RankList items={posthog.exitPages.map(p => ({ label: p.path, count: p.count }))} empty="Pas encore de données" />
+              </Card>
+              <Card>
+                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Sources de trafic</p>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>D'où vient le trafic (30j)</p>
+                <RankList items={posthog.channels.map(c => ({ label: c.channel, count: c.count }))} empty="Pas encore de données" />
               </Card>
             </div>
           </div>
