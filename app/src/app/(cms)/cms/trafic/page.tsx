@@ -336,7 +336,8 @@ export default function TraficPage() {
               </Card>
 
               <Card>
-                <p className="text-sm font-bold mb-3" style={{ color: '#0F172A' }}>Points de friction</p>
+                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Points de friction</p>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Pages où les visiteurs cliquent frénétiquement (élément qui paraît cliquable mais ne l'est pas, ou temps d'attente) — à corriger en priorité. Hors back-office.</p>
                 {posthog.frictionPages.length > 0 ? (
                   <ul className="space-y-2.5">
                     {posthog.frictionPages.map((f, i) => (

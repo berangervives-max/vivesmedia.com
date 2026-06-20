@@ -351,10 +351,10 @@ export async function getPostHogData(): Promise<PostHogData> {
   try {
     const [sessions, rage, dead, clicks, friction, daily, devices, recCount] = await Promise.all([
       hogql("SELECT avg(session.$session_duration) AS dur, count() AS n, countIf(session.$pageview_count <= 1) AS bounces FROM sessions AS session WHERE session.$start_timestamp > now() - INTERVAL 30 DAY"),
-      hogql("SELECT count() AS c FROM events WHERE event = '$rageclick' AND timestamp > now() - INTERVAL 30 DAY"),
-      hogql("SELECT count() AS c FROM events WHERE event = '$dead_click' AND timestamp > now() - INTERVAL 30 DAY"),
-      hogql("SELECT properties.$el_text AS el, count() AS c FROM events WHERE event = '$autocapture' AND properties.$event_type = 'click' AND isNotNull(properties.$el_text) AND properties.$el_text != '' AND properties.$pathname NOT LIKE '/cms%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY el ORDER BY c DESC LIMIT 8"),
-      hogql("SELECT properties.$pathname AS p, count() AS c FROM events WHERE event = '$rageclick' AND timestamp > now() - INTERVAL 30 DAY GROUP BY p ORDER BY c DESC LIMIT 5"),
+      hogql("SELECT count() AS c FROM events WHERE event = '$rageclick' AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT count() AS c FROM events WHERE event = '$dead_click' AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY"),
+      hogql("SELECT properties.$el_text AS el, count() AS c FROM events WHERE event = '$autocapture' AND properties.$event_type = 'click' AND isNotNull(properties.$el_text) AND properties.$el_text != '' AND properties.$el_text NOT LIKE '%vivesmedia%' AND properties.$el_text != '.com' AND length(properties.$el_text) > 2 AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY el ORDER BY c DESC LIMIT 8"),
+      hogql("SELECT properties.$pathname AS p, count() AS c FROM events WHERE event = '$rageclick' AND properties.$pathname NOT LIKE '/cms%' AND properties.$pathname NOT LIKE '/hub%' AND timestamp > now() - INTERVAL 30 DAY GROUP BY p ORDER BY c DESC LIMIT 5"),
       hogql("SELECT toDate(timestamp) AS d, count() AS pv, count(DISTINCT person_id) AS v FROM events WHERE event = '$pageview' AND timestamp > now() - INTERVAL 30 DAY GROUP BY d ORDER BY d"),
       hogql("SELECT properties.$device_type AS device, count(DISTINCT $session_id) AS s FROM events WHERE timestamp > now() - INTERVAL 30 DAY AND device != '' GROUP BY device ORDER BY s DESC LIMIT 4"),
       phRecordingsCount(),
