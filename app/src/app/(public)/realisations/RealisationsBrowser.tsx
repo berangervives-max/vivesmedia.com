@@ -2,6 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
+import { motion, AnimatePresence } from 'framer-motion'
 
 export type ProjectCard = {
   num: string
@@ -15,28 +16,92 @@ export type ProjectCard = {
   secteur: string
 }
 
-/** Page Réalisations : barre de filtres par secteur + grille filtrée. */
+const ease = [0.22, 1, 0.36, 1] as const
+
+/** Carte projet immersive : screenshot plein cadre, dégradé + infos lisibles,
+ *  zoom + révélation (tags / « Voir le projet ») au survol. */
+function ProjectTile({ p, index, big = false }: { p: ProjectCard; index: number; big?: boolean }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 24 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: '-60px' }}
+      transition={{ duration: 0.6, delay: index * 0.07, ease }}
+    >
+      <Link
+        href={p.href}
+        className={`group relative block w-full overflow-hidden rounded-3xl bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[21/9]' : 'aspect-[4/3]'}`}
+      >
+        <img
+          src={p.img}
+          alt={`Projet ${p.name} — ${p.type}`}
+          className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.06]"
+        />
+        {/* Dégradé permanent (lisibilité du titre) + renfort au survol */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent transition-opacity duration-500" />
+        <div className="absolute inset-0 bg-black/0 transition-colors duration-500 group-hover:bg-black/10" />
+
+        {/* Index éditorial */}
+        <span className="absolute left-6 top-5 font-mono text-xs text-white/50">{p.num}</span>
+
+        {/* Badge projet phare */}
+        {p.featured && (
+          <span className="absolute right-5 top-5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white" style={{ backgroundColor: '#F4521E' }}>
+            Dernier projet
+          </span>
+        )}
+
+        {/* Pastille flèche qui apparaît au survol (sauf sur le projet phare qui a déjà un badge) */}
+        {!p.featured && (
+          <span className="absolute right-5 top-5 flex h-10 w-10 translate-y-1 items-center justify-center rounded-full bg-white opacity-0 transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+            <ArrowUpRight className="h-4 w-4 text-foreground" />
+          </span>
+        )}
+
+        {/* Bloc infos en bas */}
+        <div className="absolute inset-x-0 bottom-0 p-6 md:p-7">
+          <p className="mb-1 text-xs text-white/70">{p.type} · {p.year}</p>
+          <h3 className={`font-bold leading-tight text-white ${big ? 'text-3xl md:text-4xl' : 'text-2xl'}`}>{p.name}</h3>
+
+          {/* Tags + CTA : révélés en douceur au survol (toujours visibles tactile via max-height) */}
+          <div className="mt-3 flex items-center gap-3 overflow-hidden">
+            <div className="flex flex-wrap gap-2 opacity-90">
+              {p.tags.map((tag) => (
+                <span key={tag} className="rounded-full bg-white/15 px-2.5 py-1 text-[11px] text-white backdrop-blur-sm">{tag}</span>
+              ))}
+            </div>
+            <span className="ml-auto hidden shrink-0 items-center gap-1.5 text-sm font-semibold text-white opacity-0 transition-all duration-500 group-hover:opacity-100 sm:flex">
+              Voir le projet <ArrowUpRight className="h-4 w-4" />
+            </span>
+          </div>
+        </div>
+      </Link>
+    </motion.div>
+  )
+}
+
+/** Page Réalisations : filtres par secteur + grille immersive. */
 export default function RealisationsBrowser({ projects }: { projects: ProjectCard[] }) {
-  const secteurs = ['Tous', ...Array.from(new Set(projects.map(p => p.secteur)))]
+  const secteurs = ['Tous', ...Array.from(new Set(projects.map((p) => p.secteur)))]
   const [actif, setActif] = useState('Tous')
 
-  const filtered = actif === 'Tous' ? projects : projects.filter(p => p.secteur === actif)
-  // Le projet "à la une" n'est mis en avant que sur la vue globale.
-  const featured = actif === 'Tous' ? filtered.find(p => p.featured) : undefined
-  const grid = featured ? filtered.filter(p => p !== featured) : filtered
+  const filtered = actif === 'Tous' ? projects : projects.filter((p) => p.secteur === actif)
+  const featured = actif === 'Tous' ? filtered.find((p) => p.featured) : undefined
+  const grid = featured ? filtered.filter((p) => p !== featured) : filtered
 
   return (
     <>
       {/* Filtres par secteur */}
-      <div className="flex flex-wrap gap-2 mb-12">
-        {secteurs.map(s => (
+      <div className="mb-10 flex flex-wrap gap-2">
+        {secteurs.map((s) => (
           <button
             key={s}
             onClick={() => setActif(s)}
-            className={`text-sm px-4 py-2 rounded-full border transition-colors ${
+            className={`rounded-full border px-4 py-2 text-sm transition-colors ${
               actif === s
-                ? 'bg-foreground text-white border-foreground'
-                : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/40'
+                ? 'border-foreground bg-foreground text-white'
+                : 'border-border text-muted-foreground hover:border-foreground/40 hover:text-foreground'
             }`}
           >
             {s}
@@ -46,52 +111,19 @@ export default function RealisationsBrowser({ projects }: { projects: ProjectCar
 
       {/* Projet à la une — pleine largeur */}
       {featured && (
-        <Link href={featured.href} className="group block rounded-3xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300 mb-8">
-          <div className="aspect-21/9 overflow-hidden bg-secondary">
-            <img src={featured.img} alt={featured.name} className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-700" />
-          </div>
-          <div className="p-6 bg-white">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-4">
-                <span className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full text-white shrink-0" style={{ backgroundColor: '#F4521E' }}>Dernier projet</span>
-                <div>
-                  <p className="text-xs text-muted-foreground mb-0.5">{featured.type} · {featured.year}</p>
-                  <h3 className="text-xl font-bold text-foreground">{featured.name}</h3>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 shrink-0 ml-4">
-                <div className="hidden sm:flex gap-2 flex-wrap justify-end">
-                  {featured.tags.map(tag => <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">{tag}</span>)}
-                </div>
-                <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors" />
-              </div>
-            </div>
-          </div>
-        </Link>
+        <div className="mb-8">
+          <ProjectTile p={featured} index={0} big />
+        </div>
       )}
 
-      {/* Grille — 2 colonnes */}
-      <div className="grid md:grid-cols-2 gap-8 mb-20">
-        {grid.map(project => (
-          <Link key={project.href} href={project.href} className="group block rounded-3xl overflow-hidden border border-border hover:shadow-xl transition-all duration-300">
-            <div className="aspect-16/10 overflow-hidden bg-secondary">
-              <img src={project.img} alt={project.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-            </div>
-            <div className="p-6 bg-white">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground mb-1">{project.type} · {project.year}</p>
-                  <h3 className="text-xl font-bold text-foreground">{project.name}</h3>
-                  <div className="flex gap-2 mt-3 flex-wrap">
-                    {project.tags.map(tag => <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground">{tag}</span>)}
-                  </div>
-                </div>
-                <ArrowUpRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground transition-colors mt-1" />
-              </div>
-            </div>
-          </Link>
-        ))}
-      </div>
+      {/* Grille immersive — 2 colonnes */}
+      <motion.div layout className="mb-20 grid gap-6 md:grid-cols-2">
+        <AnimatePresence mode="popLayout">
+          {grid.map((project, i) => (
+            <ProjectTile key={project.href} p={project} index={i} />
+          ))}
+        </AnimatePresence>
+      </motion.div>
     </>
   )
 }
