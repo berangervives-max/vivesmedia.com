@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { ArrowUpRight, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
+import AnimatedCounter from '@/components/ui/AnimatedCounter'
 
 export default function HeroSection() {
   return (
@@ -46,9 +47,9 @@ export default function HeroSection() {
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
           className="mt-16 flex flex-wrap justify-center gap-12">
-          {[{ value: '5+', label: "ans d'expérience" }, { value: '10+', label: 'projets livrés' }, { value: '100%', label: 'full remote · France' }].map((stat) => (
+          {[{ num: 5, suffix: '+', label: "ans d'expérience" }, { num: 10, suffix: '+', label: 'projets livrés' }, { num: 100, suffix: '%', label: 'full remote · France' }].map((stat) => (
             <div key={stat.label} className="text-center">
-              <p className="text-3xl font-bold text-foreground">{stat.value}</p>
+              <AnimatedCounter value={stat.num} suffix={stat.suffix} className="block text-3xl font-bold text-foreground" />
               <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
             </div>
           ))}
