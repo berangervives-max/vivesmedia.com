@@ -137,6 +137,16 @@
   100% { transform: translateX(-50%); }
 }
 
+/* CTA orange : glow premium au survol (micro-détail design) */
+.btn-orange-glow {
+  box-shadow: 0 8px 30px rgba(244, 82, 30, 0.35);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+.btn-orange-glow:hover {
+  box-shadow: 0 12px 46px rgba(244, 82, 30, 0.6);
+  transform: translateY(-2px);
+}
+
 .animate-marquee {
   animation: marquee 30s linear infinite;
   width: max-content;

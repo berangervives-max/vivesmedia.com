@@ -63,7 +63,7 @@ export default function AboutSection() {
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
               className="mt-8 flex gap-3">
               <Link href="/realisations"
-                className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full text-white"
+                className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full text-white btn-orange-glow"
                 style={{ backgroundColor: '#F4521E' }}>
                 Voir mes réalisations <ArrowUpRight className="w-4 h-4" />
               </Link>

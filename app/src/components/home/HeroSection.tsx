@@ -23,8 +23,8 @@ export default function HeroSection() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all shadow-lg"
-            style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+          <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
+            style={{ backgroundColor: '#F4521E' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>
           <a href="https://g.page/r/CVrzNHW-E9f0EAE/review" target="_blank" rel="noopener noreferrer"
