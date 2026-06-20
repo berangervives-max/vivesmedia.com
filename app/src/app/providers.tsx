@@ -30,6 +30,11 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       person_profiles: 'identified_only',
       capture_pageview: false, // géré manuellement via PostHogPageView
       capture_pageleave: true,
+      capture_exceptions: true,        // erreurs JS (message + fichier:ligne + stack) → savoir QUOI bugge et OÙ
+      capture_heatmaps: true,          // heatmaps de clics/scroll par page
+      capture_dead_clicks: true,       // clics sans effet (frustration)
+      autocapture: true,               // clics/soumissions sur tous les éléments
+      capture_performance: true,       // Core Web Vitals (LCP/CLS/INP) par page
     })
   }, [])
 

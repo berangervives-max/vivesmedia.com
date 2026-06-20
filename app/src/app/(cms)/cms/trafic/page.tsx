@@ -17,7 +17,7 @@ type FunnelStep = { key: string; label: string; count: number }
 type Data = {
   gsc: { available: boolean; totals: { clicks: number; impressions: number; ctr: number; position: number }; topQueries: GscRow[]; topPages: GscRow[]; series: Day[] }
   ga4: { available: boolean; reason?: string; realtimeUsers: number; last30: { activeUsers: number; sessions: number; pageViews: number }; trendSessionsPct: number; series: Day[]; topSources: { source: string; sessions: number }[]; topPages: { path: string; views: number }[] }
-  posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[] }
+  posthog: { available: boolean; recordingsCount: number; avgSessionSec: number; bounceRate: number; rageClicks: number; deadClicks: number; topClicks: { label: string; count: number }[]; frictionPages: { path: string; rage: number }[]; series: Day[]; devices: { device: string; sessions: number }[]; errors: { message: string; type: string; page: string; count: number }[]; vitals: { lcp: number; cls: number; inp: number; fcp: number; slowest: { path: string; lcp: number }[] } }
   funnel?: { available: boolean; periodDays: number; conseil: FunnelStep[]; achat: FunnelStep[]; events: Record<string, number> }
   insights: Insight[]
   generatedAt: string
@@ -353,6 +353,56 @@ export default function TraficPage() {
                     {posthog.devices.map((d, i) => (
                       <div key={i}><p className="text-lg font-bold" style={{ color: '#0F172A' }}>{d.sessions}</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>{d.device}</p></div>
                     ))}
+                  </div>
+                )}
+              </Card>
+            </div>
+
+            {/* Bugs & Performance — du précis pour corriger dans le code */}
+            <div className="grid lg:grid-cols-2 gap-4 mt-4">
+              <Card>
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertTriangle className="w-4 h-4" style={{ color: '#EF4444' }} />
+                  <p className="text-sm font-bold" style={{ color: '#0F172A' }}>Erreurs JS (bugs)</p>
+                </div>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Exceptions JavaScript captées sur le site public : message + page. Ouvre PostHog → Error tracking pour la stack (fichier:ligne).</p>
+                {posthog.errors.length > 0 ? (
+                  <ul className="space-y-2">
+                    {posthog.errors.map((e, i) => (
+                      <li key={i} className="text-xs">
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="font-mono break-all" style={{ color: '#B91C1C' }}>{e.type ? `${e.type}: ` : ''}{e.message}</span>
+                          <span className="shrink-0 font-semibold" style={{ color: '#0F172A' }}>{e.count}×</span>
+                        </div>
+                        <span style={{ color: '#94A3B8' }}>{e.page}</span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : <p className="text-xs" style={{ color: '#16A34A' }}>Aucune erreur JS détectée 👌 — capture activée, les futurs bugs s'afficheront ici avec leur emplacement.</p>}
+              </Card>
+
+              <Card>
+                <div className="flex items-center gap-2 mb-1">
+                  <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
+                  <p className="text-sm font-bold" style={{ color: '#0F172A' }}>Performance perçue (Web Vitals)</p>
+                </div>
+                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>p75 réel visiteurs · LCP &lt; 2,5 s · INP &lt; 200 ms · CLS &lt; 0,1 = bon</p>
+                <div className="flex gap-6 mb-3">
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.lcp > 2500 ? '#EF4444' : '#16A34A' }}>{(posthog.vitals.lcp / 1000).toFixed(1)}s</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>LCP</p></div>
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.inp > 200 ? '#EF4444' : '#16A34A' }}>{posthog.vitals.inp}ms</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>INP</p></div>
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.cls > 0.1 ? '#EF4444' : '#16A34A' }}>{posthog.vitals.cls}</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>CLS</p></div>
+                </div>
+                {posthog.vitals.slowest.length > 0 && (
+                  <div className="pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
+                    <p className="text-[11px] mb-2" style={{ color: '#94A3B8' }}>Pages les plus lentes (LCP) — à optimiser en priorité :</p>
+                    <ul className="space-y-1.5">
+                      {posthog.vitals.slowest.map((p, i) => (
+                        <li key={i} className="flex items-center justify-between text-xs gap-2">
+                          <span className="truncate" style={{ color: '#334155' }}>{p.path}</span>
+                          <span className="shrink-0 font-semibold tabular-nums" style={{ color: p.lcp > 2500 ? '#EF4444' : '#0F172A' }}>{(p.lcp / 1000).toFixed(1)}s</span>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 )}
               </Card>
