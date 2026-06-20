@@ -7,6 +7,8 @@ import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
 import { getServiceDetail } from '@/data/services-detail'
 import JsonLd from '@/components/seo/JsonLd'
 import TrackView from '@/components/analytics/TrackView'
+import BuyButton from '@/components/ui/BuyButton'
+import { getBuyableOffer } from '@/lib/checkout-catalog'
 import { serviceSchema, faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export async function generateStaticParams() {
@@ -29,6 +31,12 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
   const s = getServiceBySlug(slug)
   if (!s) notFound()
   const detail = getServiceDetail(slug)
+  const buyable = getBuyableOffer(s.slug)
+  const buyLabel = buyable
+    ? (buyable.mode === 'subscription'
+        ? `Souscrire en ligne · ${buyable.amountCents / 100}€/mois`
+        : `Acheter en ligne · ${buyable.amountCents / 100}€`)
+    : ''
 
   return (
     <div className="min-h-screen bg-background">
@@ -68,6 +76,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           )}
 
           <div className="flex flex-col sm:flex-row gap-3 mt-10">
+            {buyable && <BuyButton offer={buyable.slug} mode={buyable.mode} price={buyable.amountCents / 100} label={buyLabel} />}
             <Link
               href={`/contact?service=${s.slug}`}
               className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-full text-sm hover:bg-white/90 transition-colors"
