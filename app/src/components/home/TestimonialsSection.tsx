@@ -20,8 +20,8 @@ function Stars() {
 export default function TestimonialsSection() {
   const [items, setItems] = useState(STATIC)
   useEffect(() => {
-    temoignagesService.getActive(4).then(data => {
-      if (data && data.length >= 4) {
+    temoignagesService.getActive(7).then(data => {
+      if (data && data.length >= 3) {
         setItems(data.map((t, i) => ({ name: t.nom, company: t.entreprise || '', text: t.texte.replace(/<[^>]+>/g, ''), initial: (t.nom || '?')[0].toUpperCase(), color: COLORS[i % 4] })))
       }
     }).catch(() => {})
@@ -71,10 +71,10 @@ export default function TestimonialsSection() {
             </div>
           </motion.div>
         </div>
-        <div className="grid md:grid-cols-2 gap-6 mt-6">
-          {[items[1], items[2]].map((t, i) => (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+          {items.slice(1, 7).map((t, i) => (
             <motion.a key={i} href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 * i }}
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 * i }}
               className="rounded-2xl border border-border bg-white p-8 shadow-sm min-h-[220px] flex flex-col justify-between hover:shadow-md transition-all cursor-pointer">
               <Stars />
               <p className="text-lg text-foreground leading-relaxed font-light mt-4">"{t?.text}"</p>
