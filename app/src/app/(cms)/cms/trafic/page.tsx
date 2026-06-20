@@ -307,7 +307,7 @@ export default function TraficPage() {
               <a href="https://eu.posthog.com/project/192676/replay" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: posthog.recordingsCount > 0 ? '#0F172A' : '#FFFBEB', border: posthog.recordingsCount > 0 ? 'none' : '1px solid #FDE68A' }}>
                 <div>
                   <p className="text-sm font-bold flex items-center gap-2" style={{ color: posthog.recordingsCount > 0 ? '#fff' : '#B45309' }}><PlayCircle className="w-4 h-4" style={{ color: ORANGE }} /> Enregistrements de session</p>
-                  <p className="text-xs mt-1" style={{ color: posthog.recordingsCount > 0 ? '#94A3B8' : '#B45309' }}>{posthog.recordingsCount > 0 ? 'Regarde la navigation réelle des visiteurs' : 'À activer : PostHog → Settings → Session Replay'}</p>
+                  <p className="text-xs mt-1" style={{ color: posthog.recordingsCount > 0 ? '#94A3B8' : '#B45309' }}>{posthog.recordingsCount > 0 ? 'Regarde la navigation réelle des visiteurs' : 'Activé ✓ — les premières sessions apparaîtront ici'}</p>
                 </div>
                 <ExternalLink className="w-4 h-4" style={{ color: posthog.recordingsCount > 0 ? 'rgba(255,255,255,.6)' : '#B45309' }} />
               </a>
