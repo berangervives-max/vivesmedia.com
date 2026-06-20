@@ -17,8 +17,8 @@ type EntrepriseInfos = {
 }
 
 const DEFAULT_INFOS: EntrepriseInfos = {
-  entreprise: 'vivesmedia.com — Béranger Vives',
-  siret: '',
+  entreprise: 'Béranger Vives — VIVES & Co (vivesmedia.com)',
+  siret: '935 306 522 R.C.S. Avignon',
   adresse: 'Avignon, France',
   tva: 'TVA non applicable, art. 293 B du CGI',
   emailContact: 'contact@vivesmedia.com',
