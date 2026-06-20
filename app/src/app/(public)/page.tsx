@@ -3,6 +3,7 @@ import HeroSection from '@/components/home/HeroSection'
 import LogoMarquee from '@/components/home/LogoMarquee'
 import AboutSection from '@/components/home/AboutSection'
 import ServicesSection from '@/components/home/ServicesSection'
+import ProcessSection from '@/components/home/ProcessSection'
 import WorkSection from '@/components/home/WorkSection'
 import TestimonialsSection from '@/components/home/TestimonialsSection'
 import FaqSection from '@/components/home/FaqSection'
@@ -21,6 +22,7 @@ export default function HomePage() {
       <LogoMarquee />
       <AboutSection />
       <ServicesSection />
+      <ProcessSection />
       <WorkSection />
       <TestimonialsSection />
       <FaqSection />
