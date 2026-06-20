@@ -6,6 +6,8 @@ import { REALISATIONS_DATA, getRealisationBySlug, type RealisationData } from '@
 import { getProcess } from '@/data/realisation-process'
 import { realisationsService, dbToRealisationData, getPublishedRealisationsData } from '@/services/supabase.service'
 import JsonLd from '@/components/seo/JsonLd'
+import Reveal from '@/components/ui/Reveal'
+import { BrowserFrame, PhoneFrame } from '@/components/ui/DeviceFrames'
 import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 // Les réalisations en base (back-office) peuvent être ajoutées sans rebuild.
@@ -48,6 +50,13 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
   if (!r) notFound()
 
   const hasContext = Boolean(r.context.client || r.context.problem)
+
+  // Navigation « projet suivant » + host pour le mockup navigateur
+  const ordered = await getPublishedRealisationsData().catch(() => [])
+  const navList = ordered.length > 0 ? ordered : REALISATIONS_DATA
+  const curIdx = navList.findIndex((x) => x.slug === slug)
+  const next = curIdx >= 0 && navList.length > 1 ? navList[(curIdx + 1) % navList.length] : undefined
+  const liveHost = r.liveUrl ? (() => { try { return new URL(r.liveUrl).host.replace(/^www\./, '') } catch { return undefined } })() : undefined
 
   return (
     <div className="min-h-screen bg-background">
@@ -202,14 +211,22 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
               Le rendu, <span className="font-heading italic font-normal">en images.</span>
             </h2>
-            <div className={`grid gap-6 ${r.gallery.length > 1 ? 'md:grid-cols-2' : ''}`}>
-              {r.gallery.map(img => (
-                <figure key={img.src} className={img.mobile ? 'max-w-[320px] mx-auto' : ''}>
-                  <div className="rounded-3xl overflow-hidden border border-border shadow-xl bg-secondary">
-                    <img src={img.src} alt={img.caption} className="w-full object-cover" />
-                  </div>
-                  <figcaption className="text-xs text-muted-foreground mt-3 text-center uppercase tracking-widest">{img.caption}</figcaption>
-                </figure>
+            <div className={`grid items-start gap-8 ${r.gallery.length > 1 ? 'md:grid-cols-2' : ''}`}>
+              {r.gallery.map((img, i) => (
+                <Reveal key={img.src} delay={i * 0.08}>
+                  <figure>
+                    {img.mobile ? (
+                      <PhoneFrame>
+                        <img src={img.src} alt={img.caption} className="w-full" />
+                      </PhoneFrame>
+                    ) : (
+                      <BrowserFrame url={liveHost}>
+                        <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />
+                      </BrowserFrame>
+                    )}
+                    <figcaption className="mt-4 text-center text-xs uppercase tracking-widest text-muted-foreground">{img.caption}</figcaption>
+                  </figure>
+                </Reveal>
               ))}
             </div>
           </div>
@@ -266,8 +283,23 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
+      {/* ── PROJET SUIVANT ── */}
+      {next && (
+        <Link href={`/realisations/${next.slug}`} className="group block border-t border-border bg-background">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex items-center justify-between gap-6">
+            <div>
+              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Projet suivant</p>
+              <p className="text-2xl sm:text-4xl font-bold text-foreground transition-colors group-hover:text-foreground/55">
+                {next.name} <span className="font-heading italic font-normal text-foreground/50">— {next.type}</span>
+              </p>
+            </div>
+            <ArrowUpRight className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 text-muted-foreground transition-all duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-1.5 group-hover:text-foreground" />
+          </div>
+        </Link>
+      )}
+
       {/* ── 8. CTA ── */}
-      <section className="pb-16 sm:pb-24 bg-background">
+      <section className="pb-16 sm:pb-24 bg-background pt-16 sm:pt-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="rounded-3xl bg-foreground p-8 sm:p-12 md:p-16 text-center">
             <p className="text-white/40 text-xs uppercase tracking-widest mb-4">Votre projet est le prochain</p>
