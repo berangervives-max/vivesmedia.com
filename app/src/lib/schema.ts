@@ -27,6 +27,8 @@ export const SITE_SCHEMA = {
       '@type': 'Organization',
       '@id': ORG_ID,
       name: 'vivesmedia.com',
+      legalName: 'Béranger Vives',
+      alternateName: 'VIVES & Co',
       url: SITE_URL,
       logo: { '@type': 'ImageObject', url: `${SITE_URL}/icon.svg`, width: 100, height: 100 },
       image: `${SITE_URL}/og-image.jpg`,
@@ -34,7 +36,8 @@ export const SITE_SCHEMA = {
       description:
         'Freelance web, design et marketing, spécialisé dans la création de sites sur-mesure pensés pour convertir. Originaire d’Avignon, full remote, partout en France.',
       founder: FOUNDER,
-      foundingDate: '2025',
+      foundingDate: '2025-12-14',
+      identifier: { '@type': 'PropertyValue', propertyID: 'SIREN', value: '935306522' },
       areaServed: { '@type': 'Country', name: 'France' },
       address: ADDRESS,
       sameAs: SAME_AS,
