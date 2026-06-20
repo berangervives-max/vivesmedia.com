@@ -13,12 +13,13 @@ const NAV = [
 
 export default function Footer() {
   const [email, setEmail] = useState('')
+  const [website, setWebsite] = useState('') // honeypot anti-bot
   const [subscribed, setSubscribed] = useState(false)
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email }) })
+      await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, website }) })
       setSubscribed(true)
     } catch {
       setSubscribed(true)
@@ -40,6 +41,7 @@ export default function Footer() {
                 <p className="text-xs text-green-600 font-medium">✓ Inscription confirmée !</p>
               ) : (
                 <form onSubmit={handleSubscribe} className="flex gap-2">
+                  <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] w-px h-px opacity-0" />
                   <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="votre@email.com" className="flex-1 border border-border rounded-full px-4 py-2 text-xs focus:outline-none focus:border-foreground/30 min-w-0" />
                   <button type="submit" className="bg-foreground text-white text-xs px-4 py-2 rounded-full hover:bg-foreground/90 transition-colors flex-shrink-0">OK</button>
                 </form>

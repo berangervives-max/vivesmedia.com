@@ -23,7 +23,7 @@ const BUDGETS = [
   { id: 'non-defini', label: 'Pas encore défini', desc: 'Je veux d\'abord un devis' },
 ]
 
-const EMPTY = { nom: '', email: '', telephone: '', service: '', budget: '', message: '' }
+const EMPTY = { nom: '', email: '', telephone: '', service: '', budget: '', message: '', website: '' }
 
 export default function ContactPage() {
   const [form, setForm] = useState(EMPTY)
@@ -92,6 +92,10 @@ export default function ContactPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
+          {/* Honeypot anti-bot : invisible pour un humain, rempli par les bots */}
+          <input type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+            value={form.website} onChange={e => set('website', e.target.value)}
+            className="absolute left-[-9999px] top-0 w-px h-px opacity-0" />
           <div className="bg-white rounded-2xl border border-border p-8">
             <h3 className="font-semibold text-foreground mb-5">Type de projet</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3">

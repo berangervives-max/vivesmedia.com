@@ -5,6 +5,10 @@ import { sendDevisReceived } from '@/services/email.service'
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json()
+    // Honeypot anti-bot : si le champ piège est rempli, on simule un succès sans rien faire
+    if (typeof body.website === 'string' && body.website.trim() !== '') {
+      return NextResponse.json({ success: true })
+    }
     const { nom, email, telephone, service, budget, message } = body
 
     if (!nom || !email) return NextResponse.json({ error: 'Nom et email requis' }, { status: 400 })
