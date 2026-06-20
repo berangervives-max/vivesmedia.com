@@ -9,7 +9,7 @@ export default function CtaSection() {
       <div className="max-w-7xl mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="relative rounded-3xl overflow-hidden border border-border p-12 md:p-20 text-center">
-          <img src="https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/21b542326_6a15c44f5826e1ea74a83119_bg-cover-p-130x130q80.jpg" alt="bg" className="absolute inset-0 w-full h-full object-cover" />
+          <img src="/images/21b542326_6a15c44f5826e1ea74a83119_bg-cover-p-130x130q80.jpg" alt="bg" className="absolute inset-0 w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative">
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">

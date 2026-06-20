@@ -193,7 +193,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
     type: 'Site Vitrine · Club Padel',
     year: '2024',
     tags: ['Site Vitrine', 'Sport', 'Design'],
-    heroImage: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png',
+    heroImage: '/images/44abc6e41_p1049264-high-o0dyng.png',
     liveUrl: 'https://paul-louis-sport.vercel.app',
     intro: "Un site vitrine pour un club de padel qui devait faire deux choses : donner envie de jouer dès la première seconde, et transformer cette envie en réservation de terrain.",
     context: {
@@ -214,7 +214,7 @@ export const REALISATIONS_DATA: RealisationData[] = [
     ],
     gallery: [
       { src: '/images/realisations/paul-live-1.jpeg', caption: 'Page d\'accueil · Desktop' },
-      { src: 'https://media.base44.com/images/public/69f3530cd3a27defe3c78f69/44abc6e41_p1049264-high-o0dyng.png', caption: 'Hero — immersion terrain' },
+      { src: '/images/44abc6e41_p1049264-high-o0dyng.png', caption: 'Hero — immersion terrain' },
     ],
     testimonial: {
       text: "Le site donne exactement l'image qu'on voulait : moderne, sportive, pro. Les nouvelles têtes nous disent souvent qu'elles nous ont trouvés sur Google.",

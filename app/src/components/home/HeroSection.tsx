@@ -30,10 +30,10 @@ export default function HeroSection() {
             className="flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity">
             <div className="flex -space-x-2">
               {[
-                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/42247233d_6a15c44f5826e1ea74a830ea_Ellipse24.jpg',
-                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/9fcc2f99a_6a15c44f5826e1ea74a830eb_Ellipse23.jpg',
-                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/0c5e109b4_6a15c44f5826e1ea74a830ec_Ellipse21.jpg',
-                'https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/3d0d5b02d_6a15c44f5826e1ea74a830ed_Ellipse22.jpg',
+                '/images/42247233d_6a15c44f5826e1ea74a830ea_Ellipse24.jpg',
+                '/images/9fcc2f99a_6a15c44f5826e1ea74a830eb_Ellipse23.jpg',
+                '/images/0c5e109b4_6a15c44f5826e1ea74a830ec_Ellipse21.jpg',
+                '/images/3d0d5b02d_6a15c44f5826e1ea74a830ed_Ellipse22.jpg',
               ].map((src, i) => (
                 <img key={i} src={src} alt="client" className="w-9 h-9 rounded-full border-2 border-white object-cover" />
               ))}

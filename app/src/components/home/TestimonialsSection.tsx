@@ -60,7 +60,7 @@ export default function TestimonialsSection() {
           </motion.a>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
             className="rounded-2xl overflow-hidden border border-border min-h-[280px] relative">
-            <img src="https://media.base44.com/images/public/6a15d09e64865f761ccc6c1a/09bd18d81_p1049296-high-8vjn4x.webp" alt="Customer story" className="w-full h-full object-cover absolute inset-0" />
+            <img src="/images/09bd18d81_p1049296-high-8vjn4x.webp" alt="Customer story" className="w-full h-full object-cover absolute inset-0" />
             <div className="absolute inset-0 bg-black/30" />
             <div className="relative p-8 md:p-10 flex flex-col justify-between h-full min-h-[280px]">
               <Stars />
