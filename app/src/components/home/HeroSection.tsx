@@ -43,11 +43,15 @@ export default function HeroSection() {
             </div>
             <div className="text-left">
               <div className="flex items-center gap-0.5">{[1,2,3,4,5].map((i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">+10 clients satisfaits</p>
+              <p className="text-xs text-muted-foreground mt-0.5">+25 avis · 5,0/5</p>
             </div>
           </a>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.45 }}
+        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.5 }}
+          className="mt-5 text-xs sm:text-sm text-muted-foreground">
+          Devis gratuit · réponse sous 24&nbsp;h · validation à chaque étape, sans engagement
+        </motion.p>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.55 }}
           className="mt-16 flex flex-wrap justify-center gap-12">
           {[{ num: 5, suffix: '+', label: "ans d'expérience" }, { num: 10, suffix: '+', label: 'projets livrés' }, { num: 100, suffix: '%', label: 'full remote · France' }].map((stat) => (
             <div key={stat.label} className="text-center">

@@ -16,6 +16,10 @@ export default function CtaSection() {
               Transformez votre présence en ligne en{' '}<span className="font-heading italic font-normal">machine de croissance</span>
             </h3>
             <p className="mt-6 text-white/70 max-w-xl mx-auto">Vos concurrents investissent déjà. Rejoignez les entreprises qui convertissent leurs visiteurs en clients avec vivesmedia.com.</p>
+            <p className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white/90 rounded-full px-4 py-1.5" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <span className="relative flex h-2 w-2"><span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75" /><span className="relative inline-flex rounded-full h-2 w-2 bg-green-400" /></span>
+              Je prends 1 à 2 nouveaux projets par mois — places limitées
+            </p>
             <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
               <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-8 py-4 rounded-full hover:bg-white/90 transition-all hover:scale-105">
                 Lancer mon projet <ArrowUpRight className="w-4 h-4" />

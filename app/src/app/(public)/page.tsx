@@ -20,11 +20,11 @@ export default function HomePage() {
     <>
       <HeroSection />
       <LogoMarquee />
-      <AboutSection />
       <ServicesSection />
       <ProcessSection />
       <WorkSection />
       <TestimonialsSection />
+      <AboutSection />
       <FaqSection />
       <CtaSection />
     </>

@@ -90,6 +90,13 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <Phone className="w-4 h-4" /> Demander un devis par email
             </Link>
           </div>
+          {buyable && (
+            <p className="text-xs text-white/50 mt-3">
+              {buyable.mode === 'subscription'
+                ? 'Paiement sécurisé Stripe · sans engagement · résiliable à tout moment'
+                : 'Paiement sécurisé Stripe · facture envoyée automatiquement'}
+            </p>
+          )}
         </div>
       </div>
 

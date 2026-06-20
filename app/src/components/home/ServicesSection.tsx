@@ -1,6 +1,6 @@
 'use client'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowRight } from 'lucide-react'
+import { ArrowUpRight, ArrowRight, CreditCard } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 type Service = {
@@ -130,7 +130,7 @@ export default function ServicesSection() {
             className="mt-5 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full"
             style={{ background: '#FFF4ED', color: '#F4521E' }}
           >
-            💳 Paiement en 1 fois ou en abonnement dès 89 €/mois — sur tous les types de sites
+            <CreditCard className="w-4 h-4 shrink-0" /> Paiement en 1 fois ou en abonnement dès 89 €/mois — sur tous les types de sites
           </motion.div>
         </div>
 
