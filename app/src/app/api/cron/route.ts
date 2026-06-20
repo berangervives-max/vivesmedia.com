@@ -11,6 +11,10 @@ async function isAuthorized(req: NextRequest): Promise<boolean> {
   const secret = process.env.CRON_SECRET
   const auth = req.headers.get('authorization')
   if (secret && auth === `Bearer ${secret}`) return true
+  // Sans CRON_SECRET configuré : on autorise les invocations Vercel Cron, identifiées
+  // par leur user-agent « vercel-cron » (le cron tourne donc sans variable à poser).
+  const ua = (req.headers.get('user-agent') || '').toLowerCase()
+  if (!secret && ua.includes('vercel-cron')) return true
   try {
     const sb = await createServerSupabaseClient()
     const { data: { user } } = await sb.auth.getUser()
