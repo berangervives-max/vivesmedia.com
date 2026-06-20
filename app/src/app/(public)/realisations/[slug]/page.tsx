@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowUpRight, ArrowLeft, ExternalLink, Quote } from 'lucide-react'
+import { ArrowUpRight, ArrowLeft, ExternalLink } from 'lucide-react'
 import { REALISATIONS_DATA, getRealisationBySlug, type RealisationData } from '@/data/realisations-data'
 import { getProcess } from '@/data/realisation-process'
 import { realisationsService, dbToRealisationData, getPublishedRealisationsData } from '@/services/supabase.service'
@@ -44,12 +44,25 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   }
 }
 
+// Section : pastille + titre éditorial large (style magazine d'architecture / studio).
+function SectionHead({ eyebrow, title, accent, light = false }: { eyebrow: string; title: React.ReactNode; accent?: React.ReactNode; light?: boolean }) {
+  return (
+    <Reveal>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#F4521E' }}>{eyebrow}</p>
+      <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.08] tracking-tight ${light ? 'text-white' : 'text-foreground'}`}>
+        {title}{accent && <> <span className={`font-heading italic font-normal ${light ? 'text-white/55' : 'text-foreground/55'}`}>{accent}</span></>}
+      </h2>
+    </Reveal>
+  )
+}
+
 export default async function RealisationPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params
   const r = await resolveRealisation(slug)
   if (!r) notFound()
 
   const hasContext = Boolean(r.context.client || r.context.problem)
+  const process = getProcess(slug)
 
   // Navigation « projet suivant » + host pour le mockup navigateur
   const ordered = await getPublishedRealisationsData().catch(() => [])
@@ -67,165 +80,87 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         { name: r.name, url: `${SITE_URL}/realisations/${r.slug}` },
       ])} />
 
-      {/* Back nav */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-32 pb-0">
-        <Link href="/realisations" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group mb-12">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
+      {/* ── 1. HERO ÉDITORIAL (centré, façon magazine) ── */}
+      <header className="mx-auto max-w-3xl px-6 pt-28 sm:pt-36 pb-14 sm:pb-20 text-center">
+        <Link href="/realisations" className="group mb-12 inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Toutes les réalisations
         </Link>
-      </div>
-
-      {/* ── 1. HERO ── */}
-      <header className="max-w-7xl mx-auto px-4 sm:px-6 pb-12">
-        <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-8">
-          <div className="max-w-3xl">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>
-              Réalisation · {r.year}
-            </p>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.05] tracking-tight">
-              {r.name} —{' '}
-              <span className="font-heading italic font-normal text-foreground/60">{r.type}</span>
-            </h1>
-            <p className="mt-6 text-muted-foreground text-base sm:text-lg leading-relaxed max-w-2xl">{r.intro}</p>
-          </div>
-          <div className="flex flex-col gap-3 shrink-0">
-            <div className="flex flex-wrap gap-2">
-              {r.tags.map(tag => (
-                <span key={tag} className="text-xs px-3 py-1.5 rounded-full border border-border text-muted-foreground">{tag}</span>
-              ))}
-            </div>
-            {r.liveUrl && (
-              <a href={r.liveUrl} target="_blank" rel="nofollow noopener noreferrer"
-                className="inline-flex items-center gap-2 text-xs font-semibold px-4 py-2 rounded-full border border-border hover:border-foreground/30 transition-colors text-muted-foreground hover:text-foreground w-fit">
-                Voir le site <ExternalLink className="w-3 h-3" />
-              </a>
-            )}
-          </div>
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>
+          Étude de cas · {r.year}
+        </p>
+        <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
+          {r.name}
+        </h1>
+        <p className="mt-4 font-heading text-2xl italic text-foreground/55 sm:text-3xl">{r.type}</p>
+        <p className="mx-auto mt-8 max-w-xl text-lg leading-relaxed text-muted-foreground">{r.intro}</p>
+        <div className="mt-9 flex flex-wrap items-center justify-center gap-2.5">
+          {r.tags.map(tag => (
+            <span key={tag} className="rounded-full border border-border px-3.5 py-1.5 text-xs text-muted-foreground">{tag}</span>
+          ))}
         </div>
+        {r.liveUrl && (
+          <div className="mt-7">
+            <a href={r.liveUrl} target="_blank" rel="nofollow noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
+              style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+              Visiter le site en ligne <ExternalLink className="h-4 w-4" />
+            </a>
+          </div>
+        )}
       </header>
 
-      {/* ── IMAGE HERO IMMERSIVE (pleine largeur) ── */}
+      {/* ── IMAGE HERO IMMERSIVE (quasi pleine largeur, dans un mockup navigateur) ── */}
       {r.heroImage && (
-        <div className="relative w-full aspect-[16/10] sm:aspect-[21/9] overflow-hidden bg-secondary mb-16 sm:mb-24">
-          <img src={r.heroImage} alt={`${r.name} — aperçu du projet`} className="absolute inset-0 h-full w-full object-cover object-top" />
-          {r.liveUrl && (
-            <a href={r.liveUrl} target="_blank" rel="nofollow noopener noreferrer"
-              className="absolute bottom-5 right-5 inline-flex items-center gap-2 rounded-full bg-white/90 px-4 py-2 text-xs font-semibold text-foreground backdrop-blur-sm transition-colors hover:bg-white">
-              Visiter le site en ligne <ExternalLink className="w-3.5 h-3.5" />
-            </a>
-          )}
-        </div>
+        <Reveal className="px-3 sm:px-6">
+          <div className="mx-auto max-w-[1500px]">
+            <BrowserFrame url={liveHost}>
+              <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
+                <img src={r.heroImage} alt={`${r.name} — aperçu du projet`} className="absolute inset-0 h-full w-full object-cover object-top" />
+              </div>
+            </BrowserFrame>
+          </div>
+        </Reveal>
       )}
 
-      {/* ── 2. CONTEXTE CLIENT ── */}
+      {/* ── 2. LE CONTEXTE (éditorial, colonne étroite) ── */}
       {hasContext && (
-        <section className="py-16 sm:py-24 bg-secondary/30">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Le contexte</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-              Le client, <span className="font-heading italic font-normal">et son point de départ.</span>
-            </h2>
-            <div className="grid md:grid-cols-2 gap-6">
+        <section className="py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-3xl px-6">
+            <SectionHead eyebrow="Le contexte" title="Le client," accent="et son point de départ." />
+            <div className="mt-12 sm:mt-16 space-y-12">
               {r.context.client && (
-                <div className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-                  <p className="text-xs text-muted-foreground uppercase tracking-widest mb-3">Le client</p>
-                  <p className="text-foreground text-base leading-relaxed">{r.context.client}</p>
-                </div>
+                <Reveal>
+                  <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted-foreground">Le client</p>
+                  <p className="text-xl leading-relaxed text-foreground sm:text-2xl">{r.context.client}</p>
+                </Reveal>
               )}
               {r.context.problem && (
-                <div className="bg-white rounded-2xl border-l-4 border border-border p-6 sm:p-8" style={{ borderLeftColor: '#F4521E' }}>
-                  <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Le problème</p>
-                  <p className="text-foreground text-base leading-relaxed">{r.context.problem}</p>
-                </div>
+                <Reveal>
+                  <p className="mb-3 text-xs uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Le problème</p>
+                  <p className="border-l-2 pl-6 text-xl leading-relaxed text-foreground sm:text-2xl" style={{ borderColor: '#F4521E' }}>{r.context.problem}</p>
+                </Reveal>
               )}
             </div>
           </div>
         </section>
       )}
 
-      {/* ── 3. LA SOLUTION ── */}
+      {/* ── 3. LA SOLUTION (grands blocs numérotés) ── */}
       {r.solution.length > 0 && (
-        <section className="py-16 sm:py-24 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>La solution</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-              Ce qui a été <span className="font-heading italic font-normal">conçu, et pourquoi.</span>
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
+        <section className="border-t border-border bg-secondary/30 py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-4xl px-6">
+            <SectionHead eyebrow="La solution" title="Ce qui a été" accent="conçu, et pourquoi." />
+            <div className="mt-16 sm:mt-20">
               {r.solution.map((sol, i) => (
-                <div key={sol.title} className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-                  <span className="text-xs font-mono text-muted-foreground">0{i + 1}</span>
-                  <h3 className="text-base sm:text-lg font-bold text-foreground mt-2 mb-2">{sol.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{sol.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── LA DÉMARCHE ── */}
-      <section className="py-16 sm:py-24 bg-secondary/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>La démarche</p>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-            Comment on a <span className="font-heading italic font-normal">travaillé.</span>
-          </h2>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-            {getProcess(slug).map(step => (
-              <div key={step.step} className="bg-white rounded-2xl border border-border p-6 sm:p-8">
-                <span className="text-xs font-mono" style={{ color: '#F4521E' }}>{step.step}</span>
-                <h3 className="text-base sm:text-lg font-bold text-foreground mt-2 mb-2">{step.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ── 4. RÉSULTATS ── */}
-      {r.results.length > 0 && (
-        <section className="py-16 sm:py-24 bg-foreground">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Les résultats</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight max-w-2xl mb-12">
-              Des chiffres, <span className="font-heading italic font-normal text-white/60">pas des promesses.</span>
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {r.results.map(stat => (
-                <div key={stat.label} className="rounded-2xl border border-white/10 p-5 sm:p-8">
-                  <p className="text-3xl sm:text-4xl font-bold text-white">{stat.value}</p>
-                  <p className="text-xs sm:text-sm text-white/50 mt-2 leading-snug">{stat.label}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 5. GALERIE ── */}
-      {r.gallery.length > 0 && (
-        <section className="py-16 sm:py-24 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Aperçu du projet</p>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-foreground leading-tight max-w-2xl mb-12">
-              Le rendu, <span className="font-heading italic font-normal">en images.</span>
-            </h2>
-            <div className={`grid items-start gap-8 ${r.gallery.length > 1 ? 'md:grid-cols-2' : ''}`}>
-              {r.gallery.map((img, i) => (
-                <Reveal key={img.src} delay={i * 0.08}>
-                  <figure>
-                    {img.mobile ? (
-                      <PhoneFrame>
-                        <img src={img.src} alt={img.caption} className="w-full" />
-                      </PhoneFrame>
-                    ) : (
-                      <BrowserFrame url={liveHost}>
-                        <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />
-                      </BrowserFrame>
-                    )}
-                    <figcaption className="mt-4 text-center text-xs uppercase tracking-widest text-muted-foreground">{img.caption}</figcaption>
-                  </figure>
+                <Reveal key={sol.title}>
+                  <div className="grid gap-4 border-t border-border py-10 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-14">
+                    <span className="font-mono text-4xl font-bold leading-none text-foreground/15 sm:text-5xl">0{i + 1}</span>
+                    <div>
+                      <h3 className="text-2xl font-bold text-foreground sm:text-3xl">{sol.title}</h3>
+                      <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted-foreground">{sol.desc}</p>
+                    </div>
+                  </div>
                 </Reveal>
               ))}
             </div>
@@ -233,90 +168,169 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 6. TÉMOIGNAGE ── */}
+      {/* ── 4. LE PROJET EN IMAGES (galerie pleine largeur) ── */}
+      {r.gallery.length > 0 && (
+        <section className="py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto mb-16 max-w-3xl px-6 sm:mb-20">
+            <SectionHead eyebrow="Aperçu du projet" title="Le rendu," accent="en images." />
+          </div>
+          <div className="mx-auto max-w-[1500px] space-y-16 px-3 sm:space-y-28 sm:px-6">
+            {r.gallery.map((img) => (
+              <Reveal key={img.src}>
+                <figure>
+                  {img.mobile ? (
+                    <div className="mx-auto max-w-sm">
+                      <PhoneFrame>
+                        <img src={img.src} alt={img.caption} className="w-full" />
+                      </PhoneFrame>
+                    </div>
+                  ) : (
+                    <BrowserFrame url={liveHost}>
+                      <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />
+                    </BrowserFrame>
+                  )}
+                  {img.caption && (
+                    <figcaption className="mx-auto mt-6 max-w-xl text-center text-sm leading-relaxed text-muted-foreground">{img.caption}</figcaption>
+                  )}
+                </figure>
+              </Reveal>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── 5. LA DÉMARCHE (liste verticale éditoriale) ── */}
+      {process.length > 0 && (
+        <section className="border-t border-border bg-secondary/30 py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-4xl px-6">
+            <SectionHead eyebrow="La démarche" title="Comment on a" accent="travaillé." />
+            <div className="mt-16 sm:mt-20">
+              {process.map((step) => (
+                <Reveal key={step.step}>
+                  <div className="grid gap-4 border-t border-border py-9 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-12">
+                    <span className="font-mono text-sm font-semibold" style={{ color: '#F4521E' }}>{step.step}</span>
+                    <div>
+                      <h3 className="text-xl font-bold text-foreground sm:text-2xl">{step.title}</h3>
+                      <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted-foreground">{step.desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 6. LES RÉSULTATS (bandeau sombre, grands chiffres) ── */}
+      {r.results.length > 0 && (
+        <section className="bg-foreground py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-5xl px-6">
+            <SectionHead eyebrow="Les résultats" title="Des chiffres," accent="pas des promesses." light />
+            <div className="mt-16 grid grid-cols-2 gap-x-8 gap-y-14 sm:mt-20 md:grid-cols-4">
+              {r.results.map((stat, i) => (
+                <Reveal key={stat.label} delay={i * 0.06}>
+                  <div className="border-t border-white/15 pt-6">
+                    <p className="text-4xl font-bold leading-none text-white sm:text-5xl">{stat.value}</p>
+                    <p className="mt-4 text-sm leading-snug text-white/50">{stat.label}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 7. TÉMOIGNAGE (grande citation éditoriale) ── */}
       {r.testimonial && (
-        <section className="py-16 sm:py-24 bg-secondary/30">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-            <Quote className="w-10 h-10 mx-auto mb-6" style={{ color: '#F4521E' }} />
-            <blockquote className="text-xl sm:text-2xl md:text-3xl font-medium text-foreground leading-relaxed">
-              "{r.testimonial.text}"
-            </blockquote>
-            <p className="mt-8 text-sm font-semibold text-foreground">{r.testimonial.name}</p>
-            <p className="text-xs text-muted-foreground mt-1">{r.testimonial.role}</p>
+        <section className="py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-3xl px-6 text-center">
+            <Reveal>
+              <p className="mb-8 font-heading text-6xl italic leading-none text-foreground/15 sm:text-7xl">“</p>
+              <blockquote className="font-heading text-3xl italic leading-snug text-foreground sm:text-4xl lg:text-[2.75rem]">
+                {r.testimonial.text}
+              </blockquote>
+              <p className="mt-10 text-sm font-semibold text-foreground">{r.testimonial.name}</p>
+              <p className="mt-1 text-sm text-muted-foreground">{r.testimonial.role}</p>
+            </Reveal>
           </div>
         </section>
       )}
 
-      {/* ── 7. STACK & SERVICES ── */}
+      {/* ── 8. STACK & SERVICES (minimal) ── */}
       {(r.stack.length > 0 || r.services.length > 0) && (
-        <section className="py-16 sm:py-24 bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="grid md:grid-cols-2 gap-12">
-              {r.stack.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Technologies</p>
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">La stack du projet</h2>
-                  <div className="flex flex-wrap gap-2">
-                    {r.stack.map(t => (
-                      <span key={t} className="text-sm px-4 py-2 rounded-full bg-secondary text-foreground">{t}</span>
-                    ))}
-                  </div>
+        <section className="border-t border-border py-20 sm:py-28">
+          <div className="mx-auto grid max-w-4xl gap-14 px-6 md:grid-cols-2">
+            {r.stack.length > 0 && (
+              <Reveal>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Technologies</p>
+                <h3 className="mb-7 text-2xl font-bold text-foreground">La stack du projet</h3>
+                <div className="flex flex-wrap gap-2.5">
+                  {r.stack.map(t => (
+                    <span key={t} className="rounded-full bg-secondary px-4 py-2 text-sm text-foreground">{t}</span>
+                  ))}
                 </div>
-              )}
-              {r.services.length > 0 && (
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Services utilisés</p>
-                  <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">Le même résultat pour votre projet</h2>
-                  <div className="flex flex-col gap-3">
-                    {r.services.map(svc => (
-                      <Link key={svc.href} href={svc.href}
-                        className="group flex items-center justify-between bg-white rounded-2xl border border-border px-5 py-4 hover:border-foreground/30 transition-colors">
-                        <span className="text-sm font-semibold text-foreground">{svc.label}</span>
-                        <ArrowUpRight className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                      </Link>
-                    ))}
-                  </div>
+              </Reveal>
+            )}
+            {r.services.length > 0 && (
+              <Reveal>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Services utilisés</p>
+                <h3 className="mb-7 text-2xl font-bold text-foreground">Le même résultat pour vous</h3>
+                <div className="flex flex-col gap-3">
+                  {r.services.map(svc => (
+                    <Link key={svc.href} href={svc.href}
+                      className="group flex items-center justify-between rounded-2xl border border-border bg-white px-5 py-4 transition-colors hover:border-foreground/30">
+                      <span className="text-sm font-semibold text-foreground">{svc.label}</span>
+                      <ArrowUpRight className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+                    </Link>
+                  ))}
                 </div>
-              )}
-            </div>
+              </Reveal>
+            )}
           </div>
         </section>
       )}
 
-      {/* ── PROJET SUIVANT ── */}
+      {/* ── 9. PROJET SUIVANT (grand, façon Cuberto) ── */}
       {next && (
-        <Link href={`/realisations/${next.slug}`} className="group block border-t border-border bg-background">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 sm:py-16 flex items-center justify-between gap-6">
-            <div>
-              <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Projet suivant</p>
-              <p className="text-2xl sm:text-4xl font-bold text-foreground transition-colors group-hover:text-foreground/55">
-                {next.name} <span className="font-heading italic font-normal text-foreground/50">— {next.type}</span>
-              </p>
-            </div>
-            <ArrowUpRight className="w-8 h-8 sm:w-10 sm:h-10 shrink-0 text-muted-foreground transition-all duration-300 group-hover:translate-x-1.5 group-hover:-translate-y-1.5 group-hover:text-foreground" />
+        <Link href={`/realisations/${next.slug}`} className="group relative block overflow-hidden border-t border-border">
+          {next.heroImage && (
+            <>
+              <img src={next.heroImage} alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover object-top opacity-0 transition-all duration-700 group-hover:scale-105 group-hover:opacity-100" />
+              <div className="absolute inset-0 bg-background/0 transition-colors duration-700 group-hover:bg-black/55" />
+            </>
+          )}
+          <div className="relative mx-auto flex max-w-5xl flex-col items-center px-6 py-20 text-center sm:py-28">
+            <p className="mb-3 text-xs uppercase tracking-[0.2em] text-muted-foreground transition-colors group-hover:text-white/70">Projet suivant</p>
+            <p className="text-4xl font-bold leading-tight tracking-tight text-foreground transition-colors duration-500 group-hover:text-white sm:text-6xl lg:text-7xl">
+              {next.name}
+            </p>
+            <p className="mt-3 font-heading text-xl italic text-foreground/50 transition-colors duration-500 group-hover:text-white/70 sm:text-2xl">{next.type}</p>
+            <span className="mt-8 inline-flex h-12 w-12 items-center justify-center rounded-full border border-border text-foreground transition-all duration-500 group-hover:translate-x-1 group-hover:border-white/50 group-hover:text-white">
+              <ArrowUpRight className="h-5 w-5" />
+            </span>
           </div>
         </Link>
       )}
 
-      {/* ── 8. CTA ── */}
-      <section className="pb-16 sm:pb-24 bg-background pt-16 sm:pt-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6">
-          <div className="rounded-3xl bg-foreground p-8 sm:p-12 md:p-16 text-center">
-            <p className="text-white/40 text-xs uppercase tracking-widest mb-4">Votre projet est le prochain</p>
-            <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white leading-tight max-w-xl mx-auto">
+      {/* ── 10. CTA ── */}
+      <section className="border-t border-border bg-background px-6 py-20 sm:py-28">
+        <div className="mx-auto max-w-5xl">
+          <div className="rounded-3xl bg-foreground p-8 text-center sm:p-14 md:p-16">
+            <p className="mb-4 text-xs uppercase tracking-[0.2em] text-white/40">Votre projet est le prochain</p>
+            <h3 className="mx-auto max-w-xl text-3xl font-bold leading-tight text-white sm:text-4xl">
               Un projet similaire ?{' '}
               <span className="font-heading italic font-normal">Parlons-en.</span>
             </h3>
-            <p className="mt-4 text-white/60 max-w-md mx-auto">Devis gratuit sous 24h, sans engagement.</p>
-            <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
+            <p className="mx-auto mt-4 max-w-md text-white/60">Devis gratuit sous 24h, sans engagement.</p>
+            <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link href="/contact"
-                className="inline-flex items-center gap-2 font-semibold px-8 py-4 rounded-full text-white hover:scale-105 transition-all"
+                className="inline-flex items-center gap-2 rounded-full px-8 py-4 font-semibold text-white transition-all hover:scale-105"
                 style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
-                Lancer mon projet <ArrowUpRight className="w-4 h-4" />
+                Lancer mon projet <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link href="/realisations"
-                className="inline-flex items-center gap-2 border border-white/20 text-white font-medium px-8 py-4 rounded-full hover:border-white/50 transition-colors">
-                Voir les réalisations <ArrowUpRight className="w-4 h-4" />
+                className="inline-flex items-center gap-2 rounded-full border border-white/20 px-8 py-4 font-medium text-white transition-colors hover:border-white/50">
+                Voir les réalisations <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
           </div>
