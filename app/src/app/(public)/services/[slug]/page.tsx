@@ -6,6 +6,7 @@ import { ArrowUpRight, Check, Star, Phone, CalendarDays, X } from 'lucide-react'
 import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
 import { getServiceDetail } from '@/data/services-detail'
 import JsonLd from '@/components/seo/JsonLd'
+import TrackView from '@/components/analytics/TrackView'
 import { serviceSchema, faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 export async function generateStaticParams() {
@@ -31,6 +32,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
   return (
     <div className="min-h-screen bg-background">
+      <TrackView event="service_viewed" props={{ slug: s.slug, title: s.title, price: s.price }} />
       <JsonLd data={serviceSchema(s)} />
       {s.faq && s.faq.length > 0 && <JsonLd data={faqSchema(s.faq)} />}
       <JsonLd data={breadcrumbSchema([

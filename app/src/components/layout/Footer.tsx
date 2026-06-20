@@ -2,6 +2,7 @@
 import Link from 'next/link'
 import { useState } from 'react'
 import { ArrowUpRight, Calendar } from 'lucide-react'
+import { track } from '@/lib/analytics'
 
 const NAV = [
   { label: 'Accueil', href: '/' },
@@ -20,6 +21,7 @@ export default function Footer() {
     e.preventDefault()
     try {
       await fetch('/api/newsletter', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, website }) })
+      track('newsletter_subscribed', { location: 'footer' })
       setSubscribed(true)
     } catch {
       setSubscribed(true)

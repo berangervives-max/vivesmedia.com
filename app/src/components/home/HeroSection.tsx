@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowUpRight, Star } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
+import { track } from '@/lib/analytics'
 
 export default function HeroSection() {
   return (
@@ -23,7 +24,8 @@ export default function HeroSection() {
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
+          <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
+            className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
             style={{ backgroundColor: '#F4521E' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>

@@ -1,7 +1,8 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, CheckCircle2, AlertCircle, Check } from 'lucide-react'
+import { track } from '@/lib/analytics'
 
 const PROJECT_TYPES = [
   { id: 'site-vitrine', label: 'Site Vitrine', desc: 'Présentation de votre activité' },
@@ -41,7 +42,14 @@ export default function ContactPage() {
     }))
   }, [])
 
-  const set = (k: string, v: string) => setForm(p => ({ ...p, [k]: v }))
+  const startedRef = useRef(false)
+  const set = (k: string, v: string) => {
+    if (!startedRef.current) {
+      startedRef.current = true
+      track('devis_started', { source: form.service ? 'preselected' : 'direct', service: form.service || null })
+    }
+    setForm(p => ({ ...p, [k]: v }))
+  }
   const filledCount = [form.service, form.budget, form.nom, form.email].filter(Boolean).length
   const progress = Math.round((filledCount / 4) * 100)
 
@@ -51,8 +59,15 @@ export default function ContactPage() {
     try {
       const res = await fetch('/api/devis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
       if (!res.ok) throw new Error()
+      track('devis_submitted', {
+        service: form.service || null,
+        budget: form.budget || null,
+        has_message: !!form.message.trim(),
+        has_phone: !!form.telephone.trim(),
+      })
       setStatus('success')
     } catch {
+      track('devis_failed', { reason: 'request_error', service: form.service || null })
       setStatus('error')
     }
   }

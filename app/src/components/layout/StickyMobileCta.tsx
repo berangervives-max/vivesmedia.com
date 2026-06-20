@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
+import { track } from '@/lib/analytics'
 
 export default function StickyMobileCta() {
   const pathname = usePathname()
@@ -25,6 +26,7 @@ export default function StickyMobileCta() {
     >
       <Link
         href="/contact"
+        onClick={() => track('cta_clicked', { location: 'sticky_mobile', label: 'Devis gratuit', destination: '/contact' })}
         className="pointer-events-auto flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-full"
         style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}
       >

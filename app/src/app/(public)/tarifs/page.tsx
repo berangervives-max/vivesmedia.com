@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Check, Minus } from 'lucide-react'
 import { creationFormules, recurrentServices, maintenancePlans, tarifsFaq } from '@/data/tarifs-data'
+import TrackView from '@/components/analytics/TrackView'
 
 export const metadata: Metadata = {
   title: 'Tarifs création de site internet à Avignon — prix transparents',
@@ -47,6 +48,7 @@ export default function TarifsPage() {
 
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
+      <TrackView event="pricing_viewed" />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
 
