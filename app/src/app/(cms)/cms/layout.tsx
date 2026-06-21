@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
   BookOpen, Star, Mail, BarChart3, Globe, CalendarDays, Send,
   Zap, Settings, LogOut, Menu, X, ExternalLink, Briefcase,
-  Package, GraduationCap
+  Package, GraduationCap, Activity
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -24,6 +24,7 @@ const NAV_SECTIONS = [
     items: [
       { href: '/cms/devis', label: 'Devis', icon: FileText },
       { href: '/cms/clients', label: 'Clients', icon: Users },
+      { href: '/cms/suivi', label: 'Suivi prospection', icon: Activity },
       { href: '/cms/factures', label: 'Factures', icon: Receipt },
       { href: '/cms/commandes', label: 'Commandes', icon: ShoppingBag },
       { href: '/cms/services', label: 'Services & KPI', icon: Package },

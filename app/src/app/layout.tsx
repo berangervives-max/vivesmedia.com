@@ -35,8 +35,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-516900135" />
-        <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-516900135');` }} />
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-1XKRQWQVTQ" />
+        <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-1XKRQWQVTQ');` }} />
         {/* Ahrefs Web Analytics */}
         <script async src="https://analytics.ahrefs.com/analytics.js" data-key="9tqUA2EBj5akD55zFPOVvw" />
         <JsonLd data={SITE_SCHEMA} />
