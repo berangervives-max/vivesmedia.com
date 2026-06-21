@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { facturesService } from '@/services/supabase.service'
 import { sendFacture } from '@/services/email.service'
 import type { Facture, FactureLigne } from '@/types'
-import { Plus, Trash2, Send, Pencil, Download, ExternalLink } from 'lucide-react'
+import { Plus, Trash2, Send, Pencil, Download, ExternalLink, CheckCircle2 } from 'lucide-react'
 import { genererFacturePdf } from '@/lib/facture-pdf'
 
 const STATUTS = ['brouillon','envoyee','payee','en_retard','annulee'] as const
@@ -253,6 +253,9 @@ export default function CmsFacturesPage() {
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
                     {[
+                      ...(f.statut !== 'payee' && f.statut !== 'annulee'
+                        ? [{ icon: CheckCircle2, onClick: () => facturesService.update(f.id, { statut: 'payee' }).then(load), hoverBg: '#F0FDF4', hoverColor: '#16A34A' }]
+                        : []),
                       { icon: Download, onClick: () => genererFacturePdf(f), hoverBg: 'rgba(244,82,30,.08)', hoverColor: '#F4521E' },
                       { icon: Pencil, onClick: () => open(f), hoverBg: '#F3F4F6', hoverColor: '#374151' },
                       { icon: Send, onClick: () => sendEmail(f), hoverBg: '#EFF6FF', hoverColor: '#3B82F6' },

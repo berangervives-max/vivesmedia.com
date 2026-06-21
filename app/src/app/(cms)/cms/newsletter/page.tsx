@@ -1,8 +1,9 @@
 'use client'
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { newsletterService } from '@/services/supabase.service'
 import type { Newsletter } from '@/types'
-import { Download, Mail } from 'lucide-react'
+import { Download, Mail, Send } from 'lucide-react'
 
 export default function CmsNewsletterPage() {
   const [subs, setSubs] = useState<Newsletter[]>([])
@@ -27,13 +28,20 @@ export default function CmsNewsletterPage() {
             {subs.length > actifs && ` · ${subs.length - actifs} désabonné(s)`}
           </p>
         </div>
-        <button onClick={exportCSV}
-          className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-          style={{ border: '1px solid #E5E7EB', color: '#374151', background: '#fff' }}
-          onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F9FAFB'}
-          onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#fff'}>
-          <Download className="w-4 h-4" /> Exporter CSV
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={exportCSV}
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
+            style={{ border: '1px solid #E5E7EB', color: '#374151', background: '#fff' }}
+            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F9FAFB'}
+            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#fff'}>
+            <Download className="w-4 h-4" /> Exporter CSV
+          </button>
+          <Link href="/cms/campagnes"
+            className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
+            style={{ background: '#F4521E' }}>
+            <Send className="w-4 h-4" /> Envoyer une campagne
+          </Link>
+        </div>
       </div>
 
       {/* KPI Card */}

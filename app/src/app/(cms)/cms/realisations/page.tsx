@@ -84,6 +84,17 @@ export default function CmsRealisationsPage() {
     finally { setUploading(null) }
   }
 
+  // Image « avant » d'un visuel (active le slider avant/après sur la page publique)
+  const onUploadBefore = async (i: number, file?: File) => {
+    if (!file) return
+    setUploading(`before-${i}`)
+    try {
+      const before = await uploadToBucket(file, form.slug)
+      set('gallery', form.gallery.map((x, j) => j === i ? { ...x, before } : x))
+    } catch (err: any) { alert('Upload échoué : ' + err.message) }
+    finally { setUploading(null) }
+  }
+
   // ── FORMULAIRE ──
   if (editing) return (
     <div>
@@ -197,13 +208,26 @@ export default function CmsRealisationsPage() {
             </label>
           </div>
           {form.gallery.map((g, i) => (
-            <div key={i} className="flex gap-3 items-center p-3 rounded-lg" style={{ background: '#F9FAFB' }}>
-              <img src={g.src} alt="" className="w-16 h-12 object-cover rounded-md shrink-0 border" style={{ borderColor: '#E5E7EB' }} />
-              <input value={g.caption} onChange={e => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, caption: e.target.value } : x))} placeholder="Légende" className={inputCls} style={inputStyle} />
-              <label className="flex items-center gap-1.5 text-xs shrink-0 cursor-pointer" style={{ color: '#6B7280' }}>
-                <input type="checkbox" checked={!!g.mobile} onChange={e => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, mobile: e.target.checked } : x))} className="w-3.5 h-3.5 accent-orange-500" /> mobile
-              </label>
-              <button type="button" onClick={() => set('gallery', form.gallery.filter((_, j) => j !== i))} className="p-1.5 rounded-md shrink-0" style={{ color: '#9CA3AF' }}><X className="w-4 h-4" /></button>
+            <div key={i} className="p-3 rounded-lg space-y-2" style={{ background: '#F9FAFB' }}>
+              <div className="flex gap-3 items-center">
+                <img src={g.src} alt="" className="w-16 h-12 object-cover rounded-md shrink-0 border" style={{ borderColor: '#E5E7EB' }} />
+                <input value={g.caption} onChange={e => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, caption: e.target.value } : x))} placeholder="Légende" className={inputCls} style={inputStyle} />
+                <label className="flex items-center gap-1.5 text-xs shrink-0 cursor-pointer" style={{ color: '#6B7280' }}>
+                  <input type="checkbox" checked={!!g.mobile} onChange={e => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, mobile: e.target.checked } : x))} className="w-3.5 h-3.5 accent-orange-500" /> mobile
+                </label>
+                <button type="button" onClick={() => set('gallery', form.gallery.filter((_, j) => j !== i))} className="p-1.5 rounded-md shrink-0" style={{ color: '#9CA3AF' }}><X className="w-4 h-4" /></button>
+              </div>
+              <textarea value={g.rationale || ''} onChange={e => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, rationale: e.target.value } : x))} placeholder="Pourquoi ce choix ? (légende « rationale », optionnel)" rows={2} className={`${inputCls} resize-none`} style={inputStyle} />
+              <div className="flex items-center gap-3">
+                {g.before
+                  ? <img src={g.before} alt="avant" className="w-16 h-12 object-cover rounded-md shrink-0 border" style={{ borderColor: '#E5E7EB' }} />
+                  : <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>Image « avant » :</span>}
+                <label className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg cursor-pointer" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>
+                  <Upload className="w-3.5 h-3.5" /> {uploading === `before-${i}` ? 'Envoi…' : g.before ? 'Remplacer l\'avant' : 'Ajouter un avant/après'}
+                  <input type="file" accept="image/*" className="hidden" onChange={e => onUploadBefore(i, e.target.files?.[0])} />
+                </label>
+                {g.before && <button type="button" onClick={() => set('gallery', form.gallery.map((x, j) => j === i ? { ...x, before: undefined } : x))} className="text-xs" style={{ color: '#9CA3AF' }}>retirer</button>}
+              </div>
             </div>
           ))}
         </div>

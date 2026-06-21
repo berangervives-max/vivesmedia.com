@@ -17,7 +17,13 @@ export default function CampagnesPage() {
   const [body, setBody] = useState('')
   const [preview, setPreview] = useState(false)
   const [sending, setSending] = useState(false)
+  const [testing, setTesting] = useState(false)
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
+  const [vars, setVars] = useState<Record<string, string>>({})
+
+  // Variables {{x}} présentes dans l'objet ou le corps → champs à remplir
+  const varNames = Array.from(new Set([...`${subject} ${body}`.matchAll(/\{\{(\w+)\}\}/g)].map(m => m[1])))
+  const applyVars = (t: string) => t.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k] || `{{${k}}}`)
 
   useEffect(() => {
     newsletterService.getAll()
@@ -30,20 +36,32 @@ export default function CampagnesPage() {
     setBody(t.body)
   }
 
+  const post = (test: boolean) =>
+    fetch('/api/cms/campagne', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ subject: applyVars(subject), body: applyVars(body), test }),
+    }).then(async r => { const d = await r.json(); if (!r.ok) throw new Error(d.error || 'Erreur envoi'); return d })
+
+  const handleTest = async () => {
+    if (!subject || !body) { setResult({ ok: false, msg: 'Objet et message requis.' }); return }
+    setTesting(true); setResult(null)
+    try {
+      await post(true)
+      setResult({ ok: true, msg: 'Email test envoyé sur ta boîte ✓ — vérifie le rendu avant l\'envoi réel.' })
+    } catch (err) {
+      setResult({ ok: false, msg: err instanceof Error ? err.message : 'Erreur envoi' })
+    } finally { setTesting(false) }
+  }
+
   const handleSend = async () => {
     if (!subject || !body) { setResult({ ok: false, msg: 'Objet et message requis.' }); return }
     if (!confirm(`Envoyer cette campagne à ${abonnes} abonné(s) ? Cette action est irréversible.`)) return
     setSending(true); setResult(null)
     try {
-      const res = await fetch('/api/cms/campagne', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ subject, body }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Erreur envoi')
+      const data = await post(false)
       setResult({ ok: true, msg: `Campagne envoyée à ${data.sent} abonné(s) ✓` })
-      setSubject(''); setBody('')
+      setSubject(''); setBody(''); setVars({})
     } catch (err) {
       setResult({ ok: false, msg: err instanceof Error ? err.message : 'Erreur envoi' })
     } finally {
@@ -91,11 +109,31 @@ export default function CampagnesPage() {
               style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
           </div>
 
+          {varNames.length > 0 && (
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: '#9CA3AF' }}>Variables à remplir</label>
+              <div className="grid sm:grid-cols-2 gap-2">
+                {varNames.map(name => (
+                  <div key={name} className="flex items-center gap-2">
+                    <span className="text-xs font-mono shrink-0" style={{ color: ORANGE }}>{`{{${name}}}`}</span>
+                    <input value={vars[name] || ''} onChange={e => setVars(p => ({ ...p, [name]: e.target.value }))} placeholder={`valeur de ${name}`}
+                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button onClick={() => setPreview(p => !p)}
               className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
               style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
               <Eye className="w-4 h-4" /> {preview ? 'Masquer' : 'Prévisualiser'}
+            </button>
+            <button onClick={handleTest} disabled={testing || !subject || !body}
+              className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors disabled:opacity-40"
+              style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              <Eye className="w-4 h-4" /> {testing ? 'Envoi…' : 'Envoi test (à moi)'}
             </button>
             <button onClick={handleSend} disabled={sending || !subject || !body || !abonnes}
               className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-lg text-white transition-opacity hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed"
@@ -118,11 +156,11 @@ export default function CampagnesPage() {
             <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #E9ECEF' }}>
               <div className="px-4 py-3" style={{ background: '#F8F9FA', borderBottom: '1px solid #E9ECEF' }}>
                 <p className="text-xs" style={{ color: '#9CA3AF' }}>De : vivesmedia.com &lt;contact@vivesmedia.com&gt;</p>
-                <p className="text-sm font-bold mt-1" style={{ color: '#111827' }}>{subject || '(sans objet)'}</p>
+                <p className="text-sm font-bold mt-1" style={{ color: '#111827' }}>{applyVars(subject) || '(sans objet)'}</p>
               </div>
               <div className="p-5">
                 <div className="h-1 w-12 rounded-full mb-4" style={{ background: ORANGE }} />
-                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: '#374151' }}>{body || '(message vide)'}</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: '#374151' }}>{applyVars(body) || '(message vide)'}</p>
               </div>
             </div>
           )}

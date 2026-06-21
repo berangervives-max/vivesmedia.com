@@ -107,7 +107,7 @@ export interface Service {
 
 export interface RealisationSolution { title: string; desc: string }
 export interface RealisationResult { value: string; label: string }
-export interface RealisationGalleryItem { src: string; caption: string; mobile?: boolean }
+export interface RealisationGalleryItem { src: string; caption: string; mobile?: boolean; rationale?: string; before?: string }
 export interface RealisationServiceLink { label: string; href: string }
 
 export interface Realisation {

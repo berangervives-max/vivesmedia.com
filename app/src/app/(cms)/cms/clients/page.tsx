@@ -16,6 +16,7 @@ export default function CmsClientsPage() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [viewing, setViewing] = useState<Client | null>(null)
+  const [statutFilt, setStatutFilt] = useState<'tous' | typeof STATUTS[number]>('tous')
 
   const load = () => clientsService.getAll().then(setClients).catch(() => {})
   useEffect(() => { load() }, [])
@@ -32,7 +33,10 @@ export default function CmsClientsPage() {
   }
   const del = async (id: string) => { if (!confirm('Supprimer ce client ?')) return; await clientsService.delete(id); load() }
 
-  const filtered = clients.filter(c => [c.nom, c.email, c.entreprise].some(v => v?.toLowerCase().includes(search.toLowerCase())))
+  const filtered = clients.filter(c =>
+    (statutFilt === 'tous' || c.statut === statutFilt) &&
+    [c.nom, c.email, c.entreprise].some(v => v?.toLowerCase().includes(search.toLowerCase()))
+  )
 
   const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors"
   const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
@@ -110,6 +114,17 @@ export default function CmsClientsPage() {
         <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher par nom, email, entreprise..."
           className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none"
           style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
+      </div>
+
+      {/* Filtre par statut */}
+      <div className="mb-4 flex flex-wrap gap-1.5">
+        {(['tous', ...STATUTS] as const).map(s => (
+          <button key={s} onClick={() => setStatutFilt(s)}
+            className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+            style={{ background: statutFilt === s ? '#0F172A' : '#fff', color: statutFilt === s ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+            {s === 'tous' ? 'Tous' : s}
+          </button>
+        ))}
       </div>
 
       {/* Table */}

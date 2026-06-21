@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { commandesService } from '@/services/supabase.service'
+import { commandesService, clientsService } from '@/services/supabase.service'
 import type { Commande } from '@/types'
 
 const COLORS: Record<string, string> = {
@@ -20,7 +20,12 @@ export default function CmsCommandesPage() {
   const [commandes, setCommandes] = useState<Commande[]>([])
   const [stripe, setStripe] = useState<StripeLive | null>(null)
   const [stripeErr, setStripeErr] = useState(false)
-  useEffect(() => { commandesService.getAll().then(setCommandes).catch(() => {}) }, [])
+  const [clientEmails, setClientEmails] = useState<Set<string>>(new Set())
+  useEffect(() => {
+    commandesService.getAll().then(setCommandes).catch(() => {})
+    clientsService.getAll().then(cs => setClientEmails(new Set(cs.map(c => c.email.trim().toLowerCase())))).catch(() => {})
+  }, [])
+  const estClient = (email?: string) => !!email && clientEmails.has(email.trim().toLowerCase())
   useEffect(() => {
     fetch('/api/cms/stripe').then(r => r.ok ? r.json() : Promise.reject()).then(setStripe).catch(() => setStripeErr(true))
   }, [])
@@ -114,7 +119,10 @@ export default function CmsCommandesPage() {
                       {(c.client_nom || c.client_email || '?').charAt(0).toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-medium" style={{ color: '#111827' }}>{c.client_nom || '—'}</p>
+                      <p className="font-medium flex items-center gap-1.5" style={{ color: '#111827' }}>
+                        {c.client_nom || '—'}
+                        {estClient(c.client_email) && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#DCFCE7', color: '#16A34A' }}>client</span>}
+                      </p>
                       <p className="text-xs" style={{ color: '#9CA3AF' }}>{c.client_email}</p>
                     </div>
                   </div>

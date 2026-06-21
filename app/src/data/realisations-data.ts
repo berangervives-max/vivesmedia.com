@@ -10,7 +10,7 @@ export type RealisationData = {
   context: { client: string; problem: string }
   solution: { title: string; desc: string }[]
   results: { value: string; label: string }[]
-  gallery: { src: string; caption: string; mobile?: boolean }[]
+  gallery: { src: string; caption: string; mobile?: boolean; rationale?: string; before?: string }[]
   testimonial?: { text: string; name: string; role: string }
   stack: string[]
   services: { label: string; href: string }[]
