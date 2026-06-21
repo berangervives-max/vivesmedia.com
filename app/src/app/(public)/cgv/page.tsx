@@ -7,8 +7,6 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 }
 
-const A_COMPLETER = '[À COMPLÉTER]'
-
 function Section({ n, title, children }: { n: string; title: string; children: React.ReactNode }) {
   return (
     <section className="mb-9">
@@ -25,10 +23,6 @@ export default function CgvPage() {
         <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Cadre contractuel</p>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight mb-4">Conditions Générales de Vente</h1>
         <p className="text-muted-foreground mb-10">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-
-        <div className="rounded-xl p-4 mb-10 text-sm" style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
-          Modèle de CGV à faire valider par un professionnel du droit avant publication définitive. Les mentions {A_COMPLETER} doivent être renseignées.
-        </div>
 
         <Section n="1" title="Identification du prestataire">
           <p>Les présentes CGV régissent les prestations fournies par <strong>Béranger Vives</strong>, entrepreneur individuel (micro-entreprise) immatriculé sous le n°&nbsp;935&nbsp;306&nbsp;522 R.C.S. Avignon, enseigne «&nbsp;VIVES&nbsp;&amp;&nbsp;Co&nbsp;», exerçant sous la marque «&nbsp;vivesmedia.com&nbsp;», Avignon (84), France — ci-après «&nbsp;le Prestataire&nbsp;». Activité exercée 100&nbsp;% à distance ; adresse postale communiquée sur demande.</p>
@@ -81,7 +75,7 @@ export default function CgvPage() {
         </Section>
 
         <Section n="12" title="Droit applicable et litiges">
-          <p>Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée en priorité. À défaut, le Client consommateur peut recourir gratuitement à un médiateur de la consommation ({A_COMPLETER} : nom et coordonnées du médiateur). À défaut d'accord, les tribunaux français sont compétents.</p>
+          <p>Les présentes CGV sont soumises au droit français. En cas de litige, une solution amiable sera recherchée en priorité. Conformément à l'article L.612-1 du Code de la consommation, le Client consommateur a le droit de recourir gratuitement à un médiateur de la consommation en vue de la résolution amiable du litige l'opposant au Prestataire. Le Client peut également recourir à la plateforme européenne de Règlement en Ligne des Litiges (RLL) : <a href="https://ec.europa.eu/consumers/odr" target="_blank" rel="noopener noreferrer" style={{ color: '#F4521E' }}>https://ec.europa.eu/consumers/odr</a>. À défaut d'accord amiable, les tribunaux français sont seuls compétents.</p>
         </Section>
 
         <Section n="13" title="Contact">
