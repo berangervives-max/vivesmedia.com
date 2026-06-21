@@ -64,6 +64,21 @@ function templates(c: Client, commune: string) {
       subject: `15 min pour ${ent} ?`,
       body: `Bonjour,\n\nPlutôt que de longs emails : on échange 15 minutes ? Je vous montre 2-3 choses simples pour que ${ent} attire plus de clients via son site et Google.\n\nDites-moi un créneau qui vous arrange, je m'adapte.${sign}`,
     },
+    audit: {
+      label: 'Audit offert',
+      subject: `2 idées pour ${ent}`,
+      body: `Bonjour,\n\nJ'ai regardé rapidement la présence en ligne de ${ent}, et 2 points pourraient vous amener plus de clients${lieu} :\n\n1) (à compléter avec ce que tu observes)\n2) (à compléter)\n\nSi ça vous parle, je vous détaille tout ça en 10 minutes.${sign}`,
+    },
+    gmb: {
+      label: 'Google / avis',
+      subject: `${ent} sur Google`,
+      body: `Bonjour,\n\nQuand quelqu'un cherche un(e) ${sect}${lieu} sur Google, c'est souvent la fiche Google et les avis qui décident où il va. J'aide les pros à mieux y apparaître et à transformer ces recherches en clients.\n\nC'est un sujet pour ${ent} en ce moment ?${sign}`,
+    },
+    offre: {
+      label: 'Place dispo',
+      subject: `Une place ce mois-ci pour ${ent}`,
+      body: `Bonjour,\n\nJe prends seulement 1 à 2 nouveaux projets par mois, et il me reste une place. Si créer ou refaire le site de ${ent} est dans vos plans, c'est le bon moment pour en parler.\n\nUn créneau de 10 minutes cette semaine ?${sign}`,
+    },
   }
 }
 
