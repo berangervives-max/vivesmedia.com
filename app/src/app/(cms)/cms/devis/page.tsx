@@ -1,8 +1,8 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { devisService } from '@/services/supabase.service'
+import { devisService, clientsService } from '@/services/supabase.service'
 import type { Devis } from '@/types'
-import { Trash2, Mail, Phone, Briefcase, DollarSign, MessageSquare } from 'lucide-react'
+import { Trash2, Mail, Phone, Briefcase, DollarSign, MessageSquare, Reply, UserPlus } from 'lucide-react'
 
 const STATUTS = ['nouveau','contacte','en_cours','accepte','refuse'] as const
 const COLORS: Record<string, string> = {
@@ -34,6 +34,29 @@ export default function CmsDevisPage() {
   const del = async (id: string) => {
     if (!confirm('Supprimer ce devis ?')) return
     await devisService.delete(id); setSelected(null); load()
+  }
+
+  // Répondre : ouvre un email pré-rempli (mailto)
+  const repondre = (d: Devis) => {
+    const sujet = encodeURIComponent(`Votre demande de devis — vivesmedia.com`)
+    const corps = encodeURIComponent(`Bonjour ${d.nom.split(' ')[0]},\n\nMerci pour votre demande${d.service ? ` concernant « ${d.service} »` : ''}.\n\n\n\n— Béranger Vives · vivesmedia.com`)
+    window.location.href = `mailto:${d.email}?subject=${sujet}&body=${corps}`
+  }
+
+  // Convertir le devis en fiche client (anti-doublon par email)
+  const [converting, setConverting] = useState(false)
+  const convertir = async (d: Devis) => {
+    setConverting(true)
+    try {
+      const existants = await clientsService.getAll()
+      if (existants.some(c => c.email.trim().toLowerCase() === d.email.trim().toLowerCase())) {
+        alert('Un client avec cet email existe déjà — voir l\'onglet Clients.'); return
+      }
+      const notes = [d.service && `Service : ${d.service}`, d.budget && `Budget : ${d.budget}`, d.message && `Message : ${d.message}`].filter(Boolean).join('\n')
+      await clientsService.create({ nom: d.nom, email: d.email, telephone: d.telephone || '', entreprise: '', secteur: '', statut: 'prospect', notes, stripe_customer_id: '' })
+      alert(`${d.nom} ajouté comme client (prospect). Retrouvez-le dans l\'onglet Clients.`)
+    } catch (err: any) { alert(err.message) }
+    finally { setConverting(false) }
   }
 
   const nonLus = devis.filter(d => !d.lu).length
@@ -142,6 +165,20 @@ export default function CmsDevisPage() {
                   <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>{selected.message}</p>
                 </div>
               )}
+
+              {/* Actions rapides */}
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => repondre(selected)}
+                  className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
+                  style={{ background: '#F4521E' }}>
+                  <Reply className="w-4 h-4" /> Répondre par email
+                </button>
+                <button onClick={() => convertir(selected)} disabled={converting}
+                  className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg transition-colors disabled:opacity-50"
+                  style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+                  <UserPlus className="w-4 h-4" /> {converting ? 'Ajout…' : 'Convertir en client'}
+                </button>
+              </div>
 
               {/* Statut */}
               <div>
