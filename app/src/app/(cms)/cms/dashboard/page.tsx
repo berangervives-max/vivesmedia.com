@@ -4,8 +4,11 @@ import Link from 'next/link'
 import { clientsService, devisService, facturesService, commandesService } from '@/services/supabase.service'
 import { Users, FileText, Receipt, ShoppingBag, TrendingUp, AlertCircle, Plus, BookOpen } from 'lucide-react'
 
+type Activity = { id: string; label: string; sub: string; date: string; href: string; icon: typeof FileText; color: string }
+
 export default function DashboardPage() {
   const [stats, setStats] = useState({ clients: 0, devisNonLus: 0, facturesEnRetard: 0, revenuMois: 0, commandesMois: 0 })
+  const [recent, setRecent] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -24,6 +27,12 @@ export default function DashboardPage() {
         revenuMois: factures.filter(f => f.statut === 'payee' && f.created_at >= moisDebut).reduce((s, f) => s + f.montant_ttc, 0),
         commandesMois: commandes.filter(c => c.statut === 'paye' && c.created_at >= moisDebut).length,
       })
+      const acts: Activity[] = [
+        ...devis.map(d => ({ id: `d${d.id}`, label: `Devis — ${d.nom}`, sub: d.service || 'Demande de devis', date: d.created_at, href: '/cms/devis', icon: FileText, color: '#F4521E' })),
+        ...factures.map(f => ({ id: `f${f.id}`, label: `Facture ${f.numero}`, sub: `${f.client_nom} · ${f.montant_ttc.toFixed(0)} €`, date: f.created_at, href: '/cms/factures', icon: Receipt, color: '#8B5CF6' })),
+        ...commandes.map(c => ({ id: `c${c.id}`, label: `Commande — ${c.client_nom || c.client_email || '—'}`, sub: `${c.service || ''} · ${c.montant.toFixed(0)} €`, date: c.created_at, href: '/cms/commandes', icon: ShoppingBag, color: '#10B981' })),
+      ].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 7)
+      setRecent(acts)
       setLoading(false)
     }).catch(() => setLoading(false))
   }, [])
@@ -32,7 +41,7 @@ export default function DashboardPage() {
     { label: 'Clients', value: stats.clients, icon: Users, href: '/cms/clients', color: 'bg-blue-50 text-blue-600' },
     { label: 'Devis non lus', value: stats.devisNonLus, icon: FileText, href: '/cms/devis', color: 'bg-orange-50 text-orange-600', alert: stats.devisNonLus > 0 },
     { label: 'Factures en retard', value: stats.facturesEnRetard, icon: Receipt, href: '/cms/factures', color: 'bg-red-50 text-red-600', alert: stats.facturesEnRetard > 0 },
-    { label: 'Revenu ce mois', value: `${stats.revenuMois.toFixed(0)} €`, icon: TrendingUp, href: '/cms/commandes', color: 'bg-green-50 text-green-600' },
+    { label: 'Revenu ce mois', value: `${stats.revenuMois.toFixed(0)} €`, icon: TrendingUp, href: '/cms/factures', color: 'bg-green-50 text-green-600' },
   ]
 
   const now = new Date()
@@ -141,6 +150,33 @@ export default function DashboardPage() {
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Activité récente */}
+      <div className="rounded-xl p-5 mt-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <h3 className="text-sm font-semibold mb-4" style={{ color: '#111827' }}>Activité récente</h3>
+        {loading ? (
+          <p className="text-sm" style={{ color: '#9CA3AF' }}>Chargement…</p>
+        ) : recent.length === 0 ? (
+          <p className="text-sm" style={{ color: '#9CA3AF' }}>Aucune activité pour le moment.</p>
+        ) : (
+          <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+            {recent.map(a => (
+              <Link key={a.id} href={a.href} className="flex items-center gap-3 py-2.5 transition-colors rounded-lg px-2 -mx-2"
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FAFAFA'}
+                onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                <span className="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style={{ background: `${a.color}15`, color: a.color }}>
+                  <a.icon className="w-3.5 h-3.5" />
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>{a.label}</p>
+                  <p className="text-xs truncate" style={{ color: '#9CA3AF' }}>{a.sub}</p>
+                </div>
+                <span className="text-xs shrink-0" style={{ color: '#D1D5DB' }}>{new Date(a.date).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })}</span>
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

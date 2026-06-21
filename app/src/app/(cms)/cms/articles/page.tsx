@@ -1,8 +1,19 @@
 'use client'
 import { useState, useEffect } from 'react'
 import { articlesService } from '@/services/supabase.service'
+import { createClient } from '@/lib/supabase'
 import type { Article } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X, Upload } from 'lucide-react'
+
+/** Upload une image vers le bucket Supabase `realisations` (dossier articles/) → URL publique. */
+async function uploadArticleImage(file: File): Promise<string> {
+  const sb = createClient()
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase()
+  const path = `articles/${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`
+  const { error } = await sb.storage.from('realisations').upload(path, file, { cacheControl: '3600', upsert: false })
+  if (error) throw error
+  return sb.storage.from('realisations').getPublicUrl(path).data.publicUrl
+}
 
 const EMPTY: Omit<Article, 'id' | 'created_at' | 'updated_at'> = {
   titre: '', slug: '', extrait: '', contenu: '', categorie: '', tags: '',
@@ -37,7 +48,17 @@ export default function CmsArticlesPage() {
   const [editing, setEditing] = useState<string | null>(null)
   const [form, setForm] = useState<Omit<Article, 'id' | 'created_at' | 'updated_at'>>({ ...EMPTY })
   const [saving, setSaving] = useState(false)
+  const [uploading, setUploading] = useState(false)
+  const [previewHtml, setPreviewHtml] = useState(false)
   const [stats, setStats] = useState<Record<string, { clicks: number; impressions: number; position: number }>>({})
+
+  const onUploadImage = async (file?: File) => {
+    if (!file) return
+    setUploading(true)
+    try { setForm(p => ({ ...p, image_url: '' })); const url = await uploadArticleImage(file); setForm(p => ({ ...p, image_url: url })) }
+    catch (err: any) { alert('Upload échoué : ' + err.message) }
+    finally { setUploading(false) }
+  }
 
   const load = () => articlesService.getAll().then(setArticles).catch(() => {})
   useEffect(() => {
@@ -123,8 +144,15 @@ export default function CmsArticlesPage() {
             </div>
           </div>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Image URL</label>
-            <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} className={inputCls} style={inputStyle} />
+            <label className={labelCls} style={{ color: '#6B7280' }}>Image de couverture</label>
+            {form.image_url && <img src={form.image_url} alt="" className="w-full max-w-xs rounded-lg border mb-2" style={{ borderColor: '#E5E7EB' }} />}
+            <div className="flex items-center gap-3">
+              <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg cursor-pointer shrink-0" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+                <Upload className="w-4 h-4" /> {uploading ? 'Envoi…' : 'Choisir un fichier'}
+                <input type="file" accept="image/*" className="hidden" onChange={e => onUploadImage(e.target.files?.[0])} />
+              </label>
+              <input value={form.image_url} onChange={e => setForm(p => ({ ...p, image_url: e.target.value }))} placeholder="…ou coller une URL" className={inputCls} style={inputStyle} />
+            </div>
           </div>
           <div>
             <label className={labelCls} style={{ color: '#6B7280' }}>Extrait</label>
@@ -132,9 +160,18 @@ export default function CmsArticlesPage() {
               className={`${inputCls} resize-none`} style={inputStyle} />
           </div>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Contenu (HTML)</label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className={labelCls} style={{ color: '#6B7280' }}>Contenu (HTML)</label>
+              <button type="button" onClick={() => setPreviewHtml(p => !p)} className="flex items-center gap-1 text-xs font-medium" style={{ color: '#F4521E' }}>
+                <Eye className="w-3.5 h-3.5" /> {previewHtml ? 'Masquer l\'aperçu' : 'Aperçu du rendu'}
+              </button>
+            </div>
             <textarea value={form.contenu} onChange={e => setForm(p => ({ ...p, contenu: e.target.value }))} rows={12}
               className={`${inputCls} font-mono resize-y`} style={{ ...inputStyle, fontSize: '12px', background: '#F9FAFB' }} />
+            {previewHtml && (
+              <div className="mt-3 rounded-lg border p-5 prose prose-sm max-w-none" style={{ borderColor: '#E5E7EB', background: '#fff' }}
+                dangerouslySetInnerHTML={{ __html: form.contenu || '<p style="color:#9CA3AF">(contenu vide)</p>' }} />
+            )}
           </div>
           <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={form.publie} onChange={e => setForm(p => ({ ...p, publie: e.target.checked }))} className="w-4 h-4 rounded accent-orange-500" />

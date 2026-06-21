@@ -8,6 +8,7 @@ import { realisationsService, dbToRealisationData, getPublishedRealisationsData 
 import JsonLd from '@/components/seo/JsonLd'
 import Reveal from '@/components/ui/Reveal'
 import { BrowserFrame, PhoneFrame } from '@/components/ui/DeviceFrames'
+import BeforeAfter from '@/components/ui/BeforeAfter'
 import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 
 // Les réalisations en base (back-office) peuvent être ajoutées sans rebuild.
@@ -181,16 +182,23 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
                   {img.mobile ? (
                     <div className="mx-auto max-w-sm">
                       <PhoneFrame>
-                        <img src={img.src} alt={img.caption} className="w-full" />
+                        {img.before
+                          ? <BeforeAfter before={img.before} after={img.src} alt={img.caption} />
+                          : <img src={img.src} alt={img.caption} className="w-full" />}
                       </PhoneFrame>
                     </div>
                   ) : (
                     <BrowserFrame url={liveHost}>
-                      <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />
+                      {img.before
+                        ? <BeforeAfter before={img.before} after={img.src} alt={img.caption} />
+                        : <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />}
                     </BrowserFrame>
                   )}
-                  {img.caption && (
-                    <figcaption className="mx-auto mt-6 max-w-xl text-center text-sm leading-relaxed text-muted-foreground">{img.caption}</figcaption>
+                  {(img.caption || img.rationale) && (
+                    <figcaption className="mx-auto mt-6 max-w-xl text-center">
+                      {img.caption && <span className="block text-sm font-medium leading-relaxed text-foreground">{img.caption}{img.before && <span className="text-muted-foreground"> · glissez pour comparer avant/après</span>}</span>}
+                      {img.rationale && <span className="mt-1.5 block text-sm leading-relaxed text-muted-foreground">{img.rationale}</span>}
+                    </figcaption>
                   )}
                 </figure>
               </Reveal>

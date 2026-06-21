@@ -19,9 +19,21 @@ const STATUT_COLORS: Record<string, string> = {
 export default function CmsDevisPage() {
   const [devis, setDevis] = useState<Devis[]>([])
   const [selected, setSelected] = useState<Devis | null>(null)
+  const [clientEmails, setClientEmails] = useState<Set<string>>(new Set())
+  const [q, setQ] = useState('')
+  const [filt, setFilt] = useState<'tous' | typeof STATUTS[number]>('tous')
 
   const load = () => devisService.getAll().then(setDevis).catch(() => {})
-  useEffect(() => { load() }, [])
+  useEffect(() => {
+    load()
+    clientsService.getAll().then(cs => setClientEmails(new Set(cs.map(c => c.email.trim().toLowerCase())))).catch(() => {})
+  }, [])
+
+  const estClient = (email: string) => clientEmails.has((email || '').trim().toLowerCase())
+  const filtered = devis.filter(d =>
+    (filt === 'tous' || d.statut === filt) &&
+    (!q || [d.nom, d.email, d.service].some(v => v?.toLowerCase().includes(q.toLowerCase())))
+  )
 
   const markRead = async (d: Devis) => {
     if (!d.lu) { await devisService.update(d.id, { lu: true }); load() }
@@ -72,15 +84,30 @@ export default function CmsDevisPage() {
         </p>
       </div>
 
+      {/* Filtres */}
+      <div className="mb-4 flex flex-col sm:flex-row gap-2">
+        <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher (nom, email, service)…"
+          className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
+        <div className="flex flex-wrap gap-1.5">
+          {(['tous', ...STATUTS] as const).map(s => (
+            <button key={s} onClick={() => setFilt(s)}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+              style={{ background: filt === s ? '#0F172A' : '#fff', color: filt === s ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+              {s === 'tous' ? 'Tous' : s}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <div className="grid lg:grid-cols-5 gap-4">
         {/* Liste */}
         <div className="lg:col-span-2 space-y-2">
-          {devis.length === 0 && (
+          {filtered.length === 0 && (
             <div className="rounded-xl p-10 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>
-              Aucun devis reçu
+              Aucun devis
             </div>
           )}
-          {devis.map(d => (
+          {filtered.map(d => (
             <button key={d.id} onClick={() => markRead(d)}
               className="w-full text-left rounded-xl p-4 transition-all"
               style={{
@@ -89,7 +116,10 @@ export default function CmsDevisPage() {
                 boxShadow: selected?.id === d.id ? '0 0 0 2px rgba(244,82,30,.1)' : 'none',
               }}>
               <div className="flex items-center justify-between mb-1">
-                <p className="font-semibold text-sm" style={{ color: '#111827' }}>{d.nom}</p>
+                <p className="font-semibold text-sm flex items-center gap-1.5" style={{ color: '#111827' }}>
+                  {d.nom}
+                  {estClient(d.email) && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#DCFCE7', color: '#16A34A' }}>client</span>}
+                </p>
                 {!d.lu && (
                   <span className="flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full opacity-75" style={{ background: '#F59E0B' }} />

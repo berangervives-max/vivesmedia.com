@@ -39,17 +39,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
     }
 
-    const { subject, body } = await req.json()
+    const { subject, body, test } = await req.json()
     if (!subject || !body) return NextResponse.json({ error: 'Objet et message requis' }, { status: 400 })
 
-    // Destinataires : abonnés newsletter actifs (service role pour contourner RLS)
-    const admin = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-    const { data: abonnes, error } = await admin.from('newsletter').select('email').eq('actif', true)
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-    if (!abonnes || abonnes.length === 0) return NextResponse.json({ error: 'Aucun abonné actif' }, { status: 400 })
+    // Mode test : on n'envoie qu'à l'admin pour prévisualiser le rendu réel.
+    let emails: string[]
+    if (test) {
+      emails = [user.email]
+    } else {
+      // Destinataires : abonnés newsletter actifs (service role pour contourner RLS)
+      const admin = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      const { data: abonnes, error } = await admin.from('newsletter').select('email').eq('actif', true)
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+      if (!abonnes || abonnes.length === 0) return NextResponse.json({ error: 'Aucun abonné actif' }, { status: 400 })
+      emails = abonnes.map(a => a.email)
+    }
 
     const html = campaignHtml(body)
-    const emails = abonnes.map(a => a.email)
     let sent = 0
 
     for (let i = 0; i < emails.length; i += BATCH_SIZE) {
@@ -66,7 +72,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, sent })
+    return NextResponse.json({ success: true, sent, test: !!test })
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Erreur inconnue'
     return NextResponse.json({ error: message }, { status: 500 })
