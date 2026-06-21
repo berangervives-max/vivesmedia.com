@@ -36,6 +36,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
+// Maillage interne : on relie chaque article aux pages services pertinentes
+// (diffuse l'autorité SEO de l'article vers les pages de conversion).
+const SERVICES_LINKS: { slug: string; label: string; kw: string[] }[] = [
+  { slug: 'site-vitrine', label: 'Création de site vitrine', kw: ['vitrine', 'site web', 'développeur', 'next', 'landing'] },
+  { slug: 'site-ecommerce', label: 'Site e-commerce', kw: ['commerce', 'ecommerce', 'e-commerce', 'boutique', 'vente', 'shopify', 'panier'] },
+  { slug: 'seo', label: 'Référencement SEO', kw: ['seo', 'référencement', 'referencement', 'google', 'recherche', 'trafic', 'mots-clés', 'mots cles', 'serp'] },
+  { slug: 'visibilite-ia', label: 'Visibilité IA (AEO/GEO)', kw: ['aeo', 'geo', 'chatgpt', 'perplexity', 'visibilité', 'générative', 'generative', 'llm'] },
+  { slug: 'crm-automatisation', label: 'CRM & Automatisation IA', kw: ['automat', 'crm', 'workflow', 'n8n', 'pipeline', 'process', 'productivité', 'zapier'] },
+  { slug: 'video-contenu-ia', label: 'Vidéo & Contenu IA', kw: ['vidéo', 'video', 'contenu', 'reel', 'social', 'ugc', 'instagram'] },
+  { slug: 'formation-ia', label: 'Formation IA', kw: ['formation', 'apprendre', 'tutoriel', 'tuto'] },
+  { slug: 'maintenance', label: 'Maintenance & sécurité', kw: ['maintenance', 'sécurité', 'securite', 'mise à jour', 'sauvegarde'] },
+]
+function relatedServices(a: { titre: string; categorie?: string | null; tags?: string | null }) {
+  const hay = `${a.titre} ${a.categorie || ''} ${a.tags || ''}`.toLowerCase()
+  const out = SERVICES_LINKS.filter(s => s.kw.some(k => hay.includes(k)))
+  for (const slug of ['site-vitrine', 'seo', 'crm-automatisation']) {
+    if (out.length >= 3) break
+    const f = SERVICES_LINKS.find(s => s.slug === slug)
+    if (f && !out.some(o => o.slug === f.slug)) out.push(f)
+  }
+  return out.slice(0, 4)
+}
+
 export default async function BlogArticlePage({ params }: Props) {
   const { slug } = await params
   let article = STATIC[slug]
@@ -81,7 +104,22 @@ export default async function BlogArticlePage({ params }: Props) {
         )}
         <div className="prose prose-lg max-w-none text-foreground [&_h2]:text-2xl [&_h2]:font-bold [&_h2]:mt-10 [&_h2]:mb-4 [&_h3]:text-xl [&_h3]:font-semibold [&_h3]:mt-6 [&_h3]:mb-3 [&_p]:text-muted-foreground [&_p]:leading-relaxed [&_p]:mb-4 [&_ul]:list-disc [&_ul]:pl-6 [&_ul]:text-muted-foreground [&_li]:mb-2"
           dangerouslySetInnerHTML={{ __html: article.contenu || '' }} />
-        <div className="mt-16 pt-10 border-t border-border">
+        {/* Maillage interne — diffuse l'autorité de l'article vers les pages services */}
+        <div className="mt-14 pt-10 border-t border-border">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Aller plus loin</p>
+          <h2 className="text-xl font-bold text-foreground mb-5">Les services liés à cet article</h2>
+          <div className="grid sm:grid-cols-2 gap-3">
+            {relatedServices(article).map((s) => (
+              <Link key={s.slug} href={`/services/${s.slug}`}
+                className="group flex items-center justify-between rounded-xl border border-border bg-white px-5 py-4 transition-colors hover:border-foreground/30">
+                <span className="text-sm font-semibold text-foreground">{s.label}</span>
+                <ArrowUpRight className="w-4 h-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-10 pt-10 border-t border-border">
           <div className="rounded-2xl bg-foreground p-8 text-center">
             <h3 className="text-xl font-bold text-white mb-2">Prêt à transformer votre présence en ligne ?</h3>
             <p className="text-white/70 text-sm mb-6">Devis gratuit sous 24h — sans engagement.</p>
