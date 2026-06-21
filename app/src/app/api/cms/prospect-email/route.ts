@@ -5,6 +5,9 @@ import { createClient as createSb } from '@supabase/supabase-js'
 // Envoi d'un email de prospection personnalisé, contact par contact, depuis la fiche.
 // Admin uniquement. Part de contact@vivesmedia.com via Resend. Trace dans automation_logs.
 const FROM = 'Béranger Vives <contact@vivesmedia.com>'
+// Boîte Gmail qui reçoit une copie des envois ET les réponses des prospects
+// (le domaine vivesmedia.com n'a pas de MX → il ne peut pas recevoir d'email).
+const NOTIFY = process.env.PROSPECT_NOTIFY_EMAIL || 'vivesmediacontact@gmail.com'
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || 'https://vivesmedia.com'
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
@@ -35,23 +38,36 @@ export async function POST(req: NextRequest) {
   if (typeof clientId === 'string' && /^[A-Za-z0-9-]{6,40}$/.test(clientId)) tags.push({ name: 'prospect_id', value: clientId })
 
   // Rendu sobre/personnel (meilleure délivrabilité en cold email qu'un template marketing)
-  // + liens traçés (clics) + pixel de tracking d'ouverture (auto-hébergés)
   const toLc = String(to).toLowerCase()
   const cid = typeof clientId === 'string' ? clientId : ''
-  const paras = esc(body).split(/\n{2,}/).map(p => `<p style="margin:0 0 14px">${trackLinks(p.replace(/\n/g, '<br/>'), cid, toLc)}</p>`).join('')
+  const wrapDiv = (inner: string) => `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a">${inner}</div>`
+  const escaped = esc(body).split(/\n{2,}/).map(p => p.replace(/\n/g, '<br/>'))
+  // Version envoyée au prospect : liens traçés (clics) + pixel d'ouverture
   const pixel = `<img src="${BASE}/api/track/open?pid=${encodeURIComponent(cid)}&e=${encodeURIComponent(toLc)}" width="1" height="1" alt="" style="display:none;width:1px;height:1px" />`
-  const html = `<div style="font-family:-apple-system,Segoe UI,Roboto,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1a1a1a">${paras}</div>${pixel}`
+  const html = wrapDiv(escaped.map(p => `<p style="margin:0 0 14px">${trackLinks(p, cid, toLc)}</p>`).join('')) + pixel
+  // Version « copie » pour la boîte Gmail : SANS tracking (n'altère pas les stats d'ouverture/clic)
+  const plainHtml = wrapDiv(escaped.map(p => `<p style="margin:0 0 14px">${p}</p>`).join(''))
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, to, subject, html, reply_to: 'contact@vivesmedia.com', ...(tags.length ? { tags } : {}) }),
+    body: JSON.stringify({ from: FROM, to, subject, html, reply_to: NOTIFY, ...(tags.length ? { tags } : {}) }),
   })
   if (!res.ok) {
     const err = await res.text()
     return NextResponse.json({ error: `Resend : ${err}` }, { status: 502 })
   }
   const sent = await res.json().catch(() => ({}))
+
+  // Copie dans la boîte Gmail (trace perso) — best-effort, sans bloquer la réponse
+  try {
+    const copyHtml = `<p style="font-family:Arial,sans-serif;font-size:13px;color:#888;margin:0 0 8px">📤 Copie — email de prospection envoyé à <b>${esc(String(to))}</b> le ${new Date().toLocaleString('fr-FR')}. Les réponses arriveront directement ici.</p><hr style="border:none;border-top:1px solid #eee"/>${plainHtml}`
+    await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from: FROM, to: NOTIFY, subject: `📤 ${to} — ${subject}`, html: copyHtml }),
+    })
+  } catch { /* copie best-effort */ }
   try {
     const admin = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
     await admin.from('automation_logs').insert({ type: 'prospect_email', payload: { to: String(to).toLowerCase(), subject, kind: kind || null, prospect_id: clientId || null, email_id: sent?.id || null, at: new Date().toISOString() } })
