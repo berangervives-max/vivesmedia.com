@@ -30,7 +30,7 @@ export async function sendDevisReceived(devis: { nom: string; email: string; ser
       <p><strong>Service :</strong> ${devis.service || '—'}</p>
       <p><strong>Message :</strong> ${devis.message || '—'}</p>
     `),
-    send(devis.email, 'Votre demande a bien été reçue — VivesMedia', `
+    send(devis.email, 'Votre demande a bien été reçue — vivesmedia.com', `
       <h2>Bonjour ${devis.nom},</h2>
       <p>Merci pour votre demande. Je reviendrai vers vous dans les 24h.</p>
       <p>— Béranger Vives · <a href="https://vivesmedia.com">vivesmedia.com</a></p>
@@ -39,7 +39,7 @@ export async function sendDevisReceived(devis: { nom: string; email: string; ser
 }
 
 export async function sendFacture(facture: { client_email: string; client_nom: string; numero: string; montant_ttc: number; stripe_payment_link?: string }) {
-  await send(facture.client_email, `Facture ${facture.numero} — VivesMedia`, `
+  await send(facture.client_email, `Facture ${facture.numero} — vivesmedia.com`, `
     <h2>Bonjour ${facture.client_nom},</h2>
     <p>Veuillez trouver ci-joint votre facture <strong>${facture.numero}</strong> d'un montant de <strong>${facture.montant_ttc.toFixed(2)} € TTC</strong>.</p>
     ${facture.stripe_payment_link ? `<p><a href="${facture.stripe_payment_link}" style="background:#000;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block">Payer en ligne</a></p>` : ''}
@@ -48,7 +48,7 @@ export async function sendFacture(facture: { client_email: string; client_nom: s
 }
 
 export async function sendFollowup(client: { email: string; nom: string }) {
-  await send(client.email, 'Des nouvelles de votre projet ? — VivesMedia', `
+  await send(client.email, 'Des nouvelles de votre projet ? — vivesmedia.com', `
     <h2>Bonjour ${client.nom},</h2>
     <p>Je voulais prendre de vos nouvelles concernant votre projet web.</p>
     <p>N'hésitez pas à me répondre directement ou à <a href="https://vivesmedia.com/contact">planifier un appel</a>.</p>
@@ -57,7 +57,7 @@ export async function sendFollowup(client: { email: string; nom: string }) {
 }
 
 export async function sendTestimonialRequest(client: { email: string; nom: string }) {
-  await send(client.email, 'Votre avis compte pour nous — VivesMedia', `
+  await send(client.email, 'Votre avis compte pour nous — vivesmedia.com', `
     <h2>Bonjour ${client.nom},</h2>
     <p>Votre projet est terminé depuis un mois et j'espère que vous êtes satisfait du résultat.</p>
     <p>Pourriez-vous laisser un avis Google ? Cela ne prend que 2 minutes et m'aide énormément.</p>
@@ -67,7 +67,7 @@ export async function sendTestimonialRequest(client: { email: string; nom: strin
 }
 
 export async function sendMaintenanceUpsell(client: { email: string; nom: string }) {
-  await send(client.email, 'Maintenez votre site au top — VivesMedia', `
+  await send(client.email, 'Maintenez votre site au top — vivesmedia.com', `
     <h2>Bonjour ${client.nom},</h2>
     <p>Cela fait plus de 6 mois que votre site est en ligne. Il est peut-être temps de faire un point : mises à jour, optimisations SEO, nouvelles fonctionnalités.</p>
     <p>Je propose un <strong>pack maintenance mensuel</strong> pour garder votre site performant.</p>
@@ -84,7 +84,7 @@ export async function sendBlogDigest(subscribers: string[], articles: { titre: s
     </div>
   `).join('')
   for (const email of subscribers) {
-    await send(email, 'Les derniers articles VivesMedia', `
+    await send(email, 'Les derniers articles vivesmedia.com', `
       <h2>Les articles du mois</h2>
       ${articlesHtml}
       <p><small><a href="https://vivesmedia.com/unsubscribe?email=${email}">Se désabonner</a></small></p>
@@ -95,7 +95,7 @@ export async function sendBlogDigest(subscribers: string[], articles: { titre: s
 export async function sendOverdueAlert(factures: { numero: string; client_nom: string; montant_ttc: number; date_echeance: string }[]) {
   if (!factures.length) return
   const rows = factures.map(f => `<tr><td>${f.numero}</td><td>${f.client_nom}</td><td>${f.montant_ttc.toFixed(2)} €</td><td>${f.date_echeance}</td></tr>`).join('')
-  await send(ADMIN, `${factures.length} facture(s) impayée(s) — VivesMedia`, `
+  await send(ADMIN, `${factures.length} facture(s) impayée(s) — vivesmedia.com`, `
     <h2>Factures en retard</h2>
     <table border="1" cellpadding="8" style="border-collapse:collapse">
       <tr><th>Numéro</th><th>Client</th><th>Montant TTC</th><th>Échéance</th></tr>
@@ -105,7 +105,7 @@ export async function sendOverdueAlert(factures: { numero: string; client_nom: s
 }
 
 export async function sendRevenueReport(data: { mois: string; total: number; payees: number; en_attente: number }) {
-  await send(ADMIN, `Rapport revenus ${data.mois} — VivesMedia`, `
+  await send(ADMIN, `Rapport revenus ${data.mois} — vivesmedia.com`, `
     <h2>Rapport mensuel — ${data.mois}</h2>
     <p><strong>Total encaissé :</strong> ${data.total.toFixed(2)} €</p>
     <p><strong>Factures payées :</strong> ${data.payees}</p>
