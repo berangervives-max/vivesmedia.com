@@ -1,10 +1,20 @@
 'use client'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { crmService, clientsService, type ClientDossier as Dossier } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare } from 'lucide-react'
+import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, Eye, MousePointerClick, Activity, Gauge, PhoneCall, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
+// Métadonnées d'affichage de la timeline de suivi
+const ACT_META: Record<string, { label: string; icon: LucideIcon; bg: string; fg: string }> = {
+  prospect_email: { label: 'Email envoyé', icon: Send, bg: '#FFF1EC', fg: '#F4521E' },
+  email_open: { label: 'Email ouvert', icon: Eye, bg: '#ECFDF5', fg: '#16A34A' },
+  email_click: { label: 'Lien cliqué', icon: MousePointerClick, bg: '#EFF6FF', fg: '#2563EB' },
+  email_bounce: { label: 'Email rejeté', icon: Mail, bg: '#FEE2E2', fg: '#DC2626' },
+  prospect_call: { label: 'Appel passé', icon: PhoneCall, bg: '#F1F5F9', fg: '#475569' },
+  prospect_sms: { label: 'SMS envoyé', icon: MessageSquare, bg: '#F1F5F9', fg: '#475569' },
+  default: { label: 'Action', icon: Activity, bg: '#F3F4F6', fg: '#6B7280' },
+}
 const euro = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0)
 
 const DEVIS_COLORS: Record<string, string> = { nouveau: 'bg-orange-100 text-orange-700', contacte: 'bg-blue-100 text-blue-700', en_cours: 'bg-violet-100 text-violet-700', accepte: 'bg-green-100 text-green-700', refuse: 'bg-gray-100 text-gray-500' }
@@ -143,7 +153,23 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const [mailSent, setMailSent] = useState(false)
   const validTo = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to.trim())
 
+  // Suivi (timeline) du prospect : emails envoyés/ouverts/cliqués, appels, SMS
+  type Act = { id: string; type: string; payload: { to?: string; subject?: string; kind?: string; link?: string; note?: string; at?: string }; created_at: string }
+  const [acts, setActs] = useState<Act[]>([])
+  const refreshActs = useCallback(() => {
+    const qs = new URLSearchParams({ pid: client.id })
+    if (client.email) qs.set('email', client.email)
+    fetch(`/api/cms/prospect-activity?${qs}`).then(r => r.json()).then(d => setActs(d.events || [])).catch(() => {})
+  }, [client.email, client.id])
+
+  // Analyse du site du prospect (pour personnaliser les emails)
+  type Audit = { ok?: boolean; site?: string; unreachable?: boolean; error?: string; audit?: { score: number; responseMs: number; builder?: string; viewport?: boolean; isHttps?: boolean; metaDesc?: boolean }; findings?: { level: 'ok' | 'warn' | 'bad'; label: string }[]; emailLines?: string[] }
+  const [audit, setAudit] = useState<Audit | null>(null)
+  const [auditing, setAuditing] = useState(false)
+  const [loggedAct, setLoggedAct] = useState('')
+
   useEffect(() => { crmService.getDossier(client.email).then(setD).catch(() => setD({ devis: [], factures: [], commandes: [] })) }, [client.email])
+  useEffect(() => { refreshActs() }, [refreshActs])
 
   // Envoi direct de l'email depuis la fiche (via vivesmedia.com / Resend) + trace
   const sendViaApp = async () => {
@@ -152,7 +178,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
     if (!confirm(`Envoyer cet email à ${dest} depuis contact@vivesmedia.com ?`)) return
     setSendingMail(true)
     try {
-      const r = await fetch('/api/cms/prospect-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: dest, subject, body }) })
+      const r = await fetch('/api/cms/prospect-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: dest, subject, body, kind: active, clientId: client.id }) })
       const dd = await r.json()
       if (!r.ok) throw new Error(dd.error || 'Erreur envoi')
       setMailSent(true)
@@ -160,6 +186,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       const patch: Partial<Client> = { notes: `${client.notes || ''} · EMAIL ENVOYÉ le ${new Date().toLocaleDateString('fr-FR')} (${active})` }
       if (!client.email && dest) patch.email = dest
       clientsService.update(client.id, patch).catch(() => {})
+      setTimeout(refreshActs, 900)
     } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') }
     finally { setSendingMail(false) }
   }
@@ -183,6 +210,46 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const nafLabel = NAF_LABELS[info.naf] || info.naf || ''
   const anciennete = info.an ? new Date().getFullYear() - parseInt(info.an) : null
   const recoAngle = reco.angle.replace('{ville}', info.commune || 'votre ville')
+
+  // Lance l'analyse du site du prospect et mémorise un résumé dans la fiche
+  const runAudit = async () => {
+    if (!site) return
+    setAuditing(true); setAudit(null)
+    try {
+      const r = await fetch('/api/cms/site-audit', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ url: site }) })
+      const dd = (await r.json()) as Audit
+      setAudit(dd)
+      if (dd.ok && dd.audit) {
+        const a = dd.audit
+        const note = `${client.notes || ''} · AUDIT ${new Date().toLocaleDateString('fr-FR')}: ${a.score}/100 (${a.builder || 'site'}, ${(a.responseMs / 1000).toFixed(1)}s${a.viewport ? '' : ', non responsive'}${a.isHttps ? '' : ', sans HTTPS'})`
+        clientsService.update(client.id, { notes: note }).catch(() => {})
+      }
+    } catch { setAudit({ error: 'Analyse impossible' }) }
+    finally { setAuditing(false) }
+  }
+  // Génère un email 100% personnalisé à partir des observations de l'audit
+  const useAuditInEmail = () => {
+    const lines = audit?.emailLines || []
+    if (!lines.length) return
+    const ent = client.entreprise || client.nom
+    const lieu = commune ? ` à ${commune}` : ''
+    const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
+    const numbered = lines.map((l, i) => `${i + 1}) ${l}`).join('\n')
+    const plural = lines.length > 1 ? 's' : ''
+    setActive('audit')
+    setSubject(`${lines.length} point${plural} à améliorer pour ${ent}`)
+    setBody(`Bonjour,\n\nJe suis tombé sur le site de ${ent}${lieu} et je l'ai regardé en détail. ${lines.length} point${plural} vous font perdre des clients aujourd'hui :\n\n${numbered}\n\nTout cela se corrige rapidement. Si vous voulez, je vous montre comment en 10 minutes — sans engagement.${sign}`)
+  }
+  // Journalise un appel / SMS dans le suivi
+  const logAction = async (kind: 'call' | 'sms') => {
+    try {
+      await fetch('/api/cms/prospect-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId: client.id, email: client.email || null, phone: mobileNum || fixeNum || null, kind }) })
+      setLoggedAct(kind); setTimeout(() => setLoggedAct(''), 2500); setTimeout(refreshActs, 500)
+    } catch { /* best-effort */ }
+  }
+  const sentN = acts.filter(a => a.type === 'prospect_email').length
+  const openN = acts.filter(a => a.type === 'email_open').length
+  const clickN = acts.filter(a => a.type === 'email_click').length
 
   const caFactures = (d?.factures ?? []).filter(f => f.statut === 'payee').reduce((s, f) => s + Number(f.montant_ttc || 0), 0)
   const caCommandes = (d?.commandes ?? []).filter(c => c.statut === 'paye').reduce((s, c) => s + Number(c.montant || 0), 0)
@@ -298,13 +365,13 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
         {/* Actions rapides */}
         <div className="flex flex-wrap gap-2 mb-4">
           {(mobileNum || fixeNum) && (
-            <a href={`tel:${normPhone(mobileNum || fixeNum)}`} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
-              <Phone className="w-4 h-4" /> Appeler
+            <a href={`tel:${normPhone(mobileNum || fixeNum)}`} onClick={() => logAction('call')} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
+              <Phone className="w-4 h-4" /> Appeler{loggedAct === 'call' ? ' ✓' : ''}
             </a>
           )}
           {smsHref && (
-            <a href={smsHref} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
-              <MessageSquare className="w-4 h-4" /> SMS
+            <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              <MessageSquare className="w-4 h-4" /> SMS{loggedAct === 'sms' ? ' ✓' : ''}
             </a>
           )}
           {site && (
@@ -312,12 +379,43 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               <Globe className="w-4 h-4" /> Voir leur site
             </a>
           )}
+          {site && (
+            <button onClick={runAudit} disabled={auditing} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg disabled:opacity-50" style={{ border: '1px solid rgba(244,82,30,.4)', color: ORANGE }}>
+              <Gauge className="w-4 h-4" /> {auditing ? 'Analyse…' : 'Analyser le site'}
+            </button>
+          )}
           {isProspect && (
             <button onClick={() => markStatut('actif')} disabled={savingStatut} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50" style={{ border: '1px solid #E5E7EB', color: '#16A34A' }}>
               <UserCheck className="w-4 h-4" /> Convertir en client
             </button>
           )}
         </div>
+
+        {/* Résultat de l'analyse du site → personnalisation de l'email */}
+        {audit && (
+          <div className="rounded-lg p-4 mb-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+            {audit.error || audit.unreachable ? (
+              <p className="text-sm" style={{ color: '#B91C1C' }}>{audit.error || 'Site injoignable (ne répond pas ou trop lent).'}</p>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2"><Gauge className="w-4 h-4" style={{ color: ORANGE }} /><h3 className="text-sm font-bold" style={{ color: '#111827' }}>Analyse du site</h3></div>
+                  <span className="text-sm font-bold px-2.5 py-1 rounded-lg" style={{ background: (audit.audit?.score ?? 0) >= 70 ? '#DCFCE7' : (audit.audit?.score ?? 0) >= 45 ? '#FEF3C7' : '#FEE2E2', color: (audit.audit?.score ?? 0) >= 70 ? '#16A34A' : (audit.audit?.score ?? 0) >= 45 ? '#D97706' : '#DC2626' }}>{audit.audit?.score}/100</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5 mb-3">
+                  {(audit.findings || []).map((fd, i) => (
+                    <span key={i} className="text-[11px] px-2 py-1 rounded-md" style={fd.level === 'bad' ? { background: '#FEE2E2', color: '#B91C1C' } : fd.level === 'warn' ? { background: '#FEF3C7', color: '#92400E' } : { background: '#ECFDF5', color: '#047857' }}>{fd.label}</span>
+                  ))}
+                </div>
+                {(audit.emailLines?.length ?? 0) > 0 && (
+                  <button onClick={useAuditInEmail} className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
+                    <Send className="w-3.5 h-3.5" /> Générer l'email personnalisé à partir de cette analyse
+                  </button>
+                )}
+              </>
+            )}
+          </div>
+        )}
 
         {/* Trouver les coordonnées manquantes (1 clic) */}
         {(!client.email || (!mobileNum && !fixeNum)) && (
@@ -378,6 +476,36 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
           </div>
           <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Ouvrir dans ma messagerie » envoie depuis ta boîte perso (idéal pour le tout 1er contact à froid). Sans email, utilise l'appel / le SMS.</p>
         </div>
+      </div>
+
+      {/* ── SUIVI & HISTORIQUE (tracking live) ── */}
+      <div className="rounded-xl p-6 mb-4" style={card}>
+        <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
+          <div className="flex items-center gap-2"><Activity className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Suivi & historique</h2></div>
+          <div className="flex items-center gap-3 text-xs" style={{ color: '#6B7280' }}>
+            <span className="flex items-center gap-1"><Send className="w-3.5 h-3.5" style={{ color: ORANGE }} /> {sentN} envoyé{sentN > 1 ? 's' : ''}</span>
+            <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" style={{ color: '#16A34A' }} /> {openN} ouvert{openN > 1 ? 's' : ''}</span>
+            <span className="flex items-center gap-1"><MousePointerClick className="w-3.5 h-3.5" style={{ color: '#2563EB' }} /> {clickN} clic{clickN > 1 ? 's' : ''}</span>
+          </div>
+        </div>
+        {acts.length === 0 ? (
+          <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune action pour l'instant. Les emails envoyés, leurs <strong>ouvertures</strong> et <strong>clics</strong> (suivis en direct), ainsi que les appels et SMS, apparaîtront ici.</p>
+        ) : (
+          <div className="space-y-2">
+            {acts.map(a => { const m = ACT_META[a.type] || ACT_META.default; return (
+              <div key={a.id} className="flex items-center gap-3 text-sm">
+                <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: m.bg }}><m.icon className="w-3.5 h-3.5" style={{ color: m.fg }} /></span>
+                <span className="min-w-0 truncate" style={{ color: '#374151' }}>
+                  <strong style={{ color: '#111827' }}>{m.label}</strong>
+                  {a.payload?.kind && a.type === 'prospect_email' ? ` · ${a.payload.kind}` : ''}
+                  {a.payload?.subject ? ` — « ${a.payload.subject} »` : ''}
+                  {a.payload?.link ? ` → ${a.payload.link}` : ''}
+                </span>
+                <span className="ml-auto text-xs shrink-0" style={{ color: '#9CA3AF' }}>{new Date(a.payload?.at || a.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+              </div>
+            ) })}
+          </div>
+        )}
       </div>
 
       {/* KPIs dossier */}

@@ -180,6 +180,7 @@ export default function CmsClientsPage() {
                     <div className="flex items-center gap-2">
                       <Mail className="w-3.5 h-3.5" style={{ color: ek === 'pro' ? '#16A34A' : ek === 'perso' ? '#D97706' : '#E5E7EB' }} />
                       <Phone className="w-3.5 h-3.5" style={{ color: c.telephone ? '#16A34A' : '#E5E7EB' }} />
+                      {c.notes?.includes('EMAIL ENVOYÉ') && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#FFF1EC', color: '#F4521E' }}>contacté</span>}
                     </div>
                   </td>
                   <td className="px-4 py-3"><span className={`text-xs px-2.5 py-1 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span></td>

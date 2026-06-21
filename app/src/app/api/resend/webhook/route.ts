@@ -7,7 +7,12 @@ import { createClient as createSb } from '@supabase/supabase-js'
 // doit contenir ?key=<secret> (ex: https://vivesmedia.com/api/resend/webhook?key=XXX).
 type ResendEvent = {
   type?: string
-  data?: { tags?: { name: string; value: string }[]; subject?: string; to?: string[] | string }
+  data?: {
+    tags?: { name: string; value: string }[]
+    subject?: string
+    to?: string[] | string
+    click?: { link?: string }
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -29,10 +34,14 @@ export async function POST(req: NextRequest) {
   if (!logType) return NextResponse.json({ ok: true, ignored: evt.type })
 
   const campaign = evt.data?.tags?.find(t => t.name === 'campaign')?.value || null
+  const prospect_id = evt.data?.tags?.find(t => t.name === 'prospect_id')?.value || null
+  // Destinataire (pour attribuer l'ouverture/le clic au bon prospect dans la fiche)
+  const to = (Array.isArray(evt.data?.to) ? evt.data?.to[0] : evt.data?.to)?.toString().toLowerCase() || null
+  const link = evt.data?.click?.link || null
 
   try {
     const sb = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-    await sb.from('automation_logs').insert({ type: logType, payload: { campaign, subject: evt.data?.subject, at: new Date().toISOString() } })
+    await sb.from('automation_logs').insert({ type: logType, payload: { campaign, prospect_id, to, link, subject: evt.data?.subject, at: new Date().toISOString() } })
   } catch { /* analytics best-effort */ }
 
   return NextResponse.json({ ok: true })
