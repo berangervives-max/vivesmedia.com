@@ -14,29 +14,30 @@ type AutomationLog = {
 
 const AUTOMATIONS = [
   {
-    type: 'follow_up',
+    type: 'relance_devis',
     icon: FileText,
     label: 'Relance devis abandonnés',
-    desc: 'Tous les 2 jours à 10h — repère les devis non lus depuis 48h et déclenche une relance.',
-    cadence: 'Tous les 2 jours · 10h00',
+    desc: 'Chaque jour — repère les devis "nouveau" sans réponse depuis 2 à 14 jours et envoie une relance (une seule fois).',
+    cadence: 'Quotidien · 9h00',
   },
   {
     type: 'overdue_alert',
     icon: Receipt,
     label: 'Alerte factures impayées',
-    desc: 'Chaque jour — passe en "en retard" les factures dont l\'échéance est dépassée et te notifie.',
+    desc: 'Chaque jour — passe en "en retard" les factures envoyées dont l\'échéance est dépassée.',
     cadence: 'Quotidien',
   },
   {
     type: 'monthly_report',
     icon: TrendingUp,
     label: 'Rapport mensuel de revenus',
-    desc: 'Le 1er du mois — calcule le CA encaissé du mois précédent et l\'archive dans le journal.',
-    cadence: 'Le 1er du mois',
+    desc: 'Au début du mois — calcule le CA encaissé du mois précédent et l\'archive dans le journal.',
+    cadence: 'Mensuel',
   },
 ]
 
 const TYPE_LABELS: Record<string, string> = {
+  relance_devis: 'Relance devis',
   follow_up: 'Relance devis',
   overdue_alert: 'Factures impayées',
   monthly_report: 'Rapport mensuel',
@@ -64,7 +65,7 @@ export default function AutomationsPage() {
         <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
           <AlertCircle className="w-4 h-4 shrink-0" style={{ color: '#D97706' }} />
           <p className="text-sm" style={{ color: '#92400E' }}>
-            Les automatisations seront actives après l'exécution du script SQL (<code>002_automations.sql</code> — pg_cron) dans Supabase.
+            La table <code>automation_logs</code> est introuvable. Les 3 automatisations tournent via le cron Vercel quotidien, mais le journal a besoin de cette table (script <code>002_automations.sql</code> dans Supabase).
           </p>
         </div>
       )}
@@ -117,7 +118,7 @@ export default function AutomationsPage() {
           <div className="h-40 rounded-lg flex flex-col items-center justify-center gap-2"
             style={{ background: '#F8F9FA', border: '1px dashed #E5E7EB' }}>
             <Zap className="w-6 h-6" style={{ color: '#D1D5DB' }} />
-            <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune exécution pour le moment — les automatisations tournent toutes seules une fois le SQL activé</p>
+            <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune exécution pour le moment — les automatisations tournent chaque jour via le cron Vercel et s'afficheront ici dès la première action</p>
           </div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#F1F3F5' }}>

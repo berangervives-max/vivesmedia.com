@@ -129,7 +129,7 @@ export default function SettingsPage() {
           {saved ? <><Check className="w-4 h-4" /> Enregistré</> : <><Save className="w-4 h-4" /> Enregistrer</>}
         </button>
         <p className="text-xs" style={{ color: '#9CA3AF' }}>
-          Stocké localement pour l'instant — sera synchronisé en base à la connexion finale.
+          Utilisé pour tes <strong>factures</strong> (préfixe de numéro, coordonnées, mentions, régime TVA) et tes <strong>liens</strong> (Calendly, avis Google). Stocké sur ce navigateur.
         </p>
       </div>
 
