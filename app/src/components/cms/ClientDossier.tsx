@@ -135,32 +135,37 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const tpl = useMemo(() => templates(client, commune), [client, commune])
 
   const [active, setActive] = useState<keyof ReturnType<typeof templates>>('contact')
+  const [to, setTo] = useState(client.email || '')
   const [subject, setSubject] = useState(tpl.contact.subject)
   const [body, setBody] = useState(tpl.contact.body)
   const [copied, setCopied] = useState(false)
   const [sendingMail, setSendingMail] = useState(false)
   const [mailSent, setMailSent] = useState(false)
+  const validTo = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to.trim())
 
   useEffect(() => { crmService.getDossier(client.email).then(setD).catch(() => setD({ devis: [], factures: [], commandes: [] })) }, [client.email])
 
   // Envoi direct de l'email depuis la fiche (via vivesmedia.com / Resend) + trace
   const sendViaApp = async () => {
-    if (!client.email) return
-    if (!confirm(`Envoyer cet email à ${client.email} depuis contact@vivesmedia.com ?`)) return
+    if (!validTo) { alert('Renseigne une adresse email destinataire valide.'); return }
+    const dest = to.trim()
+    if (!confirm(`Envoyer cet email à ${dest} depuis contact@vivesmedia.com ?`)) return
     setSendingMail(true)
     try {
-      const r = await fetch('/api/cms/prospect-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: client.email, subject, body }) })
+      const r = await fetch('/api/cms/prospect-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: dest, subject, body }) })
       const dd = await r.json()
       if (!r.ok) throw new Error(dd.error || 'Erreur envoi')
       setMailSent(true)
-      const note = `${client.notes || ''} · EMAIL ENVOYÉ le ${new Date().toLocaleDateString('fr-FR')} (${active})`
-      clientsService.update(client.id, { notes: note }).catch(() => {})
+      // Trace + on mémorise l'email trouvé s'il manquait sur la fiche
+      const patch: Partial<Client> = { notes: `${client.notes || ''} · EMAIL ENVOYÉ le ${new Date().toLocaleDateString('fr-FR')} (${active})` }
+      if (!client.email && dest) patch.email = dest
+      clientsService.update(client.id, patch).catch(() => {})
     } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') }
     finally { setSendingMail(false) }
   }
 
   const pickTpl = (k: keyof ReturnType<typeof templates>) => { setActive(k); setSubject(tpl[k].subject); setBody(tpl[k].body) }
-  const mailto = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+  const mailto = `mailto:${to.trim()}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   const copy = () => { navigator.clipboard?.writeText(`${subject}\n\n${body}`); setCopied(true); setTimeout(() => setCopied(false), 2500) }
   const markStatut = async (s: Client['statut']) => { setSavingStatut(true); try { await clientsService.update(client.id, { statut: s }); setStatut(s) } catch { /* */ } finally { setSavingStatut(false) } }
 
@@ -341,20 +346,27 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
             className="w-full px-3 py-2 rounded-lg text-sm font-medium mb-2 outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
           <textarea value={body} onChange={e => setBody(e.target.value)} rows={9}
             className="w-full px-3 py-2 rounded-lg text-sm leading-relaxed outline-none resize-y" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }} />
+          {/* Destinataire modifiable : si la fiche n'a pas d'email, colle celui que tu trouves */}
+          <div className="mt-3">
+            <label className="text-[10px] uppercase tracking-wide block mb-1" style={{ color: '#9CA3AF' }}>Destinataire</label>
+            <div className="flex items-center gap-2">
+              <input type="email" value={to} onChange={e => { setTo(e.target.value); setMailSent(false) }} placeholder="email@duprospect.fr"
+                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ border: `1px solid ${to && !validTo ? '#FCA5A5' : '#E5E7EB'}`, background: '#fff', color: '#111827' }} />
+              {client.email && to.trim() === client.email && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={emTag === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{emTag}</span>
+              )}
+            </div>
+            {!client.email && <p className="text-[11px] mt-1" style={{ color: '#92400E' }}>Pas d'email sur la fiche — colle celui que tu trouves (boutons « Trouver les coordonnées » ci-dessus). Il sera enregistré à l'envoi.</p>}
+          </div>
           <div className="flex flex-wrap items-center gap-2 mt-3">
-            {client.email ? (
-              <>
-                <button onClick={sendViaApp} disabled={sendingMail || mailSent}
-                  className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-60" style={{ background: mailSent ? '#16A34A' : ORANGE }}>
-                  {mailSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mailSent ? 'Envoyé ✓' : sendingMail ? 'Envoi…' : 'Envoyer (vivesmedia.com)'}
-                </button>
-                <a href={mailto} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
-                  <Mail className="w-4 h-4" /> Ouvrir dans ma messagerie
-                </a>
-              </>
-            ) : (
-              <span className="text-xs px-3 py-2 rounded-lg" style={{ background: '#FFFBEB', color: '#92400E', border: '1px solid #FDE68A' }}>Pas d'email — appelle, envoie un SMS ou copie le message</span>
-            )}
+            <button onClick={sendViaApp} disabled={sendingMail || mailSent || !validTo} title={!validTo ? 'Renseigne un email destinataire' : ''}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: mailSent ? '#16A34A' : ORANGE }}>
+              {mailSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mailSent ? 'Envoyé ✓' : sendingMail ? 'Envoi…' : 'Envoyer (vivesmedia.com)'}
+            </button>
+            <a href={validTo ? mailto : undefined} onClick={e => { if (!validTo) e.preventDefault() }}
+              className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: validTo ? '#374151' : '#C4C4C4' }}>
+              <Mail className="w-4 h-4" /> Ouvrir dans ma messagerie
+            </a>
             <button onClick={copy} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: copied ? '#16A34A' : '#374151' }}>
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />} {copied ? 'Copié' : 'Copier'}
             </button>
@@ -364,7 +376,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               </button>
             )}
           </div>
-          <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Ouvrir dans ma messagerie » envoie depuis ta boîte perso (idéal pour le tout 1er contact à froid).</p>
+          <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Ouvrir dans ma messagerie » envoie depuis ta boîte perso (idéal pour le tout 1er contact à froid). Sans email, utilise l'appel / le SMS.</p>
         </div>
       </div>
 
