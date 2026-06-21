@@ -168,6 +168,10 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const [audit, setAudit] = useState<Audit | null>(null)
   const [auditing, setAuditing] = useState(false)
   const [loggedAct, setLoggedAct] = useState('')
+  // Composeur SMS (envoi pro via Brevo)
+  const [smsText, setSmsText] = useState(`Bonjour, Béranger de vivesmedia.com — je crée des sites web pour les ${client.secteur || 'pros'}${commune ? ` de ${commune}` : ''}. Ouvert à un échange rapide ?`)
+  const [smsSending, setSmsSending] = useState(false)
+  const [smsSent, setSmsSent] = useState(false)
 
   useEffect(() => { crmService.getDossier(client.email).then(setD).catch(() => setD({ devis: [], factures: [], commandes: [] })) }, [client.email])
   useEffect(() => { refreshActs() }, [refreshActs])
@@ -250,6 +254,22 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       await fetch('/api/cms/prospect-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId: client.id, email: client.email || null, phone: mobileNum || fixeNum || null, kind }) })
       setLoggedAct(kind); setTimeout(() => setLoggedAct(''), 2500); setTimeout(refreshActs, 500)
     } catch { /* best-effort */ }
+  }
+  // Envoi du SMS via Brevo (backend), expéditeur « vivesmedia »
+  const sendSmsBrevo = async () => {
+    const num = mobileNum || fixeNum
+    if (!num || !smsText.trim()) return
+    if (!confirm(`Envoyer ce SMS à ${num} via vivesmedia (Brevo, ~0,05 €) ?`)) return
+    setSmsSending(true)
+    try {
+      const r = await fetch('/api/cms/prospect-sms', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: num, text: smsText, clientId: client.id }) })
+      const dd = await r.json()
+      if (!r.ok) throw new Error(dd.error || 'Erreur SMS')
+      setSmsSent(true)
+      clientsService.update(client.id, { notes: `${client.notes || ''} · SMS ENVOYÉ le ${new Date().toLocaleDateString('fr-FR')}` }).catch(() => {})
+      setTimeout(refreshActs, 800)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') }
+    finally { setSmsSending(false) }
   }
   const sentN = acts.filter(a => a.type === 'prospect_email').length
   const openN = acts.filter(a => a.type === 'email_open').length
@@ -423,6 +443,30 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
                 )}
               </>
             )}
+          </div>
+        )}
+
+        {/* Composeur SMS — envoi pro via Brevo + option gratuite via le tél */}
+        {(mobileNum || fixeNum) && (
+          <div className="rounded-lg p-4 mb-4" style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: '#111827' }}><MessageSquare className="w-4 h-4" style={{ color: ORANGE }} /> SMS</h3>
+              <span className="text-[11px]" style={{ color: smsText.length > 160 ? '#DC2626' : '#9CA3AF' }}>{smsText.length}/160</span>
+            </div>
+            <textarea value={smsText} onChange={e => { setSmsText(e.target.value); setSmsSent(false) }} rows={3}
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-y" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }} />
+            <div className="flex flex-wrap items-center gap-2 mt-2">
+              <button onClick={sendSmsBrevo} disabled={smsSending || smsSent || !smsText.trim()}
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: smsSent ? '#16A34A' : ORANGE }}>
+                {smsSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {smsSent ? 'Envoyé ✓' : smsSending ? 'Envoi…' : 'Envoyer (vivesmedia)'}
+              </button>
+              {smsHref && (
+                <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+                  <Phone className="w-4 h-4" /> Depuis mon tél (gratuit)
+                </a>
+              )}
+            </div>
+            <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer (vivesmedia) » = SMS pro via Brevo (~0,05 €, expéditeur « vivesmedia », créneau légal 8h-20h hors dimanche). « Depuis mon tél » = gratuit via ton forfait (ton numéro visible).</p>
           </div>
         )}
 

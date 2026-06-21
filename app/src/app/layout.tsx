@@ -45,6 +45,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <JsonLd data={SITE_SCHEMA} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground">
+        {/* Brevo — tracker on-site (suivi des visiteurs/contacts) */}
+        <Script src="https://cdn.brevo.com/js/sdk-loader.js" strategy="afterInteractive" />
+        <Script id="brevo-init" strategy="afterInteractive">{`window.Brevo=window.Brevo||[];Brevo.push(["init",{client_key:"5mf34tiyc6okfn85xnsrn2ok"}]);`}</Script>
         <PostHogProvider>
           <SmoothScroll>
             {children}
