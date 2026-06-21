@@ -194,6 +194,17 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
           )}
         </div>
 
+        {/* Trouver les coordonnées manquantes (1 clic) */}
+        {(!client.email || (!mobileNum && !fixeNum)) && (
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-xs p-3 rounded-lg" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
+            <span style={{ color: '#92400E' }}>Coordonnées manquantes — trouve-les :</span>
+            <a href={`https://www.google.com/search?q=${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>Google</a>
+            <a href={`https://www.google.com/maps/search/${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>Maps</a>
+            <a href={`https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui=${encodeURIComponent(client.nom)}&ou=${encodeURIComponent(commune || 'Vaucluse')}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>PagesJaunes</a>
+            <span style={{ color: '#92400E' }}>→ puis « Modifier » la fiche pour les enregistrer.</span>
+          </div>
+        )}
+
         {/* Composeur d'email personnalisé */}
         <div className="rounded-lg p-4" style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
           <div className="flex flex-wrap gap-1.5 mb-3">
