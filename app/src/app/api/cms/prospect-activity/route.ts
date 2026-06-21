@@ -27,6 +27,20 @@ export async function GET(req: NextRequest) {
     for (const r of data || []) counts[r.type] = (counts[r.type] || 0) + 1
     return NextResponse.json({ counts })
   }
+  // Flux global : toutes les activités récentes, avec le nom du prospect résolu
+  if (req.nextUrl.searchParams.get('feed')) {
+    const { data } = await sb.from('automation_logs').select('id,type,payload,created_at')
+      .in('type', ACT_TYPES).order('created_at', { ascending: false }).limit(400)
+    const rows = data || []
+    const ids = [...new Set(rows.map(r => r.payload?.prospect_id).filter(Boolean))] as string[]
+    const mails = [...new Set(rows.map(r => (r.payload?.to || '').toString().toLowerCase()).filter(Boolean))] as string[]
+    const byId: Record<string, { id: string; nom: string; secteur?: string }> = {}
+    const byMail: Record<string, { id: string; nom: string; secteur?: string }> = {}
+    if (ids.length) { const { data: cs } = await sb.from('site_clients').select('id,nom,secteur').in('id', ids); (cs || []).forEach(c => { byId[c.id] = c }) }
+    if (mails.length) { const { data: cs } = await sb.from('site_clients').select('id,nom,secteur,email').in('email', mails); (cs || []).forEach(c => { if (c.email) byMail[c.email.toLowerCase()] = { id: c.id, nom: c.nom, secteur: c.secteur } }) }
+    const events = rows.map(r => ({ ...r, client: byId[r.payload?.prospect_id] || byMail[(r.payload?.to || '').toString().toLowerCase()] || null }))
+    return NextResponse.json({ events })
+  }
   const email = (req.nextUrl.searchParams.get('email') || '').toLowerCase().trim()
   const pid = (req.nextUrl.searchParams.get('pid') || '').trim()
   if (!email && !pid) return NextResponse.json({ events: [] })
