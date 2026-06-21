@@ -400,3 +400,58 @@ export async function getPostHogData(): Promise<PostHogData> {
     return empty
   }
 }
+
+// ── AGENDA (Google Calendar) ──────────────────────────────────
+// Le compte de service lit l'agenda SI le calendrier est partagé avec son email
+// (compte Gmail perso => pas de délégation domaine). Échoue proprement sinon.
+export type AgendaEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; location?: string; hangoutLink?: string; htmlLink?: string }
+export type AgendaResult =
+  | { ok: true; events: AgendaEvent[] }
+  | { ok: false; reason: 'no_sa' | 'forbidden' | 'error'; saEmail?: string; calendarId: string }
+
+type GCalItem = {
+  id: string
+  summary?: string
+  location?: string
+  hangoutLink?: string
+  htmlLink?: string
+  start?: { dateTime?: string; date?: string }
+  end?: { dateTime?: string; date?: string }
+}
+
+export function getServiceAccountEmail(): string | null {
+  return getServiceAccount()?.client_email ?? null
+}
+
+export async function getUpcomingEvents(max = 8): Promise<AgendaResult> {
+  const calendarId = process.env.GOOGLE_CALENDAR_ID || 'berangervives@gmail.com'
+  const sa = getServiceAccount()
+  if (!sa) return { ok: false, reason: 'no_sa', calendarId }
+  const token = await getAccessToken('https://www.googleapis.com/auth/calendar.readonly')
+  if (!token) return { ok: false, reason: 'error', saEmail: sa.client_email, calendarId }
+  const params = new URLSearchParams({
+    timeMin: new Date().toISOString(),
+    maxResults: String(max),
+    singleEvents: 'true',
+    orderBy: 'startTime',
+  })
+  const res = await fetch(
+    `https://www.googleapis.com/calendar/v3/calendars/${encodeURIComponent(calendarId)}/events?${params.toString()}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  )
+  if (!res.ok) {
+    return { ok: false, reason: res.status === 403 || res.status === 404 ? 'forbidden' : 'error', saEmail: sa.client_email, calendarId }
+  }
+  const json = (await res.json()) as { items?: GCalItem[] }
+  const events: AgendaEvent[] = (json.items ?? []).map((e) => ({
+    id: e.id,
+    title: e.summary || '(sans titre)',
+    start: e.start?.dateTime || e.start?.date || '',
+    end: e.end?.dateTime || e.end?.date,
+    allDay: !e.start?.dateTime,
+    location: e.location,
+    hangoutLink: e.hangoutLink,
+    htmlLink: e.htmlLink,
+  }))
+  return { ok: true, events }
+}
