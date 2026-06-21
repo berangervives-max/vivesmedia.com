@@ -21,18 +21,30 @@ function calcTotaux(lignes: FactureLigne[], remise: number, tva: number) {
   return { montant_ht: ht, montant_tva: ht * (tva / 100), montant_ttc: ht + ht * (tva / 100) }
 }
 
+/** Préfixe de numéro depuis les Paramètres (ex: « VM-2026- »), sinon défaut « VM-AAAA- ». */
+function facturePrefix() {
+  try {
+    const raw = localStorage.getItem('vivesmedia-cms-settings')
+    if (raw) { const p = JSON.parse(raw).prefixeFacture as string | undefined; if (p) return p }
+  } catch { /* défaut */ }
+  return `VM-${new Date().getFullYear()}-`
+}
+
 function nextNumero(factures: Facture[]) {
-  const y = new Date().getFullYear()
-  const nums = factures.filter(f => f.numero?.startsWith(`VM-${y}-`)).map(f => parseInt(f.numero.split('-')[2]) || 0)
-  return `VM-${y}-${String(nums.length ? Math.max(...nums) + 1 : 1).padStart(3, '0')}`
+  const prefix = facturePrefix()
+  const nums = factures
+    .filter(f => f.numero?.startsWith(prefix))
+    .map(f => parseInt(f.numero.slice(prefix.length), 10) || 0)
+  return `${prefix}${String(nums.length ? Math.max(...nums) + 1 : 1).padStart(3, '0')}`
 }
 
 const EMPTY_LIGNE: FactureLigne = { description: '', quantite: 1, prix_unitaire: 0 }
+// TVA à 0 par défaut : micro-entreprise en franchise de TVA (art. 293 B du CGI).
 const EMPTY = (factures: Facture[]): Omit<Facture, 'id' | 'created_at' | 'updated_at'> => ({
   numero: nextNumero(factures), client_nom: '', client_email: '', client_adresse: '', client_siret: '',
   date_emission: new Date().toISOString().slice(0, 10),
   date_echeance: new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10),
-  lignes: [{ ...EMPTY_LIGNE }], remise: 0, tva_taux: 20,
+  lignes: [{ ...EMPTY_LIGNE }], remise: 0, tva_taux: 0, stripe_payment_link: '',
   montant_ht: 0, montant_tva: 0, montant_ttc: 0, statut: 'brouillon', notes: '',
 })
 
@@ -51,7 +63,7 @@ export default function CmsFacturesPage() {
 
   const open = (f?: Facture) => {
     setEditing(f?.id || 'new')
-    setForm(f ? { numero: f.numero, client_nom: f.client_nom, client_email: f.client_email || '', client_adresse: f.client_adresse || '', client_siret: f.client_siret || '', date_emission: f.date_emission, date_echeance: f.date_echeance || '', lignes: f.lignes, remise: f.remise, tva_taux: f.tva_taux, montant_ht: f.montant_ht, montant_tva: f.montant_tva, montant_ttc: f.montant_ttc, statut: f.statut, notes: f.notes || '' } : EMPTY(factures))
+    setForm(f ? { numero: f.numero, client_nom: f.client_nom, client_email: f.client_email || '', client_adresse: f.client_adresse || '', client_siret: f.client_siret || '', date_emission: f.date_emission, date_echeance: f.date_echeance || '', lignes: f.lignes, remise: f.remise, tva_taux: f.tva_taux, stripe_payment_link: f.stripe_payment_link || '', montant_ht: f.montant_ht, montant_tva: f.montant_tva, montant_ttc: f.montant_ttc, statut: f.statut, notes: f.notes || '' } : EMPTY(factures))
   }
 
   const setLigne = (i: number, k: keyof FactureLigne, v: string | number) => {
@@ -59,6 +71,10 @@ export default function CmsFacturesPage() {
     const totaux = calcTotaux(lignes, form.remise, form.tva_taux)
     setForm(p => ({ ...p, lignes, ...totaux }))
   }
+
+  // Recalcule les totaux quand la remise ou le taux de TVA change.
+  const setRemise = (remise: number) => setForm(p => ({ ...p, remise, ...calcTotaux(p.lignes, remise, p.tva_taux) }))
+  const setTva = (tva: number) => setForm(p => ({ ...p, tva_taux: tva, ...calcTotaux(p.lignes, p.remise, tva) }))
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault(); setSaving(true)
@@ -136,11 +152,32 @@ export default function CmsFacturesPage() {
               </div>
             ))}
           </div>
+          {/* Remise / TVA */}
+          <div className="mt-5 pt-4 grid grid-cols-2 gap-3 max-w-xs ml-auto" style={{ borderTop: '1px solid #F3F4F6' }}>
+            <div>
+              <label className={labelCls} style={{ color: '#6B7280' }}>Remise (%)</label>
+              <input type="number" min={0} max={100} value={form.remise} onChange={e => setRemise(Number(e.target.value))} className={inputCls} style={inputStyle} />
+            </div>
+            <div>
+              <label className={labelCls} style={{ color: '#6B7280' }}>TVA (%)</label>
+              <input type="number" min={0} max={20} value={form.tva_taux} onChange={e => setTva(Number(e.target.value))} className={inputCls} style={inputStyle} />
+            </div>
+          </div>
+          {form.tva_taux === 0 && (
+            <p className="text-right text-[11px] mt-1.5" style={{ color: '#9CA3AF' }}>TVA non applicable, art. 293 B du CGI (franchise en base).</p>
+          )}
+
           {/* Totaux */}
-          <div className="mt-5 pt-4 text-right space-y-1 text-sm" style={{ borderTop: '1px solid #F3F4F6' }}>
+          <div className="mt-4 pt-4 text-right space-y-1 text-sm" style={{ borderTop: '1px solid #F3F4F6' }}>
             <p style={{ color: '#6B7280' }}>HT : <strong>{form.montant_ht.toFixed(2)} €</strong></p>
-            <p style={{ color: '#6B7280' }}>TVA ({form.tva_taux}%) : <strong>{form.montant_tva.toFixed(2)} €</strong></p>
-            <p className="text-lg font-bold" style={{ color: '#111827' }}>TTC : {form.montant_ttc.toFixed(2)} €</p>
+            {form.tva_taux > 0 && <p style={{ color: '#6B7280' }}>TVA ({form.tva_taux}%) : <strong>{form.montant_tva.toFixed(2)} €</strong></p>}
+            <p className="text-lg font-bold" style={{ color: '#111827' }}>{form.tva_taux > 0 ? 'TTC' : 'Total'} : {form.montant_ttc.toFixed(2)} €</p>
+          </div>
+
+          {/* Lien de paiement Stripe */}
+          <div className="mt-5 pt-4" style={{ borderTop: '1px solid #F3F4F6' }}>
+            <label className={labelCls} style={{ color: '#6B7280' }}>Lien de paiement Stripe (optionnel — apparaît dans le PDF et l'email)</label>
+            <input value={form.stripe_payment_link} onChange={e => setForm(p => ({ ...p, stripe_payment_link: e.target.value }))} placeholder="https://buy.stripe.com/…" className={inputCls} style={inputStyle} />
           </div>
         </div>
 

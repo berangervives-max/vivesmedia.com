@@ -152,18 +152,23 @@ export function genererFacturePdf(f: Facture) {
     y += 5.5
   }
 
-  doc.setTextColor(GRAY)
-  doc.text(`TVA (${f.tva_taux}%)`, xLabel, y)
-  doc.setTextColor(DARK)
-  doc.text(eur(f.montant_tva), col.total, y, { align: 'right' })
-  y += 7
+  // Ligne TVA uniquement si un taux s'applique (sinon franchise en base → HT = total)
+  if (f.tva_taux > 0) {
+    doc.setTextColor(GRAY)
+    doc.text(`TVA (${f.tva_taux}%)`, xLabel, y)
+    doc.setTextColor(DARK)
+    doc.text(eur(f.montant_tva), col.total, y, { align: 'right' })
+    y += 7
+  } else {
+    y += 1.5
+  }
 
   doc.setFillColor(ORANGE)
   doc.roundedRect(xLabel - 4, y - 5, W - M - xLabel + 4, 9, 1.5, 1.5, 'F')
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(10.5)
   doc.setTextColor('#FFFFFF')
-  doc.text('TOTAL TTC', xLabel, y + 1)
+  doc.text(f.tva_taux > 0 ? 'TOTAL TTC' : 'TOTAL', xLabel, y + 1)
   doc.text(eur(f.montant_ttc), col.total - 1, y + 1, { align: 'right' })
   y += 14
 
