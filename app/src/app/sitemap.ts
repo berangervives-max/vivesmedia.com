@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { articlesService, getPublishedRealisationsData } from '@/services/supabase.service'
 import { REALISATIONS_DATA } from '@/data/realisations-data'
+import { CITY_SLUGS } from '@/lib/cities-data'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = 'https://vivesmedia.com'
@@ -19,6 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/cgv`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/divulgation`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
+
+  const cityPages: MetadataRoute.Sitemap = CITY_SLUGS.map(slug => ({
+    url: `${base}/${slug}`,
+    lastModified: now,
+    changeFrequency: 'monthly' as const,
+    priority: 0.9,
+  }))
 
   let articlePages: MetadataRoute.Sitemap = []
   try {
@@ -44,5 +52,5 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticPages, ...articlePages, ...realisationPages]
+  return [...staticPages, ...cityPages, ...articlePages, ...realisationPages]
 }

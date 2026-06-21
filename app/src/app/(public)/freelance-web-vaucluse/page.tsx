@@ -20,6 +20,13 @@ export const metadata: Metadata = {
 
 const VILLES = ['Avignon', 'Carpentras', 'Orange', 'Cavaillon', "L'Isle-sur-la-Sorgue", 'Pertuis', 'Sorgues', 'Le Pontet', 'Apt', 'Bollène']
 
+// Maillage interne vers les pages villes dédiées
+const VILLE_LINKS: Record<string, string> = {
+  Avignon: '/freelance-web-avignon',
+  Carpentras: '/freelance-web-carpentras',
+  Orange: '/freelance-web-orange',
+}
+
 const SERVICES = [
   { title: 'Site vitrine', desc: 'Présentez votre activité avec un site rapide, élégant et pensé pour générer des contacts.', href: '/services/site-vitrine', price: 'dès 1 490€' },
   { title: 'Site e-commerce', desc: 'Vendez en ligne avec une boutique sur-mesure optimisée pour convertir.', href: '/services/site-ecommerce', price: 'dès 3 840€' },
@@ -140,7 +147,9 @@ export default function AgenceWebVauclusePage() {
       <section className="max-w-4xl mx-auto px-6 py-12">
         <h2 className="text-xl font-bold text-foreground mb-5 text-center">J&apos;interviens dans tout le Vaucluse</h2>
         <div className="flex flex-wrap justify-center gap-2.5">
-          {VILLES.map((v) => (
+          {VILLES.map((v) => VILLE_LINKS[v] ? (
+            <Link key={v} href={VILLE_LINKS[v]} className="text-sm px-4 py-2 rounded-full border border-black/10 text-foreground bg-white hover:bg-black/5 transition-colors">{v}</Link>
+          ) : (
             <span key={v} className="text-sm px-4 py-2 rounded-full border border-black/8 text-muted-foreground bg-white">{v}</span>
           ))}
         </div>
