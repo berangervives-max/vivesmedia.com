@@ -70,6 +70,47 @@ function templates(c: Client, commune: string) {
 // Conseils cold email (affichés dans la fiche)
 const COLD_TIPS = 'Court (50-90 mots) · parle d\'EUX d\'abord · 1 seule question · pas de « gratuit/promo » dans l\'objet · relance après 3-4 jours (le mardi/mercredi 10h-11h convertit le mieux).'
 
+// Extrait toutes les infos open data stockées dans les notes.
+function parseInfo(notes?: string) {
+  const n = notes || ''
+  const g = (re: RegExp) => (n.match(re) || [])[1] || ''
+  return {
+    commune: g(/·\s*([^·]+?)\s*\(8\d{4}\)/), cp: g(/\((8\d{4})\)/), naf: g(/NAF\s+([0-9.A-Z]+)/i),
+    an: g(/créé\s+(\d{4})/i), eff: g(/effectif\s+(\S+?)(?:\s·|$)/i), siren: g(/SIREN\s+(\d{9})/i),
+    dirigeant: g(/dirigeant\s+([^·]+?)(?:\s·|$)/i), score: g(/score\s+(\d+)\/10/i),
+  }
+}
+const NAF_LABELS: Record<string, string> = {
+  '56.10A': 'Restauration traditionnelle', '56.10C': 'Restauration rapide', '10.71C': 'Boulangerie-pâtisserie', '56.21Z': 'Traiteur', '47.25Z': 'Caviste', '47.22Z': 'Boucherie',
+  '96.02A': 'Coiffure', '96.02B': 'Soins de beauté', '86.90E': 'Ostéopathie', '86.90D': 'Kinésithérapie', '86.23Z': 'Dentiste',
+  '43.22A': 'Plomberie / chauffage', '43.21A': 'Électricité', '43.32A': 'Menuiserie', '25.12Z': 'Menuiserie métal', '47.52A': 'Bricolage', '47.52B': 'Bricolage', '43.34Z': 'Peinture', '43.33Z': 'Carrelage', '81.30Z': 'Paysagiste',
+  '47.76Z': 'Fleuriste', '47.78A': 'Opticien', '45.20A': 'Entretien auto', '45.11Z': 'Vente auto', '68.31Z': 'Agence immobilière', '74.20Z': 'Photographe', '93.13Z': 'Salle de sport', '85.53Z': 'Auto-école', '71.11Z': 'Architecte',
+}
+// Catégorie métier → analyse + services recommandés + angle de vente
+const CAT: Record<string, string> = {
+  restaurant: 'chr', pizzeria: 'chr', boulangerie: 'chr', traiteur: 'chr', caviste: 'chr', boucherie: 'chr',
+  coiffure: 'beaute', 'institut de beaute': 'beaute',
+  osteopathe: 'sante', kinesitherapeute: 'sante', dentiste: 'sante',
+  plombier: 'btp', electricien: 'btp', menuiserie: 'btp', macon: 'btp', peintre: 'btp', carreleur: 'btp', paysagiste: 'btp',
+  'garage automobile': 'auto', 'auto ecole': 'auto',
+  'agence immobiliere': 'immo', fleuriste: 'commerce', opticien: 'commerce', 'salle de sport': 'commerce',
+  architecte: 'prolib', photographe: 'prolib',
+}
+const RECO: Record<string, { services: string[]; angle: string }> = {
+  chr: { services: ['Site vitrine + menu en ligne', 'Réservation / commande en ligne', 'SEO local', 'Google Business + avis', 'Photos & vidéo'], angle: 'Être trouvé sur Google et permettre de réserver/commander en ligne 24/7.' },
+  beaute: { services: ['Site vitrine', 'Prise de RDV en ligne', 'SEO local', 'Google Business + avis', 'Contenu Instagram'], angle: 'Remplir l\'agenda automatiquement via la prise de RDV en ligne.' },
+  sante: { services: ['Site professionnel sobre', 'Prise de RDV en ligne', 'SEO local', 'Avis patients'], angle: 'Crédibilité + nouveaux patients qui cherchent un praticien à proximité.' },
+  btp: { services: ['Site vitrine + portfolio chantiers', 'Formulaire de devis', 'SEO local (« métier + ville »)', 'Google Business + avis'], angle: 'Capter les demandes de devis locales (ex. « plombier ' + '{ville}' + ' »).' },
+  auto: { services: ['Site vitrine', 'Prise de RDV en ligne', 'SEO local', 'Avis Google'], angle: 'RDV en ligne + visibilité sur « garage / auto-école + ville ».' },
+  immo: { services: ['Site + portail d\'annonces', 'Capture de leads', 'SEO', 'CRM & automatisation'], angle: 'Générer des leads vendeurs et acheteurs en continu.' },
+  commerce: { services: ['Site + e-commerce / clic & collect', 'SEO local', 'Google Business + avis'], angle: 'Vendre en ligne et proposer le clic & collect.' },
+  prolib: { services: ['Portfolio premium', 'SEO', 'Page contact optimisée'], angle: 'Un portfolio qui inspire confiance et convertit les visiteurs.' },
+  autre: { services: ['Site vitrine', 'SEO local', 'Google Business + avis'], angle: 'Une présence en ligne professionnelle qui ramène des clients.' },
+}
+const Field = ({ label, value }: { label: string; value: string }) => (
+  <div><p className="text-[10px] uppercase tracking-wide" style={{ color: '#9CA3AF' }}>{label}</p><p className="text-sm font-medium" style={{ color: '#111827' }}>{value || '—'}</p></div>
+)
+
 /** Dossier client 360° + poste de prospection (actions depuis la fiche). */
 export default function ClientDossier({ client, onBack }: { client: Client; onBack: () => void }) {
   const [d, setD] = useState<Dossier | null>(null)
@@ -97,6 +138,13 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const smsBody = `Bonjour, Béranger de vivesmedia.com — j'aide les ${client.secteur || 'pros'}${commune ? ` de ${commune}` : ''} à être plus visibles sur Google. Ouvert à un échange ? vivesmedia.com`
   const smsHref = mobileNum ? `sms:${normPhone(mobileNum)}?body=${encodeURIComponent(smsBody)}` : ''
   const emTag = emailType(client.email)
+  const info = useMemo(() => parseInfo(client.notes), [client.notes])
+  const cat = CAT[client.secteur || ''] || 'autre'
+  const reco = RECO[cat]
+  const sirenUrl = info.siren ? `https://annuaire-entreprises.data.gouv.fr/entreprise/${info.siren}` : ''
+  const nafLabel = NAF_LABELS[info.naf] || info.naf || ''
+  const anciennete = info.an ? new Date().getFullYear() - parseInt(info.an) : null
+  const recoAngle = reco.angle.replace('{ville}', info.commune || 'votre ville')
 
   const caFactures = (d?.factures ?? []).filter(f => f.statut === 'payee').reduce((s, f) => s + Number(f.montant_ttc || 0), 0)
   const caCommandes = (d?.commandes ?? []).filter(c => c.statut === 'paye').reduce((s, c) => s + Number(c.montant || 0), 0)
@@ -148,8 +196,6 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
             {site && <a href={site} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:underline" style={{ color: ORANGE }}><Globe className="w-3.5 h-3.5" /> site</a>}
           </div>
         </div>
-        {client.notes && <p className="text-sm mt-4 pt-4 leading-relaxed" style={{ color: '#6B7280', borderTop: '1px solid #F3F4F6' }}>{client.notes}</p>}
-
         {/* Changement de statut rapide */}
         <div className="flex flex-wrap items-center gap-2 mt-4 pt-4" style={{ borderTop: '1px solid #F3F4F6' }}>
           <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#9CA3AF' }}>Statut :</span>
@@ -160,6 +206,47 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               {s}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* ── INFORMATIONS ENTREPRISE (open data) ── */}
+      <div className="rounded-xl p-6 mb-4" style={card}>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2"><Building2 className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Informations entreprise</h2></div>
+          {sirenUrl && <a href={sirenUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: ORANGE }}>Fiche officielle INSEE →</a>}
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <Field label="Secteur" value={client.secteur || ''} />
+          <Field label="Activité (NAF)" value={nafLabel} />
+          <Field label="Commune" value={info.commune ? `${info.commune} (${info.cp})` : ''} />
+          <Field label="Dirigeant" value={info.dirigeant} />
+          <Field label="Créée en" value={info.an ? `${info.an}${anciennete ? ` · ${anciennete} ans` : ''}` : ''} />
+          <Field label="Effectif" value={info.eff && info.eff !== 'NN' && info.eff !== '?' ? info.eff : 'micro / NC'} />
+          <Field label="SIREN" value={info.siren} />
+          <Field label="Score ICP" value={info.score ? `${info.score}/10` : ''} />
+        </div>
+      </div>
+
+      {/* ── ANALYSE & RECOMMANDATIONS ── */}
+      <div className="rounded-xl p-6 mb-4" style={{ ...card, borderColor: 'rgba(244,82,30,.25)' }}>
+        <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Analyse & recommandations</h2></div>
+        <p className="text-sm leading-relaxed mb-4" style={{ color: '#374151' }}>
+          <strong>{client.entreprise || client.nom}</strong> — {client.secteur || 'professionnel'}{info.commune ? ` à ${info.commune}` : ''}
+          {anciennete !== null && (anciennete <= 2 ? ', structure récente (souvent sans site → besoin d\'une première vitrine).' : `, établie depuis ${anciennete} ans (site potentiellement à moderniser).`)}
+          {!site && ' Aucun site web détecté pour l\'instant — angle de vente direct.'}
+          {site && ' Un site existe : cibler la refonte / le SEO / la conversion.'}
+        </p>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <div>
+            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>Services à proposer</p>
+            <div className="flex flex-wrap gap-1.5">
+              {reco.services.map(s => <span key={s} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(244,82,30,.08)', color: '#F4521E' }}>{s}</span>)}
+            </div>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>Angle de vente</p>
+            <p className="text-sm" style={{ color: '#374151' }}>{recoAngle}</p>
+          </div>
         </div>
       </div>
 
