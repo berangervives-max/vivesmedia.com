@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Script from 'next/script'
 import { Inter_Tight, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import SmoothScroll from '@/components/layout/SmoothScroll'
@@ -35,13 +36,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" />
-        <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');` }} />
         {/* Ahrefs Web Analytics */}
         <script async src="https://analytics.ahrefs.com/analytics.js" data-key="9tqUA2EBj5akD55zFPOVvw" />
         <JsonLd data={SITE_SCHEMA} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground">
+        {/* Google Analytics 4 — chargé via next/script (évite ERR_BLOCKED_BY_ORB) */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" strategy="afterInteractive" />
+        <Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');`}</Script>
         <PostHogProvider>
           <SmoothScroll>
             {children}
