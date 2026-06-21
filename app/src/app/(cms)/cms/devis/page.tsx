@@ -22,6 +22,8 @@ export default function CmsDevisPage() {
   const [clientEmails, setClientEmails] = useState<Set<string>>(new Set())
   const [q, setQ] = useState('')
   const [filt, setFilt] = useState<'tous' | typeof STATUTS[number]>('tous')
+  const [view, setView] = useState<'liste' | 'kanban'>('liste')
+  const [dragId, setDragId] = useState<string | null>(null)
 
   const load = () => devisService.getAll().then(setDevis).catch(() => {})
   useEffect(() => {
@@ -30,10 +32,14 @@ export default function CmsDevisPage() {
   }, [])
 
   const estClient = (email: string) => clientEmails.has((email || '').trim().toLowerCase())
-  const filtered = devis.filter(d =>
-    (filt === 'tous' || d.statut === filt) &&
-    (!q || [d.nom, d.email, d.service].some(v => v?.toLowerCase().includes(q.toLowerCase())))
-  )
+  const byQuery = devis.filter(d => !q || [d.nom, d.email, d.service].some(v => v?.toLowerCase().includes(q.toLowerCase())))
+  const filtered = byQuery.filter(d => filt === 'tous' || d.statut === filt)
+
+  // Glisser-déposer kanban : déplacer une carte = changer son statut
+  const onDrop = (statut: typeof STATUTS[number]) => {
+    if (dragId) updateStatut(dragId, statut)
+    setDragId(null)
+  }
 
   const markRead = async (d: Devis) => {
     if (!d.lu) { await devisService.update(d.id, { lu: true }); load() }
@@ -76,29 +82,84 @@ export default function CmsDevisPage() {
   return (
     <div>
       {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Devis</h1>
-        <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>
-          {devis.length} demande(s) · {nonLus > 0 && <span style={{ color: '#F59E0B', fontWeight: 600 }}>{nonLus} non lu(s)</span>}
-          {nonLus === 0 && 'Tout lu'}
-        </p>
+      <div className="mb-5 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Devis</h1>
+          <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>
+            {devis.length} demande(s) · {nonLus > 0 && <span style={{ color: '#F59E0B', fontWeight: 600 }}>{nonLus} non lu(s)</span>}
+            {nonLus === 0 && 'Tout lu'}
+          </p>
+        </div>
+        {/* Bascule Liste / Kanban */}
+        <div className="flex rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid #E5E7EB' }}>
+          {(['liste', 'kanban'] as const).map(v => (
+            <button key={v} onClick={() => setView(v)}
+              className="px-3 py-1.5 text-xs font-medium capitalize transition-colors"
+              style={{ background: view === v ? '#0F172A' : '#fff', color: view === v ? '#fff' : '#6B7280' }}>
+              {v}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Filtres */}
       <div className="mb-4 flex flex-col sm:flex-row gap-2">
         <input value={q} onChange={e => setQ(e.target.value)} placeholder="Rechercher (nom, email, service)…"
           className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
-        <div className="flex flex-wrap gap-1.5">
-          {(['tous', ...STATUTS] as const).map(s => (
-            <button key={s} onClick={() => setFilt(s)}
-              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
-              style={{ background: filt === s ? '#0F172A' : '#fff', color: filt === s ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
-              {s === 'tous' ? 'Tous' : s}
-            </button>
-          ))}
-        </div>
+        {view === 'liste' && (
+          <div className="flex flex-wrap gap-1.5">
+            {(['tous', ...STATUTS] as const).map(s => (
+              <button key={s} onClick={() => setFilt(s)}
+                className="px-3 py-1.5 rounded-lg text-xs font-medium transition-colors"
+                style={{ background: filt === s ? '#0F172A' : '#fff', color: filt === s ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+                {s === 'tous' ? 'Tous' : s}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
+      {/* ── VUE KANBAN ── */}
+      {view === 'kanban' && (
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-start">
+          {STATUTS.map(col => {
+            const cards = byQuery.filter(d => d.statut === col)
+            return (
+              <div key={col}
+                onDragOver={e => e.preventDefault()}
+                onDrop={() => onDrop(col)}
+                className="rounded-xl p-2.5 min-h-[120px]"
+                style={{ background: '#F1F3F5', border: dragId ? '1px dashed #CBD5E1' : '1px solid transparent' }}>
+                <div className="flex items-center justify-between px-1.5 pb-2 mb-1">
+                  <span className="text-xs font-semibold capitalize" style={{ color: STATUT_COLORS[col] }}>{col}</span>
+                  <span className="text-[11px] font-medium px-1.5 rounded-full" style={{ background: '#fff', color: '#9CA3AF' }}>{cards.length}</span>
+                </div>
+                <div className="space-y-2">
+                  {cards.map(d => (
+                    <div key={d.id} draggable
+                      onDragStart={() => setDragId(d.id)} onDragEnd={() => setDragId(null)}
+                      onClick={() => { markRead(d); setView('liste') }}
+                      className="rounded-lg p-3 cursor-grab active:cursor-grabbing bg-white transition-shadow hover:shadow-sm"
+                      style={{ border: '1px solid #E9ECEF', borderLeft: `3px solid ${STATUT_COLORS[col]}` }}>
+                      <div className="flex items-center gap-1.5 mb-0.5">
+                        <p className="text-sm font-semibold truncate flex-1" style={{ color: '#111827' }}>{d.nom}</p>
+                        {!d.lu && <span className="h-2 w-2 rounded-full shrink-0" style={{ background: '#F59E0B' }} />}
+                      </div>
+                      {d.service && <p className="text-xs truncate" style={{ color: '#6B7280' }}>{d.service}</p>}
+                      <div className="flex items-center justify-between mt-1.5">
+                        <span className="text-[11px]" style={{ color: '#D1D5DB' }}>{new Date(d.created_at).toLocaleDateString('fr-FR')}</span>
+                        {estClient(d.email) && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#DCFCE7', color: '#16A34A' }}>client</span>}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {view === 'liste' && (
       <div className="grid lg:grid-cols-5 gap-4">
         {/* Liste */}
         <div className="lg:col-span-2 space-y-2">
@@ -231,6 +292,7 @@ export default function CmsDevisPage() {
           )}
         </div>
       </div>
+      )}
     </div>
   )
 }

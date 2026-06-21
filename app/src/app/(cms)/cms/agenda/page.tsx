@@ -18,8 +18,18 @@ const RDV_TYPES = [
   { icon: Video, label: 'Formation admin', duree: '1h – 2h', desc: 'Formation de livraison : le client devient autonome sur son site.' },
 ]
 
+type AgendaEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; location?: string; hangoutLink?: string; htmlLink?: string }
+type AgendaResult =
+  | { ok: true; events: AgendaEvent[] }
+  | { ok: false; reason: 'no_sa' | 'forbidden' | 'error'; saEmail?: string; calendarId?: string }
+
 export default function AgendaPage() {
   const [links, setLinks] = useState<AgendaLinks>(DEFAULT_LINKS)
+  const [rdv, setRdv] = useState<AgendaResult | null>(null)
+
+  useEffect(() => {
+    fetch('/api/cms/agenda').then(r => r.json()).then(setRdv).catch(() => setRdv({ ok: false, reason: 'error' }))
+  }, [])
 
   useEffect(() => {
     try {
@@ -64,6 +74,60 @@ export default function AgendaPage() {
 
   return (
     <div className="space-y-6">
+
+      {/* Prochains RDV (Google Calendar via compte de service) */}
+      <div className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <CalendarDays className="w-4 h-4" style={{ color: ORANGE }} />
+          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Prochains rendez-vous</h2>
+        </div>
+
+        {rdv === null && <p className="text-sm" style={{ color: '#9CA3AF' }}>Chargement…</p>}
+
+        {rdv?.ok && rdv.events.length === 0 && (
+          <p className="text-sm" style={{ color: '#9CA3AF' }}>Aucun RDV à venir dans ton agenda Google.</p>
+        )}
+
+        {rdv?.ok && rdv.events.length > 0 && (
+          <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+            {rdv.events.map(e => {
+              const d = new Date(e.start)
+              const dateLabel = e.allDay
+                ? d.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short' })
+                : d.toLocaleString('fr-FR', { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+              return (
+                <div key={e.id} className="flex items-center gap-3 py-2.5">
+                  <div className="w-1 h-8 rounded-full shrink-0" style={{ background: ORANGE }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>{e.title}</p>
+                    <p className="text-xs" style={{ color: '#9CA3AF' }}>{dateLabel}{e.location ? ` · ${e.location}` : ''}</p>
+                  </div>
+                  {e.hangoutLink && (
+                    <a href={e.hangoutLink} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1 text-xs font-semibold shrink-0" style={{ color: ORANGE }}>
+                      <Video className="w-3.5 h-3.5" /> Rejoindre
+                    </a>
+                  )}
+                </div>
+              )
+            })}
+          </div>
+        )}
+
+        {rdv && !rdv.ok && rdv.reason !== 'error' && (
+          <div className="rounded-lg p-4 text-sm" style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
+            <p className="font-semibold mb-1">Connexion à Google Calendar — 1 étape de ta part</p>
+            <p className="leading-relaxed">
+              Partage ton Google Agenda (lecture seule) avec l'adresse du compte de service ci-dessous, puis recharge la page :
+            </p>
+            {rdv.saEmail && <p className="mt-2 font-mono text-xs px-2 py-1.5 rounded" style={{ background: '#fff', color: '#111827', border: '1px solid #FDE68A' }}>{rdv.saEmail}</p>}
+            <p className="mt-2 text-xs">Google Agenda → Paramètres → ton agenda → « Partager avec des personnes » → ajoute cette adresse en « Afficher tous les détails ». (Vérifie aussi que l'API Calendar est activée côté Google Cloud.)</p>
+          </div>
+        )}
+
+        {rdv && !rdv.ok && rdv.reason === 'error' && (
+          <p className="text-sm" style={{ color: '#9CA3AF' }}>Agenda Google indisponible pour le moment. Tes outils de réservation ci-dessous restent fonctionnels.</p>
+        )}
+      </div>
 
       {/* Les 3 outils de réservation */}
       <div className="grid sm:grid-cols-3 gap-4">
