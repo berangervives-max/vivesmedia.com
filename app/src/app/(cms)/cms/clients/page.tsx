@@ -2,17 +2,26 @@
 import { useState, useEffect, useMemo } from 'react'
 import { clientsService } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List, Send, Building2, ArrowUpRight, Flame, CheckCircle2, Users, UserPlus } from 'lucide-react'
 import ClientDossier from '@/components/cms/ClientDossier'
 
 const STATUTS = ['prospect', 'actif', 'pause', 'termine'] as const
 const COLORS: Record<string, string> = { prospect: 'bg-blue-100 text-blue-700', actif: 'bg-green-100 text-green-700', pause: 'bg-orange-100 text-orange-700', termine: 'bg-gray-100 text-gray-500' }
 const EMPTY: Omit<Client, 'id' | 'created_at' | 'updated_at'> = { nom: '', email: '', telephone: '', entreprise: '', secteur: '', statut: 'prospect', notes: '', stripe_customer_id: '' }
-const PER = 40
+const ORANGE = '#F4521E'
 const WEBMAIL = ['gmail.', 'orange.fr', 'free.fr', 'wanadoo.fr', 'hotmail.', 'outlook.', 'live.', 'yahoo.', 'sfr.fr', 'laposte.net', 'icloud.', 'gmx.', 'aol.', 'bbox.fr', 'neuf.fr']
+
 const parseCommune = (n?: string) => (n?.match(/·\s*([^·]+?)\s*\(8\d{4}\)/) || [])[1] || ''
 const parseScore = (n?: string) => { const m = n?.match(/score\s+(\d+)\/10/i); return m ? parseInt(m[1]) : 0 }
 const emailKind = (e?: string) => { if (!e) return 'none'; const d = (e.split('@')[1] || '').toLowerCase(); return WEBMAIL.some(w => d.includes(w)) ? 'perso' : 'pro' }
+const isContacted = (c: Client) => !!c.notes?.includes('EMAIL ENVOYÉ')
+const hasContact = (c: Client) => !!(c.email || c.telephone)
+const normPhone = (t?: string) => (t || '').replace(/[\s.\-]/g, '').replace(/^\+33/, '0')
+const isMobile = (t?: string) => /^0[67]/.test(normPhone(t))
+// Couleur de priorité : client (vert) · à contacter (orange) · contacté (bleu) · sans coordonnées (gris)
+const priorityColor = (c: Client) => c.statut !== 'prospect' ? '#16A34A' : isContacted(c) ? '#2563EB' : hasContact(c) ? ORANGE : '#CBD5E1'
+
+type Segment = 'tous' | 'prospects' | 'a_contacter' | 'contactes' | 'clients' | 'sans_coord'
 
 export default function CmsClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
@@ -21,14 +30,16 @@ export default function CmsClientsPage() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [viewing, setViewing] = useState<Client | null>(null)
-  const [segment, setSegment] = useState<'tous' | 'prospects' | 'clients'>('tous')
+  const [segment, setSegment] = useState<Segment>('tous')
   const [secteurFilt, setSecteurFilt] = useState('tous')
-  const [sort, setSort] = useState<'nom' | 'score' | 'recent'>('recent')
+  const [sort, setSort] = useState<'nom' | 'score' | 'recent'>('score')
+  const [view, setView] = useState<'cards' | 'list'>('cards')
   const [page, setPage] = useState(0)
+  const PER = view === 'cards' ? 24 : 50
 
   const load = () => clientsService.getAll().then(setClients).catch(() => {})
   useEffect(() => { load() }, [])
-  useEffect(() => { setPage(0) }, [segment, secteurFilt, search, sort])
+  useEffect(() => { setPage(0) }, [segment, secteurFilt, search, sort, view])
 
   const open = (c?: Client) => { setEditing(c?.id || 'new'); setForm(c ? { nom: c.nom, email: c.email, telephone: c.telephone || '', entreprise: c.entreprise || '', secteur: c.secteur || '', statut: c.statut, notes: c.notes || '', stripe_customer_id: c.stripe_customer_id || '' } : { ...EMPTY }) }
   const save = async (e: React.FormEvent) => {
@@ -37,7 +48,7 @@ export default function CmsClientsPage() {
       if (editing === 'new') await clientsService.create(form)
       else if (editing) await clientsService.update(editing, form)
       setEditing(null); load()
-    } catch (err: any) { alert(err.message) }
+    } catch (err) { alert(err instanceof Error ? err.message : 'Erreur') }
     finally { setSaving(false) }
   }
   const del = async (id: string) => { if (!confirm('Supprimer ce client ?')) return; await clientsService.delete(id); load() }
@@ -46,28 +57,40 @@ export default function CmsClientsPage() {
     tous: clients.length,
     prospects: clients.filter(c => c.statut === 'prospect').length,
     clients: clients.filter(c => c.statut !== 'prospect').length,
+    a_contacter: clients.filter(c => c.statut === 'prospect' && hasContact(c) && !isContacted(c)).length,
+    contactes: clients.filter(c => isContacted(c)).length,
+    sans_coord: clients.filter(c => c.statut === 'prospect' && !hasContact(c)).length,
   }), [clients])
 
   const secteurs = useMemo(() => Array.from(new Set(clients.map(c => c.secteur).filter(Boolean))).sort() as string[], [clients])
 
+  const matchSegment = (c: Client) => {
+    switch (segment) {
+      case 'prospects': return c.statut === 'prospect'
+      case 'clients': return c.statut !== 'prospect'
+      case 'a_contacter': return c.statut === 'prospect' && hasContact(c) && !isContacted(c)
+      case 'contactes': return isContacted(c)
+      case 'sans_coord': return c.statut === 'prospect' && !hasContact(c)
+      default: return true
+    }
+  }
+
   const filtered = useMemo(() => {
-    let list = clients.filter(c =>
-      (segment === 'tous' || (segment === 'prospects' ? c.statut === 'prospect' : c.statut !== 'prospect')) &&
+    const q = search.toLowerCase()
+    const list = clients.filter(c => matchSegment(c) &&
       (secteurFilt === 'tous' || c.secteur === secteurFilt) &&
-      [c.nom, c.email, c.entreprise, c.notes].some(v => v?.toLowerCase().includes(search.toLowerCase()))
-    )
-    list = [...list].sort((a, b) =>
+      [c.nom, c.email, c.entreprise, c.notes].some(v => v?.toLowerCase().includes(q)))
+    return [...list].sort((a, b) =>
       sort === 'nom' ? a.nom.localeCompare(b.nom)
-        : sort === 'score' ? parseScore(b.notes) - parseScore(a.notes)
-        : (b.created_at || '').localeCompare(a.created_at || '')
-    )
-    return list
+        : sort === 'score' ? (parseScore(b.notes) - parseScore(a.notes)) || (b.created_at || '').localeCompare(a.created_at || '')
+          : (b.created_at || '').localeCompare(a.created_at || ''))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clients, segment, secteurFilt, search, sort])
 
   const pages = Math.max(1, Math.ceil(filtered.length / PER))
   const paged = filtered.slice(page * PER, page * PER + PER)
 
-  const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors"
+  const inputCls = 'w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors'
   const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
 
   if (viewing) return <ClientDossier client={viewing} onBack={() => { setViewing(null); load() }} />
@@ -98,126 +121,218 @@ export default function CmsClientsPage() {
           <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={4} className={`${inputCls} resize-none`} style={inputStyle} />
         </div>
         <div className="flex gap-3 pt-2">
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90" style={{ background: '#F4521E' }}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
+          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90" style={{ background: ORANGE }}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
           <button type="button" onClick={() => setEditing(null)} className="px-5 py-2 rounded-lg text-sm" style={{ border: '1px solid #E5E7EB', color: '#6B7280', background: '#fff' }}>Annuler</button>
         </div>
       </form>
     </div>
   )
 
+  const kpis = [
+    { key: 'a_contacter' as Segment, label: 'À contacter', value: counts.a_contacter, icon: Flame, color: ORANGE, hint: 'joignables, pas encore relancés' },
+    { key: 'contactes' as Segment, label: 'Contactés', value: counts.contactes, icon: CheckCircle2, color: '#2563EB', hint: 'un email a été envoyé' },
+    { key: 'clients' as Segment, label: 'Clients', value: counts.clients, icon: Users, color: '#16A34A', hint: 'convertis' },
+    { key: 'tous' as Segment, label: 'Total base', value: counts.tous, icon: UserPlus, color: '#64748B', hint: 'prospects + clients' },
+  ]
+  const chips: { key: Segment; label: string; n: number }[] = [
+    { key: 'tous', label: 'Tous', n: counts.tous },
+    { key: 'prospects', label: 'Prospects', n: counts.prospects },
+    { key: 'a_contacter', label: 'À contacter', n: counts.a_contacter },
+    { key: 'contactes', label: 'Contactés', n: counts.contactes },
+    { key: 'clients', label: 'Clients', n: counts.clients },
+    { key: 'sans_coord', label: 'Sans coordonnées', n: counts.sans_coord },
+  ]
+
   return (
     <div>
       {/* Header */}
-      <div className="mb-4 flex items-center justify-between">
+      <div className="mb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Clients & Prospects</h1>
           <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>{counts.clients} client(s) · {counts.prospects} prospect(s)</p>
         </div>
-        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: '#F4521E' }}>
+        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: ORANGE }}>
           <Plus className="w-4 h-4" /> Nouveau
         </button>
       </div>
 
-      {/* Segments */}
-      <div className="flex gap-2 mb-3">
-        {([['tous', 'Tous', counts.tous], ['prospects', 'Prospects', counts.prospects], ['clients', 'Clients', counts.clients]] as const).map(([k, label, n]) => (
-          <button key={k} onClick={() => setSegment(k)}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2"
-            style={{ background: segment === k ? '#0F172A' : '#fff', color: segment === k ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
-            {label} <span className="text-[11px] px-1.5 rounded-full" style={{ background: segment === k ? 'rgba(255,255,255,.2)' : '#F1F5F9' }}>{n}</span>
+      {/* Pipeline (KPI cliquables) */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        {kpis.map(k => {
+          const on = segment === k.key
+          return (
+            <button key={k.key} onClick={() => setSegment(k.key)} className="text-left rounded-xl p-4 transition-all"
+              style={{ background: '#fff', border: `1px solid ${on ? k.color : '#E9ECEF'}`, boxShadow: on ? `0 0 0 1px ${k.color}` : 'none' }}>
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-xs" style={{ color: '#9CA3AF' }}>{k.label}</span>
+                <k.icon className="w-4 h-4" style={{ color: k.color }} />
+              </div>
+              <p className="text-2xl font-bold leading-none" style={{ color: k.color }}>{k.value}</p>
+              <p className="text-[11px] mt-1.5" style={{ color: '#9CA3AF' }}>{k.hint}</p>
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Filtres : chips + recherche + secteur + tri + vue */}
+      <div className="flex flex-wrap items-center gap-2 mb-3">
+        {chips.map(c => (
+          <button key={c.key} onClick={() => setSegment(c.key)}
+            className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
+            style={{ background: segment === c.key ? '#0F172A' : '#fff', color: segment === c.key ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+            {c.label} <span className="text-[10px] px-1.5 rounded-full" style={{ background: segment === c.key ? 'rgba(255,255,255,.2)' : '#F1F5F9' }}>{c.n}</span>
           </button>
         ))}
       </div>
-
-      {/* Filtres : recherche + secteur + tri */}
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#9CA3AF' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher (nom, ville, email, secteur…)"
-            className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
+            className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none" style={inputStyle} />
         </div>
-        <select value={secteurFilt} onChange={e => setSecteurFilt(e.target.value)} className="px-3 py-2 rounded-lg text-sm outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }}>
+        <select value={secteurFilt} onChange={e => setSecteurFilt(e.target.value)} className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
           <option value="tous">Tous secteurs</option>
           {secteurs.map(s => <option key={s} value={s}>{s}</option>)}
         </select>
-        <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} className="px-3 py-2 rounded-lg text-sm outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }}>
-          <option value="recent">Plus récents</option>
+        <select value={sort} onChange={e => setSort(e.target.value as typeof sort)} className="px-3 py-2 rounded-lg text-sm outline-none" style={inputStyle}>
           <option value="score">Meilleur score</option>
+          <option value="recent">Plus récents</option>
           <option value="nom">Nom (A-Z)</option>
         </select>
+        <div className="flex rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid #E5E7EB' }}>
+          {([['cards', LayoutGrid], ['list', List]] as const).map(([v, Icon]) => (
+            <button key={v} onClick={() => setView(v)} className="px-3 py-2" title={v === 'cards' ? 'Cartes' : 'Liste'}
+              style={{ background: view === v ? '#0F172A' : '#fff', color: view === v ? '#fff' : '#9CA3AF' }}>
+              <Icon className="w-4 h-4" />
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Table — lignes cliquables */}
-      <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-        <table className="w-full text-sm">
-          <thead>
-            <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F9FAFB' }}>
-              {['Nom', 'Secteur', 'Contact', 'Statut', 'Score', ''].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#9CA3AF' }}>{h}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {paged.length === 0 && <tr><td colSpan={6} className="text-center py-12 text-sm" style={{ color: '#9CA3AF' }}>Aucun résultat</td></tr>}
-            {paged.map((c, i) => {
-              const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email)
-              return (
-                <tr key={c.id} onClick={() => setViewing(c)} className="cursor-pointer"
-                  style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none' }}
-                  onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FAFAFA'}
-                  onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: '#F4521E' }}>{c.nom.charAt(0).toUpperCase()}</div>
-                      <div className="min-w-0">
-                        <p className="font-medium truncate" style={{ color: '#111827' }}>{c.nom}</p>
-                        {commune && <p className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</p>}
+      {paged.length === 0 && (
+        <div className="text-center py-16 rounded-xl text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun résultat pour ce filtre.</div>
+      )}
+
+      {/* Vue CARTES */}
+      {view === 'cards' && paged.length > 0 && (
+        <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {paged.map(c => {
+            const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c)
+            return (
+              <div key={c.id} onClick={() => setViewing(c)} className="group relative rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-md"
+                style={{ background: '#fff', border: '1px solid #E9ECEF', borderLeft: `3px solid ${prio}` }}>
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: ORANGE }}>{c.nom.charAt(0).toUpperCase()}</div>
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold truncate" style={{ color: '#111827' }}>{c.nom}</p>
+                    <p className="text-xs truncate" style={{ color: '#9CA3AF' }}>{c.entreprise || c.secteur || '—'}</p>
+                  </div>
+                  {score > 0 && <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: score >= 8 ? 'rgba(244,82,30,.1)' : '#F1F5F9', color: score >= 8 ? ORANGE : '#94A3B8' }}>{score}/10</span>}
+                </div>
+                <div className="flex items-center gap-2 mt-3 text-xs flex-wrap" style={{ color: '#6B7280' }}>
+                  {c.secteur && <span className="flex items-center gap-1"><Building2 className="w-3 h-3" />{c.secteur}</span>}
+                  {commune && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{commune}</span>}
+                </div>
+                <div className="mt-3 space-y-1 text-xs">
+                  {c.telephone ? (
+                    <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: '#374151' }}>
+                      <Phone className="w-3.5 h-3.5" style={{ color: '#16A34A' }} /> {c.telephone}
+                      <span className="text-[9px] px-1 rounded" style={{ background: '#F1F5F9', color: '#64748B' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span>
+                    </a>
+                  ) : null}
+                  {c.email ? (
+                    <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline truncate" style={{ color: '#374151' }}>
+                      <Mail className="w-3.5 h-3.5" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /> <span className="truncate">{c.email}</span>
+                    </a>
+                  ) : null}
+                  {!hasContact(c) && <span className="flex items-center gap-1.5" style={{ color: '#B45309' }}><Search className="w-3.5 h-3.5" /> coordonnées à trouver</span>}
+                </div>
+                <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid #F3F4F6' }}>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span>
+                    {isContacted(c) && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1" style={{ background: '#EFF6FF', color: '#2563EB' }}><Send className="w-2.5 h-2.5" />contacté</span>}
+                  </div>
+                  <span className="text-xs font-semibold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: ORANGE }}>Ouvrir <ArrowUpRight className="w-3.5 h-3.5" /></span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Vue LISTE */}
+      {view === 'list' && paged.length > 0 && (
+        <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F9FAFB' }}>
+                {['Nom', 'Secteur', 'Coordonnées', 'Suivi', 'Score', ''].map(h => (
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#9CA3AF' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {paged.map((c, i) => {
+                const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c)
+                return (
+                  <tr key={c.id} onClick={() => setViewing(c)} className="cursor-pointer"
+                    style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none', borderLeft: `3px solid ${prio}` }}
+                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FAFAFA'}
+                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: ORANGE }}>{c.nom.charAt(0).toUpperCase()}</div>
+                        <div className="min-w-0">
+                          <p className="font-medium truncate" style={{ color: '#111827' }}>{c.nom}</p>
+                          {commune && <p className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</p>}
+                        </div>
                       </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>{c.secteur || '—'}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5" style={{ color: ek === 'pro' ? '#16A34A' : ek === 'perso' ? '#D97706' : '#E5E7EB' }} />
-                      <Phone className="w-3.5 h-3.5" style={{ color: c.telephone ? '#16A34A' : '#E5E7EB' }} />
-                      {c.notes?.includes('EMAIL ENVOYÉ') && <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#FFF1EC', color: '#F4521E' }}>contacté</span>}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3"><span className={`text-xs px-2.5 py-1 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span></td>
-                  <td className="px-4 py-3">{score > 0 && <span className="text-xs font-bold" style={{ color: score >= 8 ? '#F4521E' : '#9CA3AF' }}>{score}/10</span>}</td>
-                  <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
-                    <div className="flex gap-1">
-                      <button onClick={() => open(c)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
-                        <Pencil className="w-3.5 h-3.5" />
-                      </button>
-                      <button onClick={() => del(c.id)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                        onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
-                        onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </div>
+                    </td>
+                    <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>{c.secteur || '—'}</td>
+                    <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>
+                      {c.telephone ? <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Phone className="w-3 h-3" style={{ color: '#16A34A' }} />{c.telephone}</a> : null}
+                      {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline truncate max-w-[200px]"><Mail className="w-3 h-3" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /><span className="truncate">{c.email}</span></a> : null}
+                      {!hasContact(c) && <span style={{ color: '#B45309' }}>à trouver</span>}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span>
+                      {isContacted(c) && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#EFF6FF', color: '#2563EB' }}>contacté</span>}
+                    </td>
+                    <td className="px-4 py-3">{score > 0 && <span className="text-xs font-bold" style={{ color: score >= 8 ? ORANGE : '#9CA3AF' }}>{score}/10</span>}</td>
+                    <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
+                      <div className="flex gap-1">
+                        <button onClick={() => open(c)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                          <Pencil className="w-3.5 h-3.5" />
+                        </button>
+                        <button onClick={() => del(c.id)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       {/* Pagination */}
-      {pages > 1 && (
-        <div className="flex items-center justify-between mt-4 text-sm">
-          <span style={{ color: '#9CA3AF' }}>{filtered.length} résultat(s) · page {page + 1}/{pages}</span>
+      <div className="flex items-center justify-between mt-4 text-sm">
+        <span style={{ color: '#9CA3AF' }}>{filtered.length} résultat(s){pages > 1 ? ` · page ${page + 1}/${pages}` : ''}</span>
+        {pages > 1 && (
           <div className="flex gap-2">
             <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid #E5E7EB', color: '#374151' }}><ChevronLeft className="w-4 h-4" /></button>
             <button onClick={() => setPage(p => Math.min(pages - 1, p + 1))} disabled={page >= pages - 1} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid #E5E7EB', color: '#374151' }}><ChevronRight className="w-4 h-4" /></button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      <p className="text-xs mt-3" style={{ color: '#9CA3AF' }}>💡 Clique sur une ligne pour ouvrir la fiche (analyse, appel, SMS, email personnalisé).</p>
+      <p className="text-xs mt-3" style={{ color: '#9CA3AF' }}>💡 Clique une carte pour ouvrir la fiche (analyse, appel, SMS, email perso + suivi). La barre colorée à gauche = <span style={{ color: ORANGE }}>à contacter</span> · <span style={{ color: '#2563EB' }}>contacté</span> · <span style={{ color: '#16A34A' }}>client</span> · <span style={{ color: '#94A3B8' }}>sans coordonnées</span>.</p>
     </div>
   )
 }
