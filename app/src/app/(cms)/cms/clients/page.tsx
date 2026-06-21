@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { clientsService } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List, Send, Building2, ArrowUpRight, Flame, CheckCircle2, Users, UserPlus } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List, Send, ArrowUpRight, Flame, CheckCircle2, Users, UserPlus } from 'lucide-react'
 import ClientDossier from '@/components/cms/ClientDossier'
 
 const STATUTS = ['prospect', 'actif', 'pause', 'termine'] as const
@@ -18,8 +18,33 @@ const isContacted = (c: Client) => !!c.notes?.includes('EMAIL ENVOYÉ')
 const hasContact = (c: Client) => !!(c.email || c.telephone)
 const normPhone = (t?: string) => (t || '').replace(/[\s.\-]/g, '').replace(/^\+33/, '0')
 const isMobile = (t?: string) => /^0[67]/.test(normPhone(t))
-// Couleur de priorité : client (vert) · à contacter (orange) · contacté (bleu) · sans coordonnées (gris)
+// Couleur de priorité (barre gauche) : client (vert) · à contacter (orange) · contacté (bleu) · sans coordonnées (gris)
 const priorityColor = (c: Client) => c.statut !== 'prospect' ? '#16A34A' : isContacted(c) ? '#2563EB' : hasContact(c) ? ORANGE : '#CBD5E1'
+
+// ── Code couleur par catégorie de secteur (avatar + puce secteur) ──
+const CAT_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
+  food: { bg: '#FEF3C7', fg: '#B45309', label: 'Restauration & alimentation' },
+  beaute: { bg: '#FCE7F3', fg: '#BE185D', label: 'Beauté & bien-être' },
+  sante: { bg: '#CCFBF1', fg: '#0F766E', label: 'Santé' },
+  btp: { bg: '#DBEAFE', fg: '#1D4ED8', label: 'Artisanat & BTP' },
+  auto: { bg: '#E0E7FF', fg: '#4338CA', label: 'Automobile' },
+  commerce: { bg: '#EDE9FE', fg: '#6D28D9', label: 'Commerce' },
+  pro: { bg: '#D1FAE5', fg: '#047857', label: 'Services pro' },
+  tourisme: { bg: '#CFFAFE', fg: '#0E7490', label: 'Tourisme' },
+  autre: { bg: '#F1F5F9', fg: '#475569', label: 'Autre' },
+}
+const SECTOR_CAT: Record<string, keyof typeof CAT_STYLE> = {
+  restaurant: 'food', 'restauration rapide': 'food', 'bar / café': 'food', pizzeria: 'food', traiteur: 'food', boulangerie: 'food', 'pâtisserie': 'food', boucherie: 'food', caviste: 'food', 'épicerie fine': 'food',
+  coiffure: 'beaute', 'institut de beauté': 'beaute', 'institut de beaute': 'beaute', 'spa / bien-être': 'beaute', 'salle de sport': 'beaute',
+  dentiste: 'sante', opticien: 'sante', pharmacie: 'sante', 'kinésithérapeute': 'sante', kinesitherapeute: 'sante', osteopathe: 'sante',
+  'plomberie / chauffage': 'btp', plombier: 'btp', 'électricité': 'btp', electricien: 'btp', menuiserie: 'btp', peinture: 'btp', peintre: 'btp', 'carrelage / sols': 'btp', carreleur: 'btp', 'plâtrerie': 'btp', 'construction maison': 'btp', macon: 'btp', paysagiste: 'btp', isolation: 'btp',
+  'garage automobile': 'auto', 'vente auto': 'auto', moto: 'auto', 'équipement auto': 'auto', 'personnalisation auto': 'auto',
+  'prêt-à-porter': 'commerce', fleuriste: 'commerce', 'magasin de meubles': 'commerce', 'commerce de détail': 'commerce', 'électroménager / hifi': 'commerce',
+  architecte: 'pro', 'avocat / juridique': 'pro', avocat: 'pro', 'expert-comptable': 'pro', 'conseil en gestion': 'pro', 'agence de pub': 'pro', photographe: 'pro', 'design / déco': 'pro', 'agence immobilière': 'pro', 'agence immobiliere': 'pro', 'courtier assurance': 'pro',
+  'hôtel': 'tourisme', 'gîte / chambres d’hôtes': 'tourisme', 'agence de voyage': 'tourisme',
+  'auto-école': 'autre', 'auto ecole': 'autre', formation: 'autre', 'pressing / blanchisserie': 'autre',
+}
+const sectorStyle = (s?: string) => CAT_STYLE[SECTOR_CAT[s || ''] || 'autre']
 
 type Segment = 'tous' | 'prospects' | 'a_contacter' | 'contactes' | 'clients' | 'sans_coord'
 
@@ -209,6 +234,21 @@ export default function CmsClientsPage() {
         </div>
       </div>
 
+      {/* Légende code couleur */}
+      <div className="rounded-xl p-3 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <span className="font-semibold" style={{ color: '#6B7280' }}>Priorité (barre gauche) :</span>
+        {([['à contacter', ORANGE], ['contacté', '#2563EB'], ['client', '#16A34A'], ['sans coordonnées', '#CBD5E1']] as [string, string][]).map(([l, col]) => (
+          <span key={l} className="flex items-center gap-1" style={{ color: '#6B7280' }}><span className="w-2.5 h-2.5 rounded-sm" style={{ background: col }} />{l}</span>
+        ))}
+        <span className="w-px h-4" style={{ background: '#E5E7EB' }} />
+        <span className="font-semibold" style={{ color: '#6B7280' }}>Secteurs :</span>
+        {Object.values(CAT_STYLE).filter(c => c.label !== 'Autre').map(c => (
+          <span key={c.label} className="px-1.5 py-0.5 rounded-full font-medium" style={{ background: c.bg, color: c.fg }}>{c.label}</span>
+        ))}
+        <span className="w-px h-4" style={{ background: '#E5E7EB' }} />
+        <span style={{ color: '#6B7280' }}>Contact : <b style={{ color: '#16A34A' }}>mobile/pro</b> · <b style={{ color: '#D97706' }}>fixe/perso</b></span>
+      </div>
+
       {paged.length === 0 && (
         <div className="text-center py-16 rounded-xl text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun résultat pour ce filtre.</div>
       )}
@@ -217,21 +257,21 @@ export default function CmsClientsPage() {
       {view === 'cards' && paged.length > 0 && (
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {paged.map(c => {
-            const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c)
+            const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c); const ss = sectorStyle(c.secteur)
             return (
               <div key={c.id} onClick={() => setViewing(c)} className="group relative rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-md"
                 style={{ background: '#fff', border: '1px solid #E9ECEF', borderLeft: `3px solid ${prio}` }}>
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: ORANGE }}>{c.nom.charAt(0).toUpperCase()}</div>
+                  <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold truncate" style={{ color: '#111827' }}>{c.nom}</p>
-                    <p className="text-xs truncate" style={{ color: '#9CA3AF' }}>{c.entreprise || c.secteur || '—'}</p>
+                    <p className="text-xs truncate" style={{ color: '#9CA3AF' }}>{c.entreprise || '—'}</p>
                   </div>
                   {score > 0 && <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: score >= 8 ? 'rgba(244,82,30,.1)' : '#F1F5F9', color: score >= 8 ? ORANGE : '#94A3B8' }}>{score}/10</span>}
                 </div>
-                <div className="flex items-center gap-2 mt-3 text-xs flex-wrap" style={{ color: '#6B7280' }}>
-                  {c.secteur && <span className="flex items-center gap-1"><Building2 className="w-3 h-3" />{c.secteur}</span>}
-                  {commune && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{commune}</span>}
+                <div className="flex items-center gap-2 mt-3 text-xs flex-wrap">
+                  {c.secteur && <span className="px-2 py-0.5 rounded-full font-medium" style={{ background: ss.bg, color: ss.fg }}>{c.secteur}</span>}
+                  {commune && <span className="flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</span>}
                 </div>
                 <div className="mt-3 space-y-1 text-xs">
                   {c.telephone ? (
@@ -241,8 +281,9 @@ export default function CmsClientsPage() {
                     </a>
                   ) : null}
                   {c.email ? (
-                    <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline truncate" style={{ color: '#374151' }}>
-                      <Mail className="w-3.5 h-3.5" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /> <span className="truncate">{c.email}</span>
+                    <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: '#374151' }}>
+                      <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /> <span className="truncate">{c.email}</span>
+                      <span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{ek === 'pro' ? 'pro' : 'perso'}</span>
                     </a>
                   ) : null}
                   {!hasContact(c) && <span className="flex items-center gap-1.5" style={{ color: '#B45309' }}><Search className="w-3.5 h-3.5" /> coordonnées à trouver</span>}
@@ -273,7 +314,7 @@ export default function CmsClientsPage() {
             </thead>
             <tbody>
               {paged.map((c, i) => {
-                const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c)
+                const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c); const ss = sectorStyle(c.secteur)
                 return (
                   <tr key={c.id} onClick={() => setViewing(c)} className="cursor-pointer"
                     style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none', borderLeft: `3px solid ${prio}` }}
@@ -281,17 +322,17 @@ export default function CmsClientsPage() {
                     onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: ORANGE }}>{c.nom.charAt(0).toUpperCase()}</div>
+                        <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                         <div className="min-w-0">
                           <p className="font-medium truncate" style={{ color: '#111827' }}>{c.nom}</p>
                           {commune && <p className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>{c.secteur || '—'}</td>
+                    <td className="px-4 py-3">{c.secteur ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: ss.bg, color: ss.fg }}>{c.secteur}</span> : <span className="text-xs" style={{ color: '#9CA3AF' }}>—</span>}</td>
                     <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>
-                      {c.telephone ? <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Phone className="w-3 h-3" style={{ color: '#16A34A' }} />{c.telephone}</a> : null}
-                      {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline truncate max-w-[200px]"><Mail className="w-3 h-3" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /><span className="truncate">{c.email}</span></a> : null}
+                      {c.telephone ? <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Phone className="w-3 h-3" style={{ color: isMobile(c.telephone) ? '#16A34A' : '#64748B' }} />{c.telephone}<span className="text-[9px] px-1 rounded" style={{ background: '#F1F5F9', color: '#64748B' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span></a> : null}
+                      {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Mail className="w-3 h-3 shrink-0" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /><span className="truncate max-w-[170px]">{c.email}</span><span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{ek === 'pro' ? 'pro' : 'perso'}</span></a> : null}
                       {!hasContact(c) && <span style={{ color: '#B45309' }}>à trouver</span>}
                     </td>
                     <td className="px-4 py-3">
