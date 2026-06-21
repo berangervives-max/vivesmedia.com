@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { crmService, clientsService, type ClientDossier as Dossier } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, type LucideIcon } from 'lucide-react'
+import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, Trash2, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 // Métadonnées d'affichage de la timeline de suivi
@@ -284,9 +284,15 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
 
   return (
     <div>
-      <button onClick={onBack} className="text-xs mb-3 flex items-center gap-1" style={{ color: '#9CA3AF' }}>
-        <ArrowLeft className="w-3.5 h-3.5" /> Retour aux clients
-      </button>
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={onBack} className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}>
+          <ArrowLeft className="w-3.5 h-3.5" /> Retour aux clients
+        </button>
+        <button onClick={async () => { if (!confirm(`Supprimer définitivement la fiche « ${client.nom} » ? Action irréversible.`)) return; try { await clientsService.delete(client.id); onBack() } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') } }}
+          className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ border: '1px solid #FECACA', color: '#DC2626' }}>
+          <Trash2 className="w-3.5 h-3.5" /> Supprimer la fiche
+        </button>
+      </div>
 
       {/* Entête client */}
       <div className="rounded-xl p-6 mb-4" style={card}>

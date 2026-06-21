@@ -60,6 +60,8 @@ export default function CmsClientsPage() {
   const [sort, setSort] = useState<'nom' | 'score' | 'recent'>('score')
   const [view, setView] = useState<'cards' | 'list'>('cards')
   const [page, setPage] = useState(0)
+  const [selMode, setSelMode] = useState(false)
+  const [selected, setSelected] = useState<Set<string>>(new Set())
   const PER = view === 'cards' ? 24 : 50
 
   const load = () => clientsService.getAll().then(setClients).catch(() => {})
@@ -77,6 +79,14 @@ export default function CmsClientsPage() {
     finally { setSaving(false) }
   }
   const del = async (id: string) => { if (!confirm('Supprimer ce client ?')) return; await clientsService.delete(id); load() }
+  const toggleSel = (id: string) => setSelected(p => { const n = new Set(p); if (n.has(id)) n.delete(id); else n.add(id); return n })
+  const delSelected = async () => {
+    if (selected.size === 0) return
+    if (!confirm(`Supprimer définitivement ${selected.size} fiche(s) ? Action irréversible.`)) return
+    for (const id of selected) { try { await clientsService.delete(id) } catch { /* ignore */ } }
+    setSelected(new Set()); setSelMode(false); load()
+  }
+  const rowClick = (c: Client) => { if (selMode) toggleSel(c.id); else setViewing(c) }
 
   const counts = useMemo(() => ({
     tous: clients.length,
@@ -176,9 +186,19 @@ export default function CmsClientsPage() {
           <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Clients & Prospects</h1>
           <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>{counts.clients} client(s) · {counts.prospects} prospect(s)</p>
         </div>
-        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: ORANGE }}>
-          <Plus className="w-4 h-4" /> Nouveau
-        </button>
+        <div className="flex items-center gap-2 flex-wrap">
+          {selMode && selected.size > 0 && (
+            <button onClick={delSelected} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: '#DC2626' }}>
+              <Trash2 className="w-4 h-4" /> Supprimer ({selected.size})
+            </button>
+          )}
+          <button onClick={() => { setSelMode(m => !m); setSelected(new Set()) }} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: selMode ? '#DC2626' : '#6B7280', background: '#fff' }}>
+            {selMode ? 'Annuler' : 'Sélectionner'}
+          </button>
+          <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: ORANGE }}>
+            <Plus className="w-4 h-4" /> Nouveau
+          </button>
+        </div>
       </div>
 
       {/* Pipeline (KPI cliquables) */}
@@ -258,9 +278,21 @@ export default function CmsClientsPage() {
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-3">
           {paged.map(c => {
             const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c); const ss = sectorStyle(c.secteur)
+            const sel = selected.has(c.id)
             return (
-              <div key={c.id} onClick={() => setViewing(c)} className="group relative rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-md"
-                style={{ background: '#fff', border: '1px solid #E9ECEF', borderLeft: `3px solid ${prio}` }}>
+              <div key={c.id} onClick={() => rowClick(c)} className="group relative rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-md"
+                style={{ background: sel ? '#FFF7F5' : '#fff', border: `1px solid ${sel ? ORANGE : '#E9ECEF'}`, borderLeft: `3px solid ${prio}` }}>
+                {/* Sélection (mode lot) + suppression rapide */}
+                {selMode && (
+                  <span className="absolute top-2 left-2 w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold" style={{ background: sel ? ORANGE : '#fff', border: `1.5px solid ${sel ? ORANGE : '#CBD5E1'}`, color: '#fff' }}>{sel ? '✓' : ''}</span>
+                )}
+                {!selMode && (
+                  <button onClick={e => { e.stopPropagation(); del(c.id) }} title="Supprimer" className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#9CA3AF' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                   <div className="min-w-0 flex-1">
@@ -316,12 +348,13 @@ export default function CmsClientsPage() {
               {paged.map((c, i) => {
                 const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c); const ss = sectorStyle(c.secteur)
                 return (
-                  <tr key={c.id} onClick={() => setViewing(c)} className="cursor-pointer"
-                    style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none', borderLeft: `3px solid ${prio}` }}
-                    onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FAFAFA'}
-                    onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
+                  <tr key={c.id} onClick={() => rowClick(c)} className="cursor-pointer"
+                    style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none', borderLeft: `3px solid ${prio}`, background: selected.has(c.id) ? '#FFF7F5' : 'transparent' }}
+                    onMouseEnter={e => { if (!selected.has(c.id)) (e.currentTarget as HTMLElement).style.background = '#FAFAFA' }}
+                    onMouseLeave={e => { if (!selected.has(c.id)) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
+                        {selMode && <span className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: selected.has(c.id) ? ORANGE : '#fff', border: `1.5px solid ${selected.has(c.id) ? ORANGE : '#CBD5E1'}`, color: '#fff' }}>{selected.has(c.id) ? '✓' : ''}</span>}
                         <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                         <div className="min-w-0">
                           <p className="font-medium truncate" style={{ color: '#111827' }}>{c.nom}</p>
