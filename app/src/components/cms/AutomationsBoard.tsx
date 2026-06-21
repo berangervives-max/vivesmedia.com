@@ -14,6 +14,11 @@ const CADENCE_STYLE: Record<string, { bg: string; c: string }> = {
   mensuel: { bg: '#FFFBEB', c: '#D97706' },
 }
 const fmt = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+const PROCHAINE: Record<string, string> = {
+  quotidien: 'chaque jour · 9h',
+  hebdo: 'chaque lundi',
+  mensuel: 'le 1er du mois',
+}
 
 export default function AutomationsBoard({ meta, lastRun, journal }: { meta: Meta[]; lastRun: Record<string, string>; journal: Log[] }) {
   const router = useRouter()
@@ -36,11 +41,16 @@ export default function AutomationsBoard({ meta, lastRun, journal }: { meta: Met
   return (
     <div className="space-y-6">
       {/* Bandeau */}
-      <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-        <Zap className="w-4 h-4 shrink-0" style={{ color: '#16A34A' }} />
-        <p className="text-sm" style={{ color: '#166534' }}>
-          <strong>{meta.length} automatisations actives</strong> — elles tournent toutes seules via le cron quotidien (quotidiennes chaque jour, hebdo le lundi, mensuelles le 1er). Tu peux en lancer une à la main avec « Exécuter ».
-        </p>
+      <div className="rounded-xl p-5 flex items-start gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+        <Zap className="w-5 h-5 shrink-0 mt-0.5" style={{ color: '#16A34A' }} />
+        <div>
+          <p className="text-sm font-bold" style={{ color: '#166534' }}>
+            ✅ {meta.length} automatisations — 100 % automatiques, rien à cliquer.
+          </p>
+          <p className="text-sm mt-1" style={{ color: '#166534' }}>
+            Elles s'exécutent <strong>toutes seules</strong> via le robot quotidien : les <strong>quotidiennes chaque jour à 9h</strong>, les <strong>hebdo le lundi</strong>, les <strong>mensuelles le 1er</strong>. Le bouton <strong>« Tester »</strong> sert juste à en lancer une <em>tout de suite</em> pour vérifier — il n'est jamais obligatoire.
+          </p>
+        </div>
       </div>
 
       {/* Groupes par onglet */}
@@ -65,14 +75,20 @@ export default function AutomationsBoard({ meta, lastRun, journal }: { meta: Met
                   </div>
                   <p className="text-sm font-bold mb-1" style={{ color: '#111827' }}>{a.label}</p>
                   <p className="text-xs leading-relaxed mb-3 flex-1" style={{ color: '#9CA3AF' }}>{a.desc}</p>
-                  <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid #F1F3F5' }}>
-                    <span className="text-[11px]" style={{ color: last ? '#16A34A' : '#9CA3AF' }}>{last ? fmt(last) : 'jamais exécutée'}</span>
-                    <button onClick={() => run(a.id)} disabled={busy === a.id}
-                      className="flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
-                      style={{ border: '1px solid #E5E7EB', color: st === 'ok' ? '#16A34A' : st === 'err' ? '#EF4444' : '#374151' }}>
-                      {busy === a.id ? <Loader2 className="w-3 h-3 animate-spin" /> : st === 'ok' ? <Check className="w-3 h-3" /> : st === 'err' ? <AlertCircle className="w-3 h-3" /> : <Play className="w-3 h-3" />}
-                      {busy === a.id ? '…' : st === 'ok' ? 'OK' : 'Exécuter'}
-                    </button>
+                  <div className="pt-2 space-y-1.5" style={{ borderTop: '1px solid #F1F3F5' }}>
+                    <p className="flex items-center gap-1.5 text-[11px] font-medium" style={{ color: '#16A34A' }}>
+                      <span className="relative flex h-1.5 w-1.5"><span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-60" style={{ background: '#16A34A' }} /><span className="relative inline-flex rounded-full h-1.5 w-1.5" style={{ background: '#16A34A' }} /></span>
+                      Auto · {PROCHAINE[a.cadence] || 'chaque jour'}
+                    </p>
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px]" style={{ color: '#9CA3AF' }}>{last ? `dernière : ${fmt(last)}` : 'pas encore exécutée'}</span>
+                      <button onClick={() => run(a.id)} disabled={busy === a.id} title="Test manuel immédiat — facultatif"
+                        className="flex items-center gap-1 text-[11px] font-medium px-2.5 py-1 rounded-md transition-colors disabled:opacity-50"
+                        style={{ border: '1px solid #E5E7EB', color: st === 'ok' ? '#16A34A' : st === 'err' ? '#EF4444' : '#9CA3AF' }}>
+                        {busy === a.id ? <Loader2 className="w-3 h-3 animate-spin" /> : st === 'ok' ? <Check className="w-3 h-3" /> : st === 'err' ? <AlertCircle className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                        {busy === a.id ? '…' : st === 'ok' ? 'OK' : 'Tester'}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )
