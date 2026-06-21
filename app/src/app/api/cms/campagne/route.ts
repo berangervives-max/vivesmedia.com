@@ -56,10 +56,13 @@ export async function POST(req: NextRequest) {
     }
 
     const html = campaignHtml(body)
+    // Identifiant de campagne (pour attribuer les ouvertures via les tags Resend)
+    const campaignId = `c${Date.now()}`
+    const tags = test ? undefined : [{ name: 'campaign', value: campaignId }]
     let sent = 0
 
     for (let i = 0; i < emails.length; i += BATCH_SIZE) {
-      const batch = emails.slice(i, i + BATCH_SIZE).map(to => ({ from: FROM, to, subject, html }))
+      const batch = emails.slice(i, i + BATCH_SIZE).map(to => ({ from: FROM, to, subject, html, tags }))
       const res = await fetch('https://api.resend.com/emails/batch', {
         method: 'POST',
         headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
@@ -70,6 +73,12 @@ export async function POST(req: NextRequest) {
         const err = await res.text()
         return NextResponse.json({ error: `Resend : ${err}`, sent }, { status: 502 })
       }
+    }
+
+    // Historique : on journalise l'envoi réel (pas les tests) dans automation_logs
+    if (!test) {
+      const adminSb = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+      await adminSb.from('automation_logs').insert({ type: 'campagne', payload: { id: campaignId, subject, sent, at: new Date().toISOString() } }).then(() => {}, () => {})
     }
 
     return NextResponse.json({ success: true, sent, test: !!test })

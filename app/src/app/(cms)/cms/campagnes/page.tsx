@@ -1,7 +1,10 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { newsletterService } from '@/services/supabase.service'
-import { Send, Users, Eye, Sparkles, Info } from 'lucide-react'
+import { createClient } from '@/lib/supabase'
+import { Send, Users, Eye, Sparkles, Info, MailOpen } from 'lucide-react'
+
+type CampLog = { id: string; subject: string; sent: number; at: string; opens: number }
 
 const ORANGE = '#F4521E'
 
@@ -20,6 +23,28 @@ export default function CampagnesPage() {
   const [testing, setTesting] = useState(false)
   const [result, setResult] = useState<{ ok: boolean; msg: string } | null>(null)
   const [vars, setVars] = useState<Record<string, string>>({})
+  const [history, setHistory] = useState<CampLog[]>([])
+
+  const loadHistory = () => {
+    const sb = createClient()
+    sb.from('automation_logs').select('type,payload,created_at').in('type', ['campagne', 'email_open'])
+      .order('created_at', { ascending: false }).limit(300)
+      .then(({ data }) => {
+        const rows = (data ?? []) as { type: string; payload: Record<string, unknown> | null; created_at: string }[]
+        const opens: Record<string, number> = {}
+        for (const r of rows) {
+          if (r.type !== 'email_open') continue
+          const c = r.payload?.campaign as string | undefined
+          if (c) opens[c] = (opens[c] || 0) + 1
+        }
+        setHistory(rows.filter(r => r.type === 'campagne').map(r => {
+          const p = r.payload || {}
+          const id = (p.id as string) || r.created_at
+          return { id, subject: (p.subject as string) || '(sans objet)', sent: (p.sent as number) || 0, at: (p.at as string) || r.created_at, opens: opens[id] || 0 }
+        }))
+      }, () => {})
+  }
+  useEffect(() => { loadHistory() }, [])
 
   // Variables {{x}} présentes dans l'objet ou le corps → champs à remplir
   const varNames = Array.from(new Set([...`${subject} ${body}`.matchAll(/\{\{(\w+)\}\}/g)].map(m => m[1])))
@@ -62,6 +87,7 @@ export default function CampagnesPage() {
       const data = await post(false)
       setResult({ ok: true, msg: `Campagne envoyée à ${data.sent} abonné(s) ✓` })
       setSubject(''); setBody(''); setVars({})
+      setTimeout(loadHistory, 800)
     } catch (err) {
       setResult({ ok: false, msg: err instanceof Error ? err.message : 'Erreur envoi' })
     } finally {
@@ -191,6 +217,34 @@ export default function CampagnesPage() {
           </div>
         </div>
       </div>
+
+      {/* Historique des campagnes */}
+      {history.length > 0 && (
+        <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <div className="flex items-center gap-2 mb-1">
+            <MailOpen className="w-4 h-4" style={{ color: ORANGE }} />
+            <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Historique des campagnes</h2>
+          </div>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Envois passés et taux d&apos;ouverture (si le webhook Resend est activé)</p>
+          <div className="divide-y" style={{ borderColor: '#F1F3F5' }}>
+            {history.map(c => {
+              const taux = c.sent > 0 ? Math.round((c.opens / c.sent) * 100) : 0
+              return (
+                <div key={c.id} className="flex items-center gap-4 py-3">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>{c.subject}</p>
+                    <p className="text-xs" style={{ color: '#9CA3AF' }}>{new Date(c.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} · {c.sent} destinataire{c.sent > 1 ? 's' : ''}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-bold" style={{ color: c.opens > 0 ? ORANGE : '#9CA3AF' }}>{c.opens} ouverture{c.opens > 1 ? 's' : ''}</p>
+                    {c.opens > 0 && <p className="text-[11px]" style={{ color: '#9CA3AF' }}>{taux}%</p>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
 
     </div>
   )
