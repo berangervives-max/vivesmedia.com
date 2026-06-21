@@ -2,7 +2,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { crmService, clientsService, type ClientDossier as Dossier } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin } from 'lucide-react'
+import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 const euro = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0)
@@ -26,30 +26,49 @@ function parseNotes(notes?: string) {
   return { commune, site }
 }
 
+// Classification téléphone (FR) : 06/07 = mobile (SMS possible), sinon fixe.
+const normPhone = (t?: string) => (t || '').replace(/[\s.\-]/g, '').replace(/^\+33/, '0')
+const isMobile = (t?: string) => /^0[67]/.test(normPhone(t))
+const phoneType = (t?: string) => !t ? '' : isMobile(t) ? 'mobile' : 'fixe'
+// Classification email : webmail grand public (perso) vs domaine propre (pro).
+const WEBMAIL = ['gmail.', 'orange.fr', 'free.fr', 'wanadoo.fr', 'hotmail.', 'outlook.', 'live.', 'yahoo.', 'sfr.fr', 'laposte.net', 'icloud.', 'gmx.', 'aol.', 'bbox.fr', 'neuf.fr', 'numericable']
+const emailType = (e?: string) => { if (!e) return ''; const d = (e.split('@')[1] || '').toLowerCase(); return WEBMAIL.some(w => d.includes(w)) ? 'perso' : 'pro' }
+// Téléphones additionnels stockés dans les notes (« Fixe: … · Mobile: … »)
+function parsePhones(notes?: string) {
+  const n = notes || ''
+  return { fixe: (n.match(/Fixe[:\s]+(0[1-9](?:[\s.\-]?\d{2}){4})/i) || [])[1] || '', mobile: (n.match(/Mobile[:\s]+(0[67](?:[\s.\-]?\d{2}){4})/i) || [])[1] || '' }
+}
+
 /** Modèles d'email personnalisés par prospect (B2B, conformes : identité + objet métier). */
+// Modèles « cold email » suivant les bonnes pratiques 2025/26 : court, centré sur
+// le prospect, objet personnalisé sans mots spam, UN seul CTA doux (une question),
+// preuve légère, texte simple, identité claire. Personnalisé par entreprise/secteur/ville.
 function templates(c: Client, commune: string) {
   const ent = c.entreprise || c.nom
   const sect = c.secteur || 'professionnel'
-  const lieu = commune ? ` de ${commune}` : ''
-  const sign = '\n\nBien à vous,\nBéranger Vives\nvivesmedia.com · contact@vivesmedia.com'
+  const lieu = commune ? ` à ${commune}` : ''
+  const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
   return {
     contact: {
       label: '1er contact',
-      subject: `${ent} — votre visibilité en ligne`,
-      body: `Bonjour,\n\nJe suis Béranger, de vivesmedia.com — je crée des sites web et améliore la visibilité Google des ${sect}s${lieu}.\n\nEn découvrant ${ent}, j'ai pensé qu'un site moderne (ou une refonte) associé à un bon référencement local pourrait vous amener davantage de clients qui cherchent un(e) ${sect} près de chez eux.\n\nSeriez-vous ouvert(e) à un échange de 10 minutes cette semaine ? Je vous montre concrètement le rendu possible, sans engagement.${sign}`,
+      subject: `${ent} sur Google`,
+      body: `Bonjour,\n\nJe cherchais des ${sect}s${lieu} et je suis tombé sur ${ent}.\n\nJe suis développeur web indépendant (vivesmedia.com) : j'aide des pros${lieu} à mieux ressortir sur Google et à transformer plus de visiteurs en clients, avec un site clair et rapide.\n\nSeriez-vous ouvert(e) à ce que je vous envoie 2-3 pistes concrètes pour ${ent} ? Ça ne vous engage à rien.${sign}`,
     },
     relance: {
       label: 'Relance',
-      subject: `Re : ${ent} — votre site web`,
-      body: `Bonjour,\n\nJe me permets de revenir vers vous concernant la création / refonte de votre site web. Avez-vous eu le temps d'y réfléchir ?\n\nJe reste disponible pour un échange rapide — même 10 minutes suffisent pour voir si ça a du sens pour ${ent}.${sign}`,
+      subject: `Re : ${ent} sur Google`,
+      body: `Bonjour,\n\nJe me permets un petit rappel — aucun souci si ce n'est pas le moment.\n\nSi gagner en visibilité pour ${ent} vous intéresse, répondez-moi simplement « oui » et je vous envoie mes idées.${sign}`,
     },
     rdv: {
       label: 'Proposer un RDV',
-      subject: `Un créneau pour échanger ?`,
-      body: `Bonjour,\n\nPour aller à l'essentiel, je vous propose un appel découverte de 15 minutes : on regarde ensemble votre présence en ligne et 2-3 pistes concrètes pour ${ent}.\n\nDites-moi vos disponibilités, je m'adapte.${sign}`,
+      subject: `15 min pour ${ent} ?`,
+      body: `Bonjour,\n\nPlutôt que de longs emails : on échange 15 minutes ? Je vous montre 2-3 choses simples pour que ${ent} attire plus de clients via son site et Google.\n\nDites-moi un créneau qui vous arrange, je m'adapte.${sign}`,
     },
   }
 }
+
+// Conseils cold email (affichés dans la fiche)
+const COLD_TIPS = 'Court (50-90 mots) · parle d\'EUX d\'abord · 1 seule question · pas de « gratuit/promo » dans l\'objet · relance après 3-4 jours (le mardi/mercredi 10h-11h convertit le mieux).'
 
 /** Dossier client 360° + poste de prospection (actions depuis la fiche). */
 export default function ClientDossier({ client, onBack }: { client: Client; onBack: () => void }) {
@@ -70,6 +89,14 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const mailto = `mailto:${client.email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   const copy = () => { navigator.clipboard?.writeText(`${subject}\n\n${body}`); setCopied(true); setTimeout(() => setCopied(false), 2500) }
   const markStatut = async (s: Client['statut']) => { setSavingStatut(true); try { await clientsService.update(client.id, { statut: s }); setStatut(s) } catch { /* */ } finally { setSavingStatut(false) } }
+
+  // Téléphones classés + cible SMS (mobiles uniquement)
+  const ph = useMemo(() => parsePhones(client.notes), [client.notes])
+  const mobileNum = isMobile(client.telephone) ? (client.telephone || '') : ph.mobile
+  const fixeNum = (client.telephone && !isMobile(client.telephone)) ? client.telephone : ph.fixe
+  const smsBody = `Bonjour, Béranger de vivesmedia.com — j'aide les ${client.secteur || 'pros'}${commune ? ` de ${commune}` : ''} à être plus visibles sur Google. Ouvert à un échange ? vivesmedia.com`
+  const smsHref = mobileNum ? `sms:${normPhone(mobileNum)}?body=${encodeURIComponent(smsBody)}` : ''
+  const emTag = emailType(client.email)
 
   const caFactures = (d?.factures ?? []).filter(f => f.statut === 'payee').reduce((s, f) => s + Number(f.montant_ttc || 0), 0)
   const caCommandes = (d?.commandes ?? []).filter(c => c.statut === 'paye').reduce((s, c) => s + Number(c.montant || 0), 0)
@@ -97,9 +124,25 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
             </div>
             <span className="ml-2"><Badge value={statut} map={STATUT_COLORS} /></span>
           </div>
-          <div className="flex flex-wrap gap-3 text-sm" style={{ color: '#6B7280' }}>
-            {client.email && <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 hover:underline"><Mail className="w-3.5 h-3.5" /> {client.email}</a>}
-            {client.telephone && <a href={`tel:${client.telephone}`} className="flex items-center gap-1.5 hover:underline"><Phone className="w-3.5 h-3.5" /> {client.telephone}</a>}
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-sm" style={{ color: '#6B7280' }}>
+            {client.email && (
+              <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 hover:underline">
+                <Mail className="w-3.5 h-3.5" /> {client.email}
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={emTag === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{emTag}</span>
+              </a>
+            )}
+            {mobileNum && (
+              <a href={`tel:${normPhone(mobileNum)}`} className="flex items-center gap-1.5 hover:underline">
+                <Phone className="w-3.5 h-3.5" /> {mobileNum}
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: '#EFF6FF', color: '#2563EB' }}>mobile</span>
+              </a>
+            )}
+            {fixeNum && (
+              <a href={`tel:${normPhone(fixeNum)}`} className="flex items-center gap-1.5 hover:underline">
+                <Phone className="w-3.5 h-3.5" /> {fixeNum}
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: '#F1F5F9', color: '#64748B' }}>fixe</span>
+              </a>
+            )}
             {commune && <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {commune}</span>}
             {client.secteur && <span className="flex items-center gap-1.5"><Building2 className="w-3.5 h-3.5" /> {client.secteur}</span>}
             {site && <a href={site} target="_blank" rel="noopener noreferrer" className="flex items-center gap-1.5 hover:underline" style={{ color: ORANGE }}><Globe className="w-3.5 h-3.5" /> site</a>}
@@ -129,9 +172,14 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
 
         {/* Actions rapides */}
         <div className="flex flex-wrap gap-2 mb-4">
-          {client.telephone && (
-            <a href={`tel:${client.telephone}`} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
+          {(mobileNum || fixeNum) && (
+            <a href={`tel:${normPhone(mobileNum || fixeNum)}`} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
               <Phone className="w-4 h-4" /> Appeler
+            </a>
+          )}
+          {smsHref && (
+            <a href={smsHref} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              <MessageSquare className="w-4 h-4" /> SMS
             </a>
           )}
           {site && (
@@ -157,6 +205,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               </button>
             ))}
           </div>
+          <p className="text-[11px] leading-relaxed mb-2" style={{ color: '#9CA3AF' }}>💡 {COLD_TIPS}</p>
           <input value={subject} onChange={e => setSubject(e.target.value)}
             className="w-full px-3 py-2 rounded-lg text-sm font-medium mb-2 outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
           <textarea value={body} onChange={e => setBody(e.target.value)} rows={9}
