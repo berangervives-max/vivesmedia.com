@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { clientsService, devisService, facturesService, commandesService } from '@/services/supabase.service'
-import { Users, FileText, Receipt, ShoppingBag, TrendingUp, AlertCircle, Plus, BookOpen } from 'lucide-react'
+import { Users, FileText, Receipt, ShoppingBag, TrendingUp, AlertCircle, Plus, BookOpen, Activity, Send, Eye, MousePointerClick, Phone, MessageSquare, MessageCircle } from 'lucide-react'
 
 type Activity = { id: string; label: string; sub: string; date: string; href: string; icon: typeof FileText; color: string }
 
@@ -10,8 +10,15 @@ export default function DashboardPage() {
   const [stats, setStats] = useState({ clients: 0, devisNonLus: 0, facturesEnRetard: 0, revenuMois: 0, commandesMois: 0 })
   const [recent, setRecent] = useState<Activity[]>([])
   const [loading, setLoading] = useState(true)
+  const [suivi, setSuivi] = useState({ sent: 0, open: 0, click: 0, call: 0, sms: 0, whatsapp: 0 })
+  const [pipeline, setPipeline] = useState({ prospects: 0, aContacter: 0, contactes: 0 })
 
   useEffect(() => {
+    // KPI de suivi prospection (emails/ouvertures/clics/appels/SMS/WhatsApp)
+    fetch('/api/cms/prospect-activity?summary=1').then(r => r.json()).then(d => {
+      const c = d.counts || {}
+      setSuivi({ sent: c.prospect_email || 0, open: c.email_open || 0, click: c.email_click || 0, call: c.prospect_call || 0, sms: c.prospect_sms || 0, whatsapp: c.prospect_whatsapp || 0 })
+    }).catch(() => {})
     Promise.all([
       clientsService.getAll(),
       devisService.getAll(),
@@ -26,6 +33,14 @@ export default function DashboardPage() {
         facturesEnRetard: factures.filter(f => f.statut === 'en_retard').length,
         revenuMois: factures.filter(f => f.statut === 'payee' && f.created_at >= moisDebut).reduce((s, f) => s + f.montant_ttc, 0),
         commandesMois: commandes.filter(c => c.statut === 'paye' && c.created_at >= moisDebut).length,
+      })
+      // Pipeline prospection (depuis les clients/prospects)
+      const contacted = (n?: string) => !!n && (n.includes('EMAIL ENVOYÉ') || n.includes('SMS ENVOYÉ'))
+      const prospects = clients.filter(c => c.statut === 'prospect')
+      setPipeline({
+        prospects: prospects.length,
+        aContacter: prospects.filter(c => (c.email || c.telephone) && !contacted(c.notes)).length,
+        contactes: clients.filter(c => contacted(c.notes)).length,
       })
       const acts: Activity[] = [
         ...devis.map(d => ({ id: `d${d.id}`, label: `Devis — ${d.nom}`, sub: d.service || 'Demande de devis', date: d.created_at, href: '/cms/devis', icon: FileText, color: '#F4521E' })),
@@ -94,6 +109,41 @@ export default function DashboardPage() {
           ))}
         </div>
       )}
+
+      {/* Suivi prospection — KPI de suivi (emails, ouvertures, clics, appels, SMS, WhatsApp) */}
+      <div className="rounded-xl p-5 mb-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold flex items-center gap-2" style={{ color: '#111827' }}><Activity className="w-4 h-4" style={{ color: '#F4521E' }} /> Suivi prospection</h3>
+          <Link href="/cms/suivi" className="text-xs font-semibold" style={{ color: '#F4521E' }}>Voir le détail →</Link>
+        </div>
+        <div className="grid grid-cols-3 lg:grid-cols-6 gap-3 mb-4">
+          {[
+            { label: 'Emails envoyés', v: suivi.sent, icon: Send, c: '#F4521E' },
+            { label: 'Ouverts', v: suivi.open, icon: Eye, c: '#16A34A' },
+            { label: 'Clics', v: suivi.click, icon: MousePointerClick, c: '#2563EB' },
+            { label: 'Appels', v: suivi.call, icon: Phone, c: '#475569' },
+            { label: 'SMS', v: suivi.sms, icon: MessageSquare, c: '#475569' },
+            { label: 'WhatsApp', v: suivi.whatsapp, icon: MessageCircle, c: '#16A34A' },
+          ].map(k => (
+            <div key={k.label} className="rounded-lg p-3" style={{ border: '1px solid #F3F4F6' }}>
+              <div className="flex items-center justify-between mb-1"><span className="text-[11px]" style={{ color: '#9CA3AF' }}>{k.label}</span><k.icon className="w-3.5 h-3.5" style={{ color: k.c }} /></div>
+              <p className="text-xl font-bold" style={{ color: k.c }}>{k.v}</p>
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { label: 'Prospects', v: pipeline.prospects, c: '#64748B' },
+            { label: 'À contacter', v: pipeline.aContacter, c: '#F4521E' },
+            { label: 'Contactés', v: pipeline.contactes, c: '#2563EB' },
+          ].map(k => (
+            <Link key={k.label} href="/cms/clients" className="rounded-lg p-3 flex items-center justify-between transition-colors" style={{ background: '#F9FAFB', border: '1px solid #F3F4F6' }}>
+              <span className="text-xs" style={{ color: '#6B7280' }}>{k.label}</span>
+              <span className="text-lg font-bold" style={{ color: k.c }}>{k.v}</span>
+            </Link>
+          ))}
+        </div>
+      </div>
 
       {/* Bottom grid */}
       <div className="grid lg:grid-cols-3 gap-4">
