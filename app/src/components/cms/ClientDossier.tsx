@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { crmService, clientsService, type ClientDossier as Dossier } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, Eye, MousePointerClick, Activity, Gauge, PhoneCall, type LucideIcon } from 'lucide-react'
+import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 // Métadonnées d'affichage de la timeline de suivi
@@ -13,6 +13,7 @@ const ACT_META: Record<string, { label: string; icon: LucideIcon; bg: string; fg
   email_bounce: { label: 'Email rejeté', icon: Mail, bg: '#FEE2E2', fg: '#DC2626' },
   prospect_call: { label: 'Appel passé', icon: PhoneCall, bg: '#F1F5F9', fg: '#475569' },
   prospect_sms: { label: 'SMS envoyé', icon: MessageSquare, bg: '#F1F5F9', fg: '#475569' },
+  prospect_whatsapp: { label: 'WhatsApp', icon: MessageCircle, bg: '#DCFCE7', fg: '#16A34A' },
   default: { label: 'Action', icon: Activity, bg: '#F3F4F6', fg: '#6B7280' },
 }
 const euro = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0)
@@ -202,6 +203,9 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const fixeNum = (client.telephone && !isMobile(client.telephone)) ? client.telephone : ph.fixe
   const smsBody = `Bonjour, Béranger de vivesmedia.com — je crée des sites web pour les ${client.secteur || 'pros'}${commune ? ` de ${commune}` : ''} et j'améliore leur visibilité Google. Ouvert à un échange ? vivesmedia.com`
   const smsHref = mobileNum ? `sms:${normPhone(mobileNum)}?body=${encodeURIComponent(smsBody)}` : ''
+  // WhatsApp click-to-chat (gratuit) : numéro FR 0X… → format international 33X…
+  const waRaw = normPhone(mobileNum || fixeNum)
+  const waHref = waRaw ? `https://wa.me/33${waRaw.replace(/^0/, '')}?text=${encodeURIComponent(smsBody)}` : ''
   const emTag = emailType(client.email)
   const info = useMemo(() => parseInfo(client.notes), [client.notes])
   const cat = CAT[client.secteur || ''] || 'autre'
@@ -241,7 +245,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
     setBody(`Bonjour,\n\nJe suis tombé sur le site de ${ent}${lieu} et je l'ai regardé en détail. ${lines.length} point${plural} vous font perdre des clients aujourd'hui :\n\n${numbered}\n\nTout cela se corrige rapidement. Si vous voulez, je vous montre comment en 10 minutes — sans engagement.${sign}`)
   }
   // Journalise un appel / SMS dans le suivi
-  const logAction = async (kind: 'call' | 'sms') => {
+  const logAction = async (kind: 'call' | 'sms' | 'whatsapp') => {
     try {
       await fetch('/api/cms/prospect-activity', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ clientId: client.id, email: client.email || null, phone: mobileNum || fixeNum || null, kind }) })
       setLoggedAct(kind); setTimeout(() => setLoggedAct(''), 2500); setTimeout(refreshActs, 500)
@@ -372,6 +376,11 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
           {smsHref && (
             <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
               <MessageSquare className="w-4 h-4" /> SMS{loggedAct === 'sms' ? ' ✓' : ''}
+            </a>
+          )}
+          {waHref && (
+            <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={() => logAction('whatsapp')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg text-white" style={{ background: '#25D366' }}>
+              <MessageCircle className="w-4 h-4" /> WhatsApp{loggedAct === 'whatsapp' ? ' ✓' : ''}
             </a>
           )}
           {site && (

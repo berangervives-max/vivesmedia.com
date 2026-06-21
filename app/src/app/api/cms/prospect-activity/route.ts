@@ -7,7 +7,7 @@ import { createClient as createSb } from '@supabase/supabase-js'
 // Admin uniquement. S'appuie sur la table automation_logs (type + payload jsonb).
 
 const ADMIN = 'berangervives@gmail.com'
-const ACT_TYPES = ['prospect_email', 'email_open', 'email_click', 'email_bounce', 'prospect_call', 'prospect_sms']
+const ACT_TYPES = ['prospect_email', 'email_open', 'email_click', 'email_bounce', 'prospect_call', 'prospect_sms', 'prospect_whatsapp']
 
 async function admin(req: NextRequest) {
   const supabase = await createServerSupabaseClient()
@@ -58,9 +58,9 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   if (!(await admin(req))) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   const { clientId, email, phone, kind, note } = await req.json().catch(() => ({}))
-  if (!['call', 'sms'].includes(kind)) return NextResponse.json({ error: 'kind requis' }, { status: 400 })
+  if (!['call', 'sms', 'whatsapp'].includes(kind)) return NextResponse.json({ error: 'kind requis' }, { status: 400 })
   if (!clientId && !email) return NextResponse.json({ error: 'clientId ou email requis' }, { status: 400 })
-  const type = kind === 'call' ? 'prospect_call' : 'prospect_sms'
+  const type = kind === 'call' ? 'prospect_call' : kind === 'whatsapp' ? 'prospect_whatsapp' : 'prospect_sms'
   await svc().from('automation_logs').insert({ type, payload: { prospect_id: clientId || null, to: email ? String(email).toLowerCase() : null, phone: phone || null, note: note || '', at: new Date().toISOString() } })
   return NextResponse.json({ ok: true })
 }

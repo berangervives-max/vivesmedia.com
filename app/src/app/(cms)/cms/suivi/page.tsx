@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useMemo, useState } from 'react'
-import { Send, Eye, MousePointerClick, Phone, MessageSquare, Mail, Activity, Search, type LucideIcon } from 'lucide-react'
+import { Send, Eye, MousePointerClick, Phone, MessageSquare, MessageCircle, Mail, Activity, Search, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 type Evt = { id: string; type: string; payload: { to?: string; subject?: string; kind?: string; link?: string; note?: string; at?: string }; created_at: string; client: { id: string; nom: string; secteur?: string } | null }
@@ -12,10 +12,11 @@ const META: Record<string, { label: string; icon: LucideIcon; bg: string; fg: st
   email_bounce: { label: 'Email rejeté', icon: Mail, bg: '#FEE2E2', fg: '#DC2626', chan: 'email' },
   prospect_call: { label: 'Appel', icon: Phone, bg: '#F1F5F9', fg: '#475569', chan: 'appel' },
   prospect_sms: { label: 'SMS', icon: MessageSquare, bg: '#F1F5F9', fg: '#475569', chan: 'sms' },
+  prospect_whatsapp: { label: 'WhatsApp', icon: MessageCircle, bg: '#DCFCE7', fg: '#16A34A', chan: 'whatsapp' },
 }
 const FILTERS: { key: string; label: string }[] = [
   { key: 'tous', label: 'Tout' }, { key: 'prospect_email', label: 'Envoyés' }, { key: 'email_open', label: 'Ouverts' },
-  { key: 'email_click', label: 'Clics' }, { key: 'prospect_call', label: 'Appels' }, { key: 'prospect_sms', label: 'SMS' },
+  { key: 'email_click', label: 'Clics' }, { key: 'prospect_call', label: 'Appels' }, { key: 'prospect_sms', label: 'SMS' }, { key: 'prospect_whatsapp', label: 'WhatsApp' },
 ]
 
 export default function SuiviPage() {
