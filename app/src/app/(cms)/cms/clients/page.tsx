@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { clientsService } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { Plus, Pencil, Trash2, Search } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Eye } from 'lucide-react'
+import ClientDossier from '@/components/cms/ClientDossier'
 
 const STATUTS = ['prospect','actif','pause','termine'] as const
 const COLORS: Record<string, string> = { prospect: 'bg-blue-100 text-blue-700', actif: 'bg-green-100 text-green-700', pause: 'bg-orange-100 text-orange-700', termine: 'bg-gray-100 text-gray-500' }
@@ -14,6 +15,7 @@ export default function CmsClientsPage() {
   const [form, setForm] = useState<Omit<Client, 'id' | 'created_at' | 'updated_at'>>({ ...EMPTY })
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
+  const [viewing, setViewing] = useState<Client | null>(null)
 
   const load = () => clientsService.getAll().then(setClients).catch(() => {})
   useEffect(() => { load() }, [])
@@ -34,6 +36,8 @@ export default function CmsClientsPage() {
 
   const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors"
   const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
+
+  if (viewing) return <ClientDossier client={viewing} onBack={() => setViewing(null)} />
 
   if (editing) return (
     <div>
@@ -142,6 +146,13 @@ export default function CmsClientsPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex gap-1">
+                    <button onClick={() => setViewing(c)} title="Dossier 360° (devis, factures, commandes)"
+                      className="p-1.5 rounded-md transition-colors"
+                      style={{ color: '#9CA3AF' }}
+                      onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'rgba(244,82,30,.08)'; (e.currentTarget as HTMLElement).style.color = '#F4521E' }}
+                      onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                      <Eye className="w-3.5 h-3.5" />
+                    </button>
                     <button onClick={() => open(c)}
                       className="p-1.5 rounded-md transition-colors"
                       style={{ color: '#9CA3AF' }}

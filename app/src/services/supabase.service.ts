@@ -285,6 +285,29 @@ export const temoignagesService = {
   },
 }
 
+// ── CRM : dossier client 360° ─────────────────────────────────
+// Relie devis / factures / commandes à un client par l'email (clé commune,
+// insensible à la casse). 100% additif : aucune table ni schéma modifié.
+export type ClientDossier = { devis: Devis[]; factures: Facture[]; commandes: Commande[] }
+
+export const crmService = {
+  async getDossier(email: string): Promise<ClientDossier> {
+    const e = (email || '').trim()
+    if (!e) return { devis: [], factures: [], commandes: [] }
+    const sb = createClient()
+    const [d, f, c] = await Promise.all([
+      sb.from('devis').select('*').ilike('email', e).order('created_at', { ascending: false }),
+      sb.from('factures').select('*').ilike('client_email', e).order('created_at', { ascending: false }),
+      sb.from('commandes').select('*').ilike('client_email', e).order('created_at', { ascending: false }),
+    ])
+    return {
+      devis: (d.data ?? []) as Devis[],
+      factures: (f.data ?? []) as Facture[],
+      commandes: (c.data ?? []) as Commande[],
+    }
+  },
+}
+
 // ── NEWSLETTER ────────────────────────────────────────────────
 export const newsletterService = {
   async subscribe(email: string) {
