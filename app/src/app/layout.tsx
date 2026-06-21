@@ -36,14 +36,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
+        {/* Google Analytics 4 — beforeInteractive : la balise est dans le HTML statique
+            (détectable par le vérificateur Google) ET chargée proprement par Next. */}
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" strategy="beforeInteractive" />
+        <Script id="ga4-init" strategy="beforeInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');`}</Script>
         {/* Ahrefs Web Analytics */}
         <script async src="https://analytics.ahrefs.com/analytics.js" data-key="9tqUA2EBj5akD55zFPOVvw" />
         <JsonLd data={SITE_SCHEMA} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground">
-        {/* Google Analytics 4 — chargé via next/script (évite ERR_BLOCKED_BY_ORB) */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" strategy="afterInteractive" />
-        <Script id="ga4-init" strategy="afterInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');`}</Script>
         <PostHogProvider>
           <SmoothScroll>
             {children}
