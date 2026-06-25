@@ -18,6 +18,51 @@ export type RealisationData = {
 
 export const REALISATIONS_DATA: RealisationData[] = [
   {
+    slug: 'cadence',
+    name: 'CADENCE',
+    type: 'Concept & Site · Studio Multisport',
+    year: '2026',
+    tags: ['Concept', 'Direction Artistique', 'Sport & Bien-être', 'SEO'],
+    heroImage: '/images/realisations/cadence-desktop.png',
+    liveUrl: 'https://cadence-ashen-five.vercel.app',
+    intro: "Un concept original imaginé ET prototypé de A à Z par vivesmedia.com : CADENCE, un studio multisport premium qui réunit 6 disciplines (running, Hyrox, CrossFit, force, yoga, mobilité) sous un même toit, avec un bar healthy et une vraie communauté. Au-delà du site, c'est une marque, une direction artistique éditoriale noir & blanc, une architecture complète (18+ pages) et un dossier business — la démonstration qu'on sait penser un projet de bout en bout pour un secteur précis, et le matérialiser en un site qui donne envie de s'abonner.",
+    context: {
+      client: "CADENCE est un concept maison de vivesmedia.com — pas un client, mais un prototype de marque pensé pour le secteur du sport et du bien-être. L'idée : prouver qu'on peut concevoir pour une salle de sport, un club de running, une box CrossFit ou un studio de yoga un site à la hauteur des meilleures marques lifestyle, et même imaginer le concept commercial qui va avec.",
+      problem: "Les sites de salles de sport se ressemblent tous : sombres, génériques, datés. Le défi était double — créer une direction artistique forte, premium et différenciante (à des années-lumière du fitness low-cost), et bâtir un site complet et fonctionnel (disciplines, planning, abonnements, communauté, blog, réservation) capable de convertir et de servir d'exemple sectoriel.",
+    },
+    solution: [
+      { title: 'Le parti pris : une marque lifestyle, pas une salle de sport', desc: "Direction artistique éditoriale mono — noir, blanc, gris — inspirée des marques running premium (Bandit, Tracksmith). Typographie XXL qui déborde du viewport, filets fins, photos couleur sur chrome noir & blanc, vidéos hero passées en N&B. Aux antipodes du fitness générique : on vend une appartenance, pas un abonnement." },
+      { title: 'Direction artistique & branding complet', desc: "Logo (monogramme 3 chevrons + wordmark Archivo), système de couleurs en tokens, pairing typographique Archivo / Inter, style photo défini, ton de voix. Un mini-brandkit cohérent, décliné jusqu'à une page charte intégrée au site." },
+      { title: 'Une architecture complète (18+ pages)', desc: "Accueil, 6 pages disciplines dédiées, planning, Le Comptoir (bar healthy), communauté, abonnements + 4 fiches formules, journal + articles, contact, réservation. Un vrai site d'exploitation, pas une plaquette." },
+      { title: 'Pages disciplines approfondies', desc: "Chaque discipline a sa page : intro, chiffres, « pour qui » (tunnels de conversion par cible), contenu inclus, galerie, et un bloc coach avec photo de profil et liens Strava / Instagram — la dimension communautaire incarnée." },
+      { title: 'Le concept du Comptoir & la communauté', desc: "Un bar à matcha / café de spécialité (Le Comptoir) et des fonctionnalités communautaires (s'entraîner entre potes, visibilité opt-in, apps connectées) qui différencient radicalement le concept des chaînes anonymes." },
+      { title: 'Contenu & SEO / AEO', desc: "6 articles de blog rédigés et optimisés pour le référencement classique ET les moteurs IA (balisage Schema.org Article + FAQ), métadonnées complètes, sitemap — pensé pour être trouvé sur Google comme cité par les IA." },
+      { title: 'Tunnel de conversion fonctionnel', desc: "Sélecteur « trouve ton parcours », formules détaillées (dont tarif étudiant et duo), et un tunnel de réservation d'essai gratuit fonctionnel avec confirmation. De la découverte à la prise de contact, sans friction." },
+      { title: 'Conçu, développé et déployé en un temps record', desc: "Stack moderne (Next.js 16, React 19, Tailwind CSS v4), médias sourcés et calibrés, build statique optimisé, déploiement Vercel. Le tout doublé d'un dossier d'étude de marché et de faisabilité — la preuve d'une approche projet globale." },
+    ],
+    results: [
+      { value: '18+', label: 'pages, architecture multi-secteurs complète' },
+      { value: 'Mono', label: 'DA éditoriale noir & blanc premium' },
+      { value: 'SEO + IA', label: 'articles balisés Schema (Article + FAQ)' },
+      { value: 'Concept', label: 'marque + site + dossier business de A à Z' },
+    ],
+    gallery: [
+      { src: '/images/realisations/cadence-desktop.png', caption: "Page d'accueil · Desktop" },
+      { src: '/images/realisations/cadence-disciplines.png', caption: 'Disciplines · grille éditoriale' },
+      { src: '/images/realisations/cadence-mobile.png', caption: 'Version mobile · 390px', mobile: true },
+    ],
+    testimonial: {
+      text: "CADENCE résume ce que sait faire vivesmedia.com : penser un concept de marque pour un secteur, lui donner une direction artistique forte, et le matérialiser en un site complet et fonctionnel — du premier pixel au déploiement.",
+      name: 'Béranger Vives',
+      role: 'Fondateur, vivesmedia.com',
+    },
+    stack: ['Next.js 16', 'React 19', 'TypeScript', 'Tailwind CSS v4', 'Vercel'],
+    services: [
+      { label: 'Site Vitrine', href: '/services/site-vitrine' },
+      { label: 'Référencement SEO', href: '/services/seo' },
+    ],
+  },
+  {
     slug: 'marine-caro',
     name: 'Marine Caro',
     type: 'Site Vitrine · Architecte en Provence',

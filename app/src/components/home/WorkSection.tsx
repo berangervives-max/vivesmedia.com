@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 
 const PROJECTS = [
   { title: 'Marine Caro', tag: 'Site Vitrine · Architecte en Provence', href: '/realisations/marine-caro', thumbnail: '/images/realisations/marine-desktop.jpg', featured: true },
+  { title: 'CADENCE', tag: 'Concept & Site · Studio Multisport', href: '/realisations/cadence', thumbnail: '/images/realisations/cadence-desktop.png' },
   { title: 'Stoop', tag: 'Site Vitrine · Logistique & Transport', href: '/realisations/stoop', thumbnail: '/images/realisations/stoop-desktop.jpg' },
   { title: 'Sésame Informatique', tag: 'Refonte Site · ERP B2B Négoce', href: '/realisations/sesame-informatique', thumbnail: '/thumbnails/sesame-hero.png' },
   { title: 'Yannis Amielh', tag: 'Portfolio · Mannequin Éditorial', href: '/realisations/yannis-amielh', thumbnail: '/images/realisations/yannis-site-desktop.jpg' },
