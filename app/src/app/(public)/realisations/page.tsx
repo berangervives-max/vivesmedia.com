@@ -33,7 +33,7 @@ const secteurDe = (slug: string) => SECTEUR_PAR_SLUG[slug] ?? 'Autres'
 // Secours si la base est vide/indisponible.
 const FALLBACK_PROJECTS: ProjectCard[] = [
   { num: '01', name: 'Marine Caro', type: 'Site Vitrine · Architecte en Provence', year: '2026', href: '/realisations/marine-caro', img: '/images/realisations/marine-desktop.jpg', tags: ['Site Vitrine', 'Architecture', 'SEO'], featured: true, secteur: 'Architecture' },
-  { num: '02', name: 'CADENCE', type: 'Concept & Site · Studio Multisport', year: '2026', href: '/realisations/cadence', img: '/images/realisations/cadence-desktop.png', tags: ['Concept', 'Direction Artistique', 'Sport'], secteur: 'Sport & Loisirs' },
+  { num: '02', name: 'CADENCE', type: 'Concept & Site · Studio Multisport', year: '2026', href: '/realisations/cadence', img: '/images/realisations/cadence-disciplines.png', tags: ['Concept', 'Direction Artistique', 'Sport'], secteur: 'Sport & Loisirs' },
   { num: '03', name: 'Stoop', type: 'Site Vitrine · Logistique & Transport', year: '2026', href: '/realisations/stoop', img: '/images/realisations/stoop-desktop.jpg', tags: ['Site Vitrine', 'Direction Artistique', 'SEO'], secteur: 'Transport & Logistique' },
   { num: '03', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2025', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Framer'], secteur: 'Tech & B2B' },
   { num: '04', name: 'Yannis Amielh', type: 'Portfolio · Mannequin Éditorial', year: '2026', href: '/realisations/yannis-amielh', img: '/images/realisations/yannis-site-desktop.jpg', tags: ['Portfolio', 'Direction Artistique', '3D'], secteur: 'Mode & Portfolio' },
@@ -46,7 +46,7 @@ const FALLBACK_PROJECTS: ProjectCard[] = [
 export default async function RealisationsPage() {
   // La base (back-office /cms) pilote l'affichage et l'ordre (champ `ordre`).
   const dbRealisations = await getPublishedRealisationsData()
-  const allProjects: ProjectCard[] = dbRealisations.length > 0
+  let allProjects: ProjectCard[] = dbRealisations.length > 0
     ? dbRealisations.map((r, i) => ({
         num: String(i + 1).padStart(2, '0'),
         name: r.name,
@@ -59,6 +59,12 @@ export default async function RealisationsPage() {
         secteur: secteurDe(r.slug),
       }))
     : FALLBACK_PROJECTS
+
+  // CADENCE (concept maison) toujours présent dans la grille, même si la base ne le référence pas encore.
+  const CADENCE_CARD: ProjectCard = { num: '—', name: 'CADENCE', type: 'Concept & Site · Studio Multisport', year: '2026', href: '/realisations/cadence', img: '/images/realisations/cadence-disciplines.png', tags: ['Concept', 'Direction Artistique', 'Sport'], secteur: 'Sport & Loisirs' }
+  if (!allProjects.some(p => p.href === '/realisations/cadence')) {
+    allProjects = [allProjects[0], CADENCE_CARD, ...allProjects.slice(1)].filter(Boolean) as ProjectCard[]
+  }
 
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
