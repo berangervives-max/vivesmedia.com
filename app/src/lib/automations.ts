@@ -51,6 +51,20 @@ const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const postBlock = (platform: string, text: string) =>
   `<p style="font-weight:700;margin:16px 0 4px;color:#111827">${platform}</p><pre style="white-space:pre-wrap;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;line-height:1.5;color:#1f2937;background:#F8F9FA;border:1px solid #EFF0F2;border-radius:10px;padding:12px;margin:0">${escHtml(text)}</pre>`
 
+// Dépose une proposition dans le cockpit « À valider » (/cms/validation). Best-effort :
+// si la table proposals n'existe pas encore, on ignore silencieusement. Dédoublonne
+// par titre tant qu'une proposition 'a_valider' du même titre existe.
+async function pushProposal(sb: Sb, p: { type: string; titre: string; recherche?: string; contenu: string; ton?: string; retombees?: string; cible_url?: string; source: string }) {
+  try {
+    const { data } = await sb.from('proposals').select('id').eq('statut', 'a_valider').eq('titre', p.titre).limit(1)
+    if (data && data.length) return
+    await sb.from('proposals').insert({
+      type: p.type, titre: p.titre, recherche: p.recherche || '', contenu: p.contenu,
+      ton: p.ton || '', retombees: p.retombees || '', cible_url: p.cible_url || '', source: p.source,
+    })
+  } catch { /* table absente ou erreur → best-effort */ }
+}
+
 // Nettoie un nom d'entreprise open-data (forme juridique + parenthèses + MAJUSCULES) pour l'affichage.
 const LEGAL_FORMS = /\b(SARLU|SARL|SASU|SAS|EURL|EIRL|EI|SNC|SCIC|SCI|SCM|SELARL|SELAS|SCOP|GAEC|SCEA|SA|ETS|ETABLISSEMENTS?)\b\.?/gi
 function cleanCompanyName(raw?: string): string {
@@ -207,6 +221,13 @@ export const AUTOMATIONS: Automation[] = [
       const top = recos.slice(0, 4)
       await mailAdmin(`Tes ${top.length} action(s) de la semaine`, wrap(`Propositions à valider — semaine du ${new Date().toLocaleDateString('fr-FR')}`,
         `<p style="font-size:13px;color:#374151;margin:0 0 14px">Voici ce que je te recommande cette semaine. <b>Rien n'est envoyé automatiquement</b> — clique pour décider.</p>${top.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:8px">Estimations indicatives, calibrées sur une activité solo en démarrage. Elles s'affineront avec tes vraies données (PostHog / Search Console).</p>`))
+      await pushProposal(sb, {
+        type: 'autre', titre: `Actions recommandées — semaine du ${new Date().toLocaleDateString('fr-FR')}`, source: 'conseiller_hebdo',
+        recherche: `Analyse hebdo : ${A} abonné(s) newsletter, ${D} devis à relancer, ${P} prospect(s) en base.`,
+        contenu: `${top.length} action(s) recommandée(s) cette semaine (détail complet dans l'email) : selon les déclencheurs — newsletter, relance des devis, publication d'article, prospection.`,
+        cible_url: 'https://vivesmedia.com/cms/dashboard',
+        retombees: 'Impacts estimés sourcés et proratés (voir email). La régularité prime sur le coup d\'éclat.',
+      })
       return { count: 1, payload: { recos: top.length, abonnes: A, devis_relance: D, prospects: P } }
     },
   },
@@ -218,6 +239,7 @@ export const AUTOMATIONS: Automation[] = [
     desc: 'Chaque lundi : prépare 3 posts prêts à coller (LinkedIn + Instagram) à partir de ton dernier article et de ta dernière réalisation, + 1 conseil evergreen. Tu copies-colles et publies — rien n\'est posté automatiquement.',
     run: async ({ sb, mailAdmin }) => {
       const blocks: string[] = []
+      const posts: { titre: string; contenu: string }[] = []
       // 1) LinkedIn — dernier article publié
       const today = new Date().toISOString().slice(0, 10)
       const { data: arts } = await sb.from('articles').select('titre,slug,extrait,categorie').eq('publie', true).lte('date_pub', today).order('date_pub', { ascending: false }).limit(1)
@@ -226,6 +248,7 @@ export const AUTOMATIONS: Automation[] = [
         const tag = (art.categorie || 'web').replace(/[^a-zA-Z0-9]/g, '')
         const txt = `${art.titre}\n\n${(art.extrait || '').trim()}\n\n👉 À lire en entier : ${SITE}/blog/${art.slug}\n\nUn site qui travaille pour vous, c'est tout l'objet de vivesmedia.com.\n\n#WebVaucluse #SiteInternet #${tag || 'Web'}`
         blocks.push(postBlock('🔵 LinkedIn — à partir de ton dernier article', txt))
+        posts.push({ titre: 'Post LinkedIn — dernier article', contenu: txt })
       }
       // 2) Instagram — dernière réalisation publiée
       const { data: reals } = await sb.from('site_realisations').select('name,slug').eq('publie', true).order('created_at', { ascending: false }).limit(1)
@@ -233,6 +256,7 @@ export const AUTOMATIONS: Automation[] = [
       if (real?.name && real.slug) {
         const txt = `✨ Nouveau projet en ligne : ${real.name}\n\nUn site sur-mesure, rapide et pensé pour convertir les visiteurs en clients.\n\nDécouvre la réalisation 👉 lien en bio (${SITE}/realisations/${real.slug})\n\n#vivesmedia #créationsite #webdesign #Vaucluse #Avignon`
         blocks.push(postBlock('🟣 Instagram — à partir de ta dernière réalisation', txt))
+        posts.push({ titre: 'Post Instagram — dernière réalisation', contenu: txt })
       }
       // 3) LinkedIn — conseil evergreen (rotation par semaine)
       const tips = [
@@ -243,11 +267,22 @@ export const AUTOMATIONS: Automation[] = [
       ]
       const wk = Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 1)) / (7 * DAY))
       const tip = tips[wk % tips.length]
-      blocks.push(postBlock('🔵 LinkedIn — conseil de la semaine', `${tip}\n\nC'est exactement ce sur quoi je travaille pour les pros du Vaucluse.\n\nUn doute sur votre site actuel ? Écrivez-moi, je vous dis ce qui peut être amélioré.\n\n#WebVaucluse #SiteInternet #Avignon`))
+      const tipTxt = `${tip}\n\nC'est exactement ce sur quoi je travaille pour les pros du Vaucluse.\n\nUn doute sur votre site actuel ? Écrivez-moi, je vous dis ce qui peut être amélioré.\n\n#WebVaucluse #SiteInternet #Avignon`
+      blocks.push(postBlock('🔵 LinkedIn — conseil de la semaine', tipTxt))
+      posts.push({ titre: 'Post LinkedIn — conseil de la semaine', contenu: tipTxt })
 
       if (!blocks.length) return { count: 0 }
+      // Dépose chaque post dans le cockpit « À valider »
+      for (const p of posts) {
+        await pushProposal(sb, {
+          type: 'post_social', titre: p.titre, contenu: p.contenu, source: 'social_hebdo',
+          cible_url: 'https://vivesmedia.com/cms/social',
+          ton: 'Expert accessible, on parle d\'EUX, 1 idée + 1 CTA — pour le reach ET la conversion.',
+          retombees: 'Cumulatif : reach modeste au départ (compte jeune), construit la visibilité sur 60-90 j si régulier 3-5×/sem.',
+        })
+      }
       await mailAdmin('Tes posts réseaux de la semaine', wrap('À publier cette semaine',
-        `<p style="font-size:13px;color:#374151;margin:0 0 8px">3 posts prêts à copier-coller. Adapte une phrase si tu veux, ajoute ta photo/visuel, et publie. <b>Rien n'est posté automatiquement.</b></p>${blocks.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:10px">Astuce : LinkedIn le mardi/jeudi 8-9h, Instagram le soir 18-20h convertissent le mieux.</p>`))
+        `<p style="font-size:13px;color:#374151;margin:0 0 8px">3 posts prêts à copier-coller (aussi déposés dans l'onglet <b>À valider</b>). Adapte si tu veux, ajoute ton visuel, et publie. <b>Rien n'est posté automatiquement.</b></p>${blocks.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:10px">Astuce : LinkedIn le mardi/jeudi 8-9h, Instagram le soir 18-20h convertissent le mieux.</p>`))
       return { count: 1, payload: { posts: blocks.length } }
     },
   },
@@ -286,6 +321,13 @@ export const AUTOMATIONS: Automation[] = [
         : '<p style="margin:8px 0">Site plutôt sain — peu d\'arguments « refonte ». Plutôt un angle SEO/Google.</p>'
       await mailAdmin(`Prospect du jour : ${ent} — ${score}/10`, wrap(`Prospect du jour — ${verdict}`,
         `<p><b>${ent}</b>${candidat.secteur ? ` · ${candidat.secteur}` : ''}<br/>Site : ${site || '—'}${a.builder ? ` · ${a.builder}` : ''}${a.reachable ? '' : ' · <b>injoignable</b>'}</p>${defauts}<p style="margin-top:12px">👉 Ouvre la fiche dans <b>/cms/clients</b> (recherche « ${ent} ») pour générer l'email perso (déjà nettoyé) et valider l'envoi.</p>`))
+      await pushProposal(sb, {
+        type: 'autre', titre: `Prospect du jour : ${ent}`, source: 'prospect_du_jour',
+        recherche: `Audit gratuit du site ${site || '(aucun)'} ${a.builder ? `· techno ${a.builder}` : ''}. Secteur : ${candidat.secteur || '—'}.`,
+        contenu: `Score d'opportunité ${score}/10 — ${verdict}.\n` + (a.lines.length ? 'Arguments refonte : ' + a.lines.join(' · ') : 'Site plutôt sain — angle SEO/Google plutôt que refonte.'),
+        cible_url: 'https://vivesmedia.com/cms/clients',
+        retombees: score >= 6 ? 'Prospect prioritaire : bon gabarit + site à refaire.' : 'À creuser / déprioriser.',
+      })
       return { count: 1, payload: { id: candidat.id, ent, score, contacter: score >= 6 } }
     },
   },
