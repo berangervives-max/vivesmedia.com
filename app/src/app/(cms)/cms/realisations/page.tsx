@@ -4,6 +4,7 @@ import { realisationsService } from '@/services/supabase.service'
 import { createClient } from '@/lib/supabase'
 import type { Realisation } from '@/types'
 import { Plus, Pencil, Trash2, Eye, EyeOff, Briefcase, X, Upload } from 'lucide-react'
+import Kpis from '@/components/cms/Kpis'
 
 type Form = Omit<Realisation, 'id' | 'created_at' | 'updated_at'>
 
@@ -292,6 +293,12 @@ export default function CmsRealisationsPage() {
           <Plus className="w-4 h-4" /> Nouvelle réalisation
         </button>
       </div>
+
+      <Kpis items={[
+        { label: 'Total en base', value: items.length, icon: Briefcase, color: '#0F172A' },
+        { label: 'En ligne', value: items.filter(r => r.publie).length, icon: Eye, color: '#16A34A', hint: 'visibles sur le site' },
+        { label: 'Brouillons', value: items.filter(r => !r.publie).length, icon: EyeOff, color: '#9CA3AF', hint: 'non publiés' },
+      ]} />
 
       {items.length === 0 && (
         <div className="rounded-xl p-12 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>

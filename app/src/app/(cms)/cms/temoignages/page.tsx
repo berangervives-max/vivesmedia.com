@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react'
 import { temoignagesService } from '@/services/supabase.service'
 import type { Temoignage } from '@/types'
-import { Plus, Pencil, Trash2, Star, ExternalLink, MessageSquarePlus } from 'lucide-react'
+import { Plus, Pencil, Trash2, Star, ExternalLink, MessageSquarePlus, Eye, EyeOff, MessageSquare } from 'lucide-react'
+import Kpis from '@/components/cms/Kpis'
 
 function getGoogleReviewUrl(): string {
   try {
@@ -129,6 +130,13 @@ export default function CmsTemoignagesPage() {
           </button>
         </div>
       </div>
+
+      <Kpis items={[
+        { label: 'Total', value: items.length, icon: MessageSquare, color: '#0F172A' },
+        { label: 'Affichés sur le site', value: items.filter(t => t.actif).length, icon: Eye, color: '#16A34A' },
+        { label: 'En attente', value: items.filter(t => !t.actif).length, icon: EyeOff, color: '#9CA3AF', hint: 'non publiés' },
+        { label: 'Note moyenne', value: items.length ? `${(items.reduce((s, t) => s + (t.note || 0), 0) / items.length).toFixed(1)} ★` : '—', icon: Star, color: '#F59E0B' },
+      ]} />
 
       {items.length === 0 && (
         <div className="rounded-xl p-12 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun témoignage</div>

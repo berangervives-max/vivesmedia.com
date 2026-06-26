@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { CalendarDays, Video, Phone, ExternalLink, Clock, CheckCircle2, CalendarPlus } from 'lucide-react'
+import Kpis from '@/components/cms/Kpis'
 
 const ORANGE = '#F4521E'
 
@@ -72,8 +73,20 @@ export default function AgendaPage() {
     },
   ]
 
+  const evs = rdv?.ok ? rdv.events : []
+  const nowMs = Date.now()
+  const todayStr = new Date().toDateString()
+  const cetteSemaine = evs.filter(e => { const t = new Date(e.start).getTime(); return t >= nowMs && t < nowMs + 7 * 864e5 }).length
+  const aujourdhui = evs.filter(e => new Date(e.start).toDateString() === todayStr).length
+
   return (
     <div className="space-y-6">
+
+      <Kpis items={[
+        { label: 'RDV à venir', value: evs.length, icon: CalendarDays, color: '#F4521E' },
+        { label: 'Cette semaine', value: cetteSemaine, icon: Clock, color: '#2563EB' },
+        { label: "Aujourd'hui", value: aujourdhui, icon: CheckCircle2, color: '#16A34A' },
+      ]} />
 
       {/* Prochains RDV (Google Calendar via compte de service) */}
       <div className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>

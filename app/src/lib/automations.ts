@@ -1,5 +1,6 @@
 import 'server-only'
 import { createServiceClient } from '@/lib/supabase'
+import { submitGoogle } from '@/lib/indexing'
 import { sendFollowup, sendTestimonialRequest, sendOverdueAlert, sendRevenueReport } from '@/services/email.service'
 
 // ── Moteur d'automatisations ──────────────────────────────────────────────
@@ -840,9 +841,11 @@ export async function runDueAutomations(force?: string): Promise<Record<string, 
     return s
   }
   const indexNow = async (url: string) => {
+    // 1) IndexNow (Bing/Yandex, donc visibilité côté ChatGPT/Bing) — instantané, sans vérif.
     const key = process.env.INDEXNOW_KEY
-    if (!key) return
-    await fetch(`https://api.indexnow.org/indexnow?url=${encodeURIComponent(url)}&key=${key}`).catch(() => {})
+    if (key) await fetch(`https://api.indexnow.org/indexnow?url=${encodeURIComponent(url)}&key=${key}`).catch(() => {})
+    // 2) Google Indexing API — best-effort (no-op tant que GOOGLE_SA_KEY_B64 n'est pas posée).
+    await submitGoogle(url).catch(() => {})
   }
 
   const ctx: AutoCtx = { sb, now, today, ago, mailAdmin, ranToday, loggedIds, indexNow }

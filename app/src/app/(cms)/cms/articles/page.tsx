@@ -3,7 +3,8 @@ import { useState, useEffect } from 'react'
 import { articlesService } from '@/services/supabase.service'
 import { createClient } from '@/lib/supabase'
 import type { Article } from '@/types'
-import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X, Upload } from 'lucide-react'
+import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X, Upload, MousePointerClick } from 'lucide-react'
+import Kpis from '@/components/cms/Kpis'
 
 /** Upload une image vers le bucket Supabase `realisations` (dossier articles/) → URL publique. */
 async function uploadArticleImage(file: File): Promise<string> {
@@ -203,6 +204,14 @@ export default function CmsArticlesPage() {
           <Plus className="w-4 h-4" /> Nouvel article
         </button>
       </div>
+
+      <Kpis items={[
+        { label: 'Publiés', value: articles.filter(a => statusOf(a) === 'publie').length, icon: BookOpen, color: '#16A34A' },
+        { label: 'Programmés', value: articles.filter(a => statusOf(a) === 'programme').length, icon: CalendarClock, color: '#D97706' },
+        { label: 'Brouillons', value: articles.filter(a => statusOf(a) === 'brouillon').length, icon: EyeOff, color: '#9CA3AF' },
+        { label: 'Clics Google', value: Object.values(stats).reduce((s, v) => s + (v.clicks || 0), 0), icon: MousePointerClick, color: '#2563EB', hint: '30 derniers jours (GSC)' },
+        { label: 'Impressions', value: Object.values(stats).reduce((s, v) => s + (v.impressions || 0), 0).toLocaleString('fr-FR'), icon: Eye, color: '#7C3AED', hint: 'vues dans la recherche' },
+      ]} />
 
       {articles.length === 0 && (
         <div className="rounded-xl p-12 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>

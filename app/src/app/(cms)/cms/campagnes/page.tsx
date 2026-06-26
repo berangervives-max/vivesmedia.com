@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { newsletterService } from '@/services/supabase.service'
 import { createClient } from '@/lib/supabase'
 import { Send, Users, Eye, Sparkles, Info, MailOpen } from 'lucide-react'
+import Kpis from '@/components/cms/Kpis'
 
 type CampLog = { id: string; subject: string; sent: number; at: string; opens: number }
 
@@ -98,21 +99,19 @@ export default function CampagnesPage() {
   return (
     <div className="space-y-6">
 
-      {/* Header info */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl p-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center mb-3" style={{ background: 'rgba(244,82,30,.1)', color: ORANGE }}>
-            <Users className="w-4 h-4" />
-          </div>
-          <p className="text-2xl font-bold" style={{ color: '#111827' }}>{abonnes ?? '—'}</p>
-          <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Destinataires actifs</p>
-        </div>
-        <div className="rounded-xl p-5 sm:col-span-2 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
+      <Kpis items={[
+        { label: 'Destinataires actifs', value: abonnes ?? '—', icon: Users, color: '#F4521E' },
+        { label: 'Campagnes envoyées', value: history.length, icon: Send, color: '#2563EB' },
+        { label: 'Emails envoyés', value: history.reduce((s, c) => s + (c.sent || 0), 0), icon: MailOpen, color: '#7C3AED' },
+        { label: "Taux d'ouverture", value: (() => { const sent = history.reduce((s, c) => s + (c.sent || 0), 0); const op = history.reduce((s, c) => s + (c.opens || 0), 0); return sent ? `${Math.round(op / sent * 100)} %` : '—' })(), icon: Eye, color: '#16A34A', hint: 'moyenne historique' },
+      ]} />
+
+      {/* Bandeau info */}
+      <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
           <Info className="w-4 h-4 shrink-0" style={{ color: '#16A34A' }} />
           <p className="text-xs leading-relaxed" style={{ color: '#166534' }}>
             <strong>Envoi Resend connecté.</strong> La campagne part depuis contact@vivesmedia.com avec le template aux couleurs vivesmedia. Confirmation demandée avant chaque envoi — rien ne part par accident.
           </p>
-        </div>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-6">
