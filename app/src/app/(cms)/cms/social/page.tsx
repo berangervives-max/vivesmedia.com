@@ -75,6 +75,7 @@ export default function CmsSocialPage() {
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
   const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()))
+  const [view, setView] = useState<'calendrier' | 'feed'>('calendrier')
 
   const load = () => socialPostsService.getAll().then(setPosts).catch(e => setErr(e.message?.includes('social_posts') ? 'table_absente' : e.message))
   useEffect(() => { load() }, [])
@@ -234,6 +235,17 @@ export default function CmsSocialPage() {
         { label: 'Publiés', value: posts.filter(p => p.statut === 'publie').length, icon: CheckCircle2, color: '#16A34A' },
       ]} />
 
+      {/* Sélecteur de vue */}
+      <div className="inline-flex rounded-lg p-0.5 mb-4" style={{ background: '#F1F3F5' }}>
+        {([['calendrier', '📅 Calendrier'], ['feed', '🟣 Feed Instagram']] as const).map(([v, label]) => (
+          <button key={v} onClick={() => setView(v)} className="text-xs font-semibold px-3 py-1.5 rounded-md transition"
+            style={view === v ? { background: '#fff', color: '#111827', boxShadow: '0 1px 2px rgba(0,0,0,.06)' } : { color: '#6B7280' }}>
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {view === 'calendrier' && (<>
       {/* Navigation de semaine */}
       <div className="flex items-center justify-between mb-3">
         <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }} title="Semaine précédente"><ChevronLeft className="w-4 h-4" style={{ color: '#6B7280' }} /></button>
@@ -308,6 +320,31 @@ export default function CmsSocialPage() {
                 )
               })}
             </div>
+          </div>
+        )
+      })()}
+      </>)}
+
+      {view === 'feed' && (() => {
+        const grid = posts
+          .filter(p => p.plateforme === 'instagram' && ['post', 'carrousel', 'reel_grille'].includes(p.format))
+          .sort((a, b) => (b.date_prevue || '').localeCompare(a.date_prevue || '') || (b.heure || '').localeCompare(a.heure || ''))
+        return (
+          <div>
+            <p className="text-xs mb-3" style={{ color: '#9CA3AF' }}>Aperçu de ta grille Instagram (posts, carrousels et reels affichés sur la grille). Les stories et reels masqués n&apos;y figurent pas. Du plus récent au plus ancien.</p>
+            <div className="max-w-md mx-auto">
+              <div className="grid grid-cols-3 gap-1">
+                {grid.length === 0 && <div className="col-span-3 text-center text-sm py-12 rounded-lg" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun post de grille pour l&apos;instant.</div>}
+                {grid.map(p => (
+                  <button key={p.id} onClick={() => open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
+                    {p.visuel_url
+                      ? <img src={p.visuel_url} alt="" className="w-full h-full object-cover" />
+                      : <span className="absolute inset-0 flex items-center justify-center text-[10px] px-1.5 text-center leading-tight" style={{ color: '#9CA3AF' }}>{p.titre || p.format}</span>}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <p className="text-[11px] mt-3 max-w-md mx-auto text-center" style={{ color: '#9CA3AF' }}>💡 Cherche la cohérence : alterne les types (citation / réalisation / conseil), garde la même palette et la même lumière (voir DA Station). Une grille harmonieuse = un profil qui inspire confiance.</p>
           </div>
         )
       })()}
