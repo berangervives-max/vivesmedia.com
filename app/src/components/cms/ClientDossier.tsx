@@ -54,41 +54,72 @@ function parsePhones(notes?: string) {
 // Modèles « cold email » suivant les bonnes pratiques 2025/26 : court, centré sur
 // le prospect, objet personnalisé sans mots spam, UN seul CTA doux (une question),
 // preuve légère, texte simple, identité claire. Personnalisé par entreprise/secteur/ville.
+// Nettoie un nom d'entreprise issu de l'open data (MAJUSCULES + forme juridique + mentions
+// entre parenthèses) pour un usage naturel en email.
+// Ex. « SARL MENUISERIE DURAND (EI) » → « Menuiserie Durand ».
+const LEGAL_FORMS = /\b(SARLU|SARL|SASU|SAS|EURL|EIRL|EI|SNC|SCIC|SCI|SCM|SELARL|SELAS|SCOP|GAEC|SCEA|SA|ETS|ETABLISSEMENTS?|MICRO[\s-]?ENTREPRISE|AUTO[\s-]?ENTREPRENEUR)\b\.?/gi
+const SMALL_WORDS = new Set(['de', 'du', 'des', 'le', 'la', 'les', 'et', 'd', 'l', 'à', 'au', 'aux', 'en', 'sur'])
+
+function cleanCompany(raw: string): string {
+  let s = (raw || '').trim()
+  if (!s) return ''
+  s = s.replace(/\([^)]*\)/g, ' ').replace(LEGAL_FORMS, ' ').replace(/\s{2,}/g, ' ').trim()
+  const letters = s.replace(/[^A-Za-zÀ-ÿ]/g, '')
+  // Open data tout en MAJUSCULES → Title Case (en gardant les mots de liaison en minuscule)
+  if (letters && letters === letters.toUpperCase()) {
+    s = s.toLowerCase().split(/\s+/).map((w, i) =>
+      i > 0 && SMALL_WORDS.has(w) ? w : w.charAt(0).toUpperCase() + w.slice(1)
+    ).join(' ')
+  }
+  return s.trim()
+}
+
+// Prénom du dirigeant pour personnaliser l'accroche (heuristique INSEE : le prénom
+// n'est pas en MAJUSCULES, contrairement au NOM). Retourne '' si rien d'exploitable.
+function firstNameOf(dirigeant: string): string {
+  const parts = (dirigeant || '').replace(/\b(M\.?|Mme\.?|Mr\.?|Monsieur|Madame|Dr\.?)\b/gi, '').trim().split(/\s+/).filter(Boolean)
+  if (!parts.length) return ''
+  const pick = parts.find(p => p && p !== p.toUpperCase()) || parts[parts.length - 1]
+  if (pick.length < 2) return ''
+  return pick.charAt(0).toUpperCase() + pick.slice(1).toLowerCase()
+}
+
 function templates(c: Client, commune: string) {
-  const ent = c.entreprise || c.nom
-  const sect = c.secteur || 'professionnel'
+  const ent = cleanCompany(c.entreprise || c.nom) || 'votre entreprise'
   const lieu = commune ? ` à ${commune}` : ''
+  const prenom = firstNameOf(parseInfo(c.notes).dirigeant)
+  const hello = prenom ? `Bonjour ${prenom},` : 'Bonjour,'
   const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
   return {
     contact: {
       label: '1er contact',
       subject: `${ent} sur Google`,
-      body: `Bonjour,\n\nJe suis tombé sur ${ent} en cherchant des ${sect}s${lieu}, et j'ai regardé votre présence en ligne.\n\nAvec vivesmedia.com, je crée des sites internet pour les pros${lieu} et je les aide à mieux ressortir sur Google et à transformer plus de visiteurs en clients.\n\nSeriez-vous ouvert(e) à ce que je vous envoie 2-3 idées concrètes pour ${ent} ? Ça ne vous engage à rien.${sign}`,
+      body: `${hello}\n\nJe suis tombé sur ${ent}${lieu} et j'ai pris le temps de regarder votre présence en ligne — votre site et votre visibilité sur Google.\n\nC'est justement mon métier chez vivesmedia.com : créer des sites pour les pros${lieu} et les aider à mieux ressortir sur Google, pour transformer plus de visiteurs en clients.\n\nCela vous intéresserait-il que je vous partage 2 ou 3 idées concrètes pour ${ent} ? C'est sans engagement.${sign}`,
     },
     relance: {
       label: 'Relance',
       subject: `Re : ${ent} sur Google`,
-      body: `Bonjour,\n\nJe me permets un petit rappel — aucun souci si ce n'est pas le moment.\n\nSi gagner en visibilité pour ${ent} vous intéresse, répondez-moi simplement « oui » et je vous envoie mes idées.${sign}`,
+      body: `${hello}\n\nJe me permets un petit rappel au sujet de mon précédent message — aucun souci si ce n'est pas le moment.\n\nSi gagner en visibilité pour ${ent} vous intéresse, répondez-moi simplement « oui » et je vous envoie mes idées.${sign}`,
     },
     rdv: {
       label: 'Proposer un RDV',
       subject: `15 min pour ${ent} ?`,
-      body: `Bonjour,\n\nPlutôt que de longs emails : on échange 15 minutes ? Je vous montre 2-3 choses simples pour que ${ent} attire plus de clients via son site et Google.\n\nDites-moi un créneau qui vous arrange, je m'adapte.${sign}`,
+      body: `${hello}\n\nPlutôt que de longs emails, je vous propose un échange de 15 minutes : je vous montre 2 ou 3 choses simples pour que ${ent} attire plus de clients via son site et Google.\n\nIndiquez-moi un créneau qui vous arrange, je m'adapte.${sign}`,
     },
     audit: {
       label: 'Audit offert',
       subject: `2 idées pour ${ent}`,
-      body: `Bonjour,\n\nJ'ai regardé rapidement la présence en ligne de ${ent}, et 2 points pourraient vous amener plus de clients${lieu} :\n\n1) (à compléter avec ce que tu observes)\n2) (à compléter)\n\nSi ça vous parle, je vous détaille tout ça en 10 minutes.${sign}`,
+      body: `${hello}\n\nJ'ai regardé la présence en ligne de ${ent} et quelques détails simples pourraient vous amener plus de clients${lieu}.\n\nSi le sujet vous parle, je vous montre tout ça en 10 minutes, sans engagement.${sign}`,
     },
     gmb: {
       label: 'Google / avis',
       subject: `${ent} sur Google`,
-      body: `Bonjour,\n\nQuand quelqu'un cherche un(e) ${sect}${lieu} sur Google, c'est souvent la fiche Google et les avis qui décident où il va. J'aide les pros à mieux y apparaître et à transformer ces recherches en clients.\n\nC'est un sujet pour ${ent} en ce moment ?${sign}`,
+      body: `${hello}\n\nQuand quelqu'un cherche votre métier${lieu} sur Google, ce sont souvent la fiche Google et les avis qui décident où il va. J'aide les pros à mieux y apparaître et à transformer ces recherches en clients.\n\nEst-ce un sujet pour ${ent} en ce moment ?${sign}`,
     },
     offre: {
       label: 'Place dispo',
       subject: `Une place ce mois-ci pour ${ent}`,
-      body: `Bonjour,\n\nJe prends seulement 1 à 2 nouveaux projets par mois, et il me reste une place. Si créer ou refaire le site de ${ent} est dans vos plans, c'est le bon moment pour en parler.\n\nUn créneau de 10 minutes cette semaine ?${sign}`,
+      body: `${hello}\n\nJe prends seulement 1 à 2 nouveaux projets par mois, et il me reste une place. Si créer ou refaire le site de ${ent} fait partie de vos projets, c'est le bon moment pour en parler.\n\nUn créneau de 10 minutes cette semaine ?${sign}`,
     },
   }
 }
@@ -239,14 +270,16 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const useAuditInEmail = () => {
     const lines = audit?.emailLines || []
     if (!lines.length) return
-    const ent = client.entreprise || client.nom
+    const ent = cleanCompany(client.entreprise || client.nom) || 'votre entreprise'
     const lieu = commune ? ` à ${commune}` : ''
+    const prenom = firstNameOf(parseInfo(client.notes).dirigeant)
+    const hello = prenom ? `Bonjour ${prenom},` : 'Bonjour,'
     const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
     const numbered = lines.map((l, i) => `${i + 1}) ${l}`).join('\n')
     const plural = lines.length > 1 ? 's' : ''
     setActive('audit')
     setSubject(`${lines.length} point${plural} à améliorer pour ${ent}`)
-    setBody(`Bonjour,\n\nJe suis tombé sur le site de ${ent}${lieu} et je l'ai regardé en détail. ${lines.length} point${plural} vous font perdre des clients aujourd'hui :\n\n${numbered}\n\nTout cela se corrige rapidement. Si vous voulez, je vous montre comment en 10 minutes — sans engagement.${sign}`)
+    setBody(`${hello}\n\nJe suis tombé sur le site de ${ent}${lieu} et je l'ai regardé en détail. ${lines.length} point${plural} vous font aujourd'hui perdre des clients :\n\n${numbered}\n\nTout cela se corrige rapidement. Si vous le souhaitez, je vous montre comment en 10 minutes — sans engagement.${sign}`)
   }
   // Journalise un appel / SMS dans le suivi
   const logAction = async (kind: 'call' | 'sms' | 'whatsapp') => {

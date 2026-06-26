@@ -39,6 +39,55 @@ const li = (s: string) => `<li style="margin:4px 0">${s}</li>`
 const wrap = (title: string, body: string) =>
   `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#111827"><h2 style="font-size:16px;margin:0 0 12px">${title}</h2>${body}<p style="font-size:12px;color:#9CA3AF;margin-top:16px">— Automatisation vivesmedia.com</p></div>`
 
+// Nettoie un nom d'entreprise open-data (forme juridique + parenthèses + MAJUSCULES) pour l'affichage.
+const LEGAL_FORMS = /\b(SARLU|SARL|SASU|SAS|EURL|EIRL|EI|SNC|SCIC|SCI|SCM|SELARL|SELAS|SCOP|GAEC|SCEA|SA|ETS|ETABLISSEMENTS?)\b\.?/gi
+function cleanCompanyName(raw?: string): string {
+  let s = (raw || '').trim(); if (!s) return 'ce prospect'
+  s = s.replace(/\([^)]*\)/g, ' ').replace(LEGAL_FORMS, ' ').replace(/\s{2,}/g, ' ').trim()
+  const letters = s.replace(/[^A-Za-zÀ-ÿ]/g, '')
+  if (letters && letters === letters.toUpperCase()) s = s.toLowerCase().replace(/\b([a-zà-ÿ])/g, (_m, c: string) => c.toUpperCase())
+  return s || 'ce prospect'
+}
+
+// Audit GRATUIT d'un site (aucune clé externe) → score d'OPPORTUNITÉ /10 :
+// plus le site est faible (pas de HTTPS, pas mobile, lent, builder bas de gamme),
+// plus le score monte (= plus l'argument « refonte » est fort). Voir PROSPECTION/CIBLAGE_SITE_A_REFAIRE.md.
+async function quickAudit(url: string): Promise<{ score10: number; lines: string[]; builder: string; reachable: boolean }> {
+  if (!url) return { score10: 0, lines: [], builder: '', reachable: false }
+  let u: URL
+  try { u = new URL(url) } catch { return { score10: 0, lines: [], builder: '', reachable: false } }
+  const t0 = Date.now()
+  let resp: Response
+  try {
+    const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 10000)
+    resp = await fetch(u.toString(), { redirect: 'follow', signal: ctrl.signal, headers: { 'User-Agent': 'Mozilla/5.0 (compatible; vivesmedia-audit/1.0)' } })
+    clearTimeout(timer)
+  } catch {
+    return { score10: 7, lines: ['le site ne répond pas (ou trop lentement) : vos visiteurs tombent sur une page vide'], builder: '', reachable: false }
+  }
+  const total = Date.now() - t0
+  const isHttps = (resp.url || u.toString()).startsWith('https://')
+  let html = ''
+  try { const buf = await resp.arrayBuffer(); html = Buffer.from(buf.slice(0, 400_000)).toString('utf8') } catch { /* ignore */ }
+  const h = html.toLowerCase()
+  const gen = (html.match(/<meta[^>]+name=["']generator["'][^>]+content=["']([^"']+)/i) || [])[1] || ''
+  const builder = /wix\.com|static\.wixstatic/.test(h) ? 'Wix'
+    : /squarespace/.test(h) ? 'Squarespace'
+    : /jimdo/.test(h) ? 'Jimdo'
+    : /godaddy|website builder/i.test(gen) ? 'GoDaddy'
+    : /e-monsite|pagesperso-orange|perso\.numericable/.test(h) ? 'site perso bas de gamme'
+    : /wp-content|wordpress/.test(h) ? 'WordPress' : gen
+  const viewport = /<meta[^>]+name=["']viewport["']/i.test(html)
+  const metaDesc = /<meta[^>]+name=["']description["']/i.test(html)
+  let s = 0; const lines: string[] = []
+  if (!isHttps) { s += 2; lines.push('site non sécurisé (pas de HTTPS) : Chrome affiche « non sécurisé », Google le déclasse') }
+  if (!viewport) { s += 2; lines.push('pas de version mobile : le site s\'affiche mal sur téléphone (la majorité des visites)') }
+  if (total > 2500) { s += 1; lines.push(`site lent (${(total / 1000).toFixed(1)}s) : une partie des visiteurs part avant l\'affichage`) }
+  if (!metaDesc) { s += 1; lines.push('pas de description Google : moins de clics depuis la recherche') }
+  if (['Wix', 'GoDaddy', 'Jimdo', 'site perso bas de gamme'].includes(builder)) { s += 3; lines.push(`site sur ${builder} : on peut faire plus rapide, mieux référencé et sur-mesure`) }
+  return { score10: Math.min(10, s), lines: lines.slice(0, 4), builder, reachable: true }
+}
+
 // ── Catalogue ──────────────────────────────────────────────────────────────
 export const AUTOMATIONS: Automation[] = [
 
@@ -88,6 +137,44 @@ export const AUTOMATIONS: Automation[] = [
       if ((d?.length ?? 0) > 0 || (c?.length ?? 0) > 0) return { count: 0 }
       await mailAdmin('Activité calme depuis 7 jours', wrap('Aucune nouvelle demande depuis 7 jours', '<p>Pense à relancer ta visibilité : un post, un article, une campagne, ou de la prospection.</p>'))
       return { count: 1 }
+    },
+  },
+
+  // ════════ VENTES — Prospection ════════
+  {
+    id: 'prospect_du_jour', onglet: 'Ventes', cible: 'Clients', cadence: 'quotidien',
+    label: 'Prospect du jour (audit gratuit)',
+    desc: 'Chaque jour : sélectionne 1 prospect ayant un site, l\'audite gratuitement (HTTPS, mobile, vitesse, technologie), calcule un score d\'opportunité /10 et envoie une fiche prête à valider. N\'envoie RIEN au prospect (tu gardes la main sur l\'envoi).',
+    run: async ({ sb, today, mailAdmin, ranToday }) => {
+      if (await ranToday('prospect_du_jour')) return { count: 0 }
+      const { data: rows } = await sb.from('site_clients')
+        .select('id,nom,entreprise,secteur,notes,statut,created_at')
+        .eq('statut', 'prospect')
+        .order('created_at', { ascending: true })
+        .limit(300)
+      // Candidat : a un site dans les notes, pas encore audité automatiquement
+      const candidat = (rows ?? []).find(r => /https?:\/\//.test(r.notes || '') && !/\[audit-auto/.test(r.notes || ''))
+      if (!candidat) {
+        await mailAdmin('Prospection : plus de prospect à auditer', wrap('File d\'audit vide',
+          '<p>Tous les prospects ayant un site ont été audités. Ajoute de nouveaux prospects (open data) dans <b>/cms/clients</b> pour relancer le flux quotidien.</p>'))
+        return { count: 0 }
+      }
+      const site = (String(candidat.notes).match(/https?:\/\/[^\s·]+/) || [])[0] || ''
+      const a = await quickAudit(site)
+      // Bonus secteur « fort ROI site » (proximité)
+      const sect = (candidat.secteur || '').toLowerCase()
+      const bonusSecteur = /restau|pizz|boulang|traiteur|caviste|bouch|coiff|beaut|osteo|kine|dentiste|plomb|electr|menuis|macon|peintr|carrel|paysag|garage|auto|immo|fleur|opticien|sport/.test(sect) ? 1 : 0
+      const score = Math.min(10, a.score10 + bonusSecteur)
+      // Marque la fiche pour ne pas ré-auditer le même prospect
+      await sb.from('site_clients').update({ notes: (candidat.notes || '') + `\n[audit-auto ${today} · score ${score}/10]` }).eq('id', candidat.id)
+      const ent = cleanCompanyName(candidat.entreprise || candidat.nom)
+      const verdict = score >= 6 ? '✅ À CONTACTER en priorité' : score >= 4 ? '🟡 Tiède — à creuser' : '⚪ Peu prioritaire (site déjà correct)'
+      const defauts = a.lines.length
+        ? `<p style="margin:8px 0 4px"><b>Arguments « refonte » à utiliser :</b></p><ul>${a.lines.map(li).join('')}</ul>`
+        : '<p style="margin:8px 0">Site plutôt sain — peu d\'arguments « refonte ». Plutôt un angle SEO/Google.</p>'
+      await mailAdmin(`Prospect du jour : ${ent} — ${score}/10`, wrap(`Prospect du jour — ${verdict}`,
+        `<p><b>${ent}</b>${candidat.secteur ? ` · ${candidat.secteur}` : ''}<br/>Site : ${site || '—'}${a.builder ? ` · ${a.builder}` : ''}${a.reachable ? '' : ' · <b>injoignable</b>'}</p>${defauts}<p style="margin-top:12px">👉 Ouvre la fiche dans <b>/cms/clients</b> (recherche « ${ent} ») pour générer l'email perso (déjà nettoyé) et valider l'envoi.</p>`))
+      return { count: 1, payload: { id: candidat.id, ent, score, contacter: score >= 6 } }
     },
   },
   {
