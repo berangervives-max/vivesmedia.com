@@ -46,6 +46,10 @@ const ctaBtn = (label: string, path: string) =>
   `<a href="${SITE}${path}" style="display:inline-block;margin-top:8px;padding:8px 14px;background:#F4521E;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">${label} →</a>`
 const recoCard = (titre: string, pourquoi: string, impact: string, source: string, cta: string) =>
   `<div style="border:1px solid #EFF0F2;border-radius:12px;padding:14px;margin:0 0 12px"><p style="font-weight:700;margin:0 0 6px;color:#111827">${titre}</p><p style="margin:0 0 6px;color:#374151;font-size:13px">${pourquoi}</p><p style="margin:0 0 4px;color:#166534;font-size:13px">📈 Impact estimé : ${impact}</p><p style="margin:0 0 2px;color:#9CA3AF;font-size:11px">Source : ${source}</p>${cta}</div>`
+// Bloc « post prêt à coller » pour l'email Réseaux sociaux (chantier F).
+const escHtml = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+const postBlock = (platform: string, text: string) =>
+  `<p style="font-weight:700;margin:16px 0 4px;color:#111827">${platform}</p><pre style="white-space:pre-wrap;font-family:-apple-system,Segoe UI,Roboto,sans-serif;font-size:13px;line-height:1.5;color:#1f2937;background:#F8F9FA;border:1px solid #EFF0F2;border-radius:10px;padding:12px;margin:0">${escHtml(text)}</pre>`
 
 // Nettoie un nom d'entreprise open-data (forme juridique + parenthèses + MAJUSCULES) pour l'affichage.
 const LEGAL_FORMS = /\b(SARLU|SARL|SASU|SAS|EURL|EIRL|EI|SNC|SCIC|SCI|SCM|SELARL|SELAS|SCOP|GAEC|SCEA|SA|ETS|ETABLISSEMENTS?)\b\.?/gi
@@ -204,6 +208,47 @@ export const AUTOMATIONS: Automation[] = [
       await mailAdmin(`Tes ${top.length} action(s) de la semaine`, wrap(`Propositions à valider — semaine du ${new Date().toLocaleDateString('fr-FR')}`,
         `<p style="font-size:13px;color:#374151;margin:0 0 14px">Voici ce que je te recommande cette semaine. <b>Rien n'est envoyé automatiquement</b> — clique pour décider.</p>${top.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:8px">Estimations indicatives, calibrées sur une activité solo en démarrage. Elles s'affineront avec tes vraies données (PostHog / Search Console).</p>`))
       return { count: 1, payload: { recos: top.length, abonnes: A, devis_relance: D, prospects: P } }
+    },
+  },
+
+  // ════════ MARKETING — Réseaux sociaux ════════
+  {
+    id: 'social_hebdo', onglet: 'Marketing', cible: 'Réseaux', cadence: 'hebdo',
+    label: 'Posts réseaux de la semaine (à publier)',
+    desc: 'Chaque lundi : prépare 3 posts prêts à coller (LinkedIn + Instagram) à partir de ton dernier article et de ta dernière réalisation, + 1 conseil evergreen. Tu copies-colles et publies — rien n\'est posté automatiquement.',
+    run: async ({ sb, mailAdmin }) => {
+      const blocks: string[] = []
+      // 1) LinkedIn — dernier article publié
+      const today = new Date().toISOString().slice(0, 10)
+      const { data: arts } = await sb.from('articles').select('titre,slug,extrait,categorie').eq('publie', true).lte('date_pub', today).order('date_pub', { ascending: false }).limit(1)
+      const art = arts?.[0] as { titre?: string; slug?: string; extrait?: string; categorie?: string } | undefined
+      if (art?.titre && art.slug) {
+        const tag = (art.categorie || 'web').replace(/[^a-zA-Z0-9]/g, '')
+        const txt = `${art.titre}\n\n${(art.extrait || '').trim()}\n\n👉 À lire en entier : ${SITE}/blog/${art.slug}\n\nUn site qui travaille pour vous, c'est tout l'objet de vivesmedia.com.\n\n#WebVaucluse #SiteInternet #${tag || 'Web'}`
+        blocks.push(postBlock('🔵 LinkedIn — à partir de ton dernier article', txt))
+      }
+      // 2) Instagram — dernière réalisation publiée
+      const { data: reals } = await sb.from('site_realisations').select('name,slug').eq('publie', true).order('created_at', { ascending: false }).limit(1)
+      const real = reals?.[0] as { name?: string; slug?: string } | undefined
+      if (real?.name && real.slug) {
+        const txt = `✨ Nouveau projet en ligne : ${real.name}\n\nUn site sur-mesure, rapide et pensé pour convertir les visiteurs en clients.\n\nDécouvre la réalisation 👉 lien en bio (${SITE}/realisations/${real.slug})\n\n#vivesmedia #créationsite #webdesign #Vaucluse #Avignon`
+        blocks.push(postBlock('🟣 Instagram — à partir de ta dernière réalisation', txt))
+      }
+      // 3) LinkedIn — conseil evergreen (rotation par semaine)
+      const tips = [
+        'Un site qui charge en plus de 3 secondes fait fuir 1 visiteur sur 2. La vitesse, ce n\'est pas un détail technique : c\'est du chiffre d\'affaires.',
+        '80 % de vos futurs clients regardent votre site sur leur téléphone. S\'il n\'est pas pensé mobile d\'abord, vous les perdez avant même qu\'ils vous lisent.',
+        'Une fiche Google complète + quelques avis récents, et vous apparaissez quand quelqu\'un cherche votre métier près de chez lui. C\'est souvent là que tout se joue.',
+        'Votre site doit répondre à UNE question en 5 secondes : « est-ce que c\'est pour moi ? ». Si le visiteur doit chercher, il part.',
+      ]
+      const wk = Math.floor((Date.now() - Date.UTC(new Date().getUTCFullYear(), 0, 1)) / (7 * DAY))
+      const tip = tips[wk % tips.length]
+      blocks.push(postBlock('🔵 LinkedIn — conseil de la semaine', `${tip}\n\nC'est exactement ce sur quoi je travaille pour les pros du Vaucluse.\n\nUn doute sur votre site actuel ? Écrivez-moi, je vous dis ce qui peut être amélioré.\n\n#WebVaucluse #SiteInternet #Avignon`))
+
+      if (!blocks.length) return { count: 0 }
+      await mailAdmin('Tes posts réseaux de la semaine', wrap('À publier cette semaine',
+        `<p style="font-size:13px;color:#374151;margin:0 0 8px">3 posts prêts à copier-coller. Adapte une phrase si tu veux, ajoute ta photo/visuel, et publie. <b>Rien n'est posté automatiquement.</b></p>${blocks.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:10px">Astuce : LinkedIn le mardi/jeudi 8-9h, Instagram le soir 18-20h convertissent le mieux.</p>`))
+      return { count: 1, payload: { posts: blocks.length } }
     },
   },
 
