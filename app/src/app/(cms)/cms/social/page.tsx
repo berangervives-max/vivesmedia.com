@@ -4,11 +4,17 @@ import { socialPostsService } from '@/services/supabase.service'
 import type { SocialPost, SocialPlateforme, SocialFormat, SocialStatut } from '@/types'
 import Kpis from '@/components/cms/Kpis'
 import VoiceInput from '@/components/cms/VoiceInput'
-import { Plus, Pencil, Trash2, Briefcase, Camera, CalendarClock, Send, Clock, CheckCircle2, X, Link as LinkIcon, Hash } from 'lucide-react'
+import { Plus, Trash2, Briefcase, Camera, CalendarClock, Send, Clock, CheckCircle2, X, Link as LinkIcon, Hash, ChevronLeft, ChevronRight } from 'lucide-react'
 
 // lucide v1 n'a pas d'icônes de marque → on mappe : LinkedIn = Briefcase (pro), Instagram = Camera.
 const LinkedinIcon = Briefcase
 const InstagramIcon = Camera
+
+// ── Helpers calendrier (semaine du lundi au dimanche) ──
+const DAYS = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim']
+function mondayOf(d: Date) { const x = new Date(d); const off = (x.getDay() + 6) % 7; x.setDate(x.getDate() - off); x.setHours(0, 0, 0, 0); return x }
+function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDate() + n); return x }
+function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
 const EMPTY: Omit<SocialPost, 'id' | 'created_at' | 'updated_at'> = {
   plateforme: 'linkedin', format: 'carrousel', titre: '', legende: '', hashtags: '', lien: '', visuel_url: '',
@@ -27,11 +33,11 @@ const FORMATS: Record<SocialPlateforme, { v: SocialFormat; label: string }[]> = 
     { v: 'story_alaune', label: 'Story à la une (permanente)' },
   ],
 }
-const STATUTS: { v: SocialStatut; label: string; cls: string }[] = [
-  { v: 'idee', label: 'Idée', cls: 'bg-gray-100 text-gray-600' },
-  { v: 'a_valider', label: 'À valider', cls: 'bg-amber-100 text-amber-700' },
-  { v: 'planifie', label: 'Planifié', cls: 'bg-blue-100 text-blue-700' },
-  { v: 'publie', label: 'Publié', cls: 'bg-green-100 text-green-700' },
+const STATUTS: { v: SocialStatut; label: string; cls: string; dot: string }[] = [
+  { v: 'idee', label: 'Idée', cls: 'bg-gray-100 text-gray-600', dot: '#9CA3AF' },
+  { v: 'a_valider', label: 'À valider', cls: 'bg-amber-100 text-amber-700', dot: '#D97706' },
+  { v: 'planifie', label: 'Planifié', cls: 'bg-blue-100 text-blue-700', dot: '#2563EB' },
+  { v: 'publie', label: 'Publié', cls: 'bg-green-100 text-green-700', dot: '#16A34A' },
 ]
 const statutMeta = (s: SocialStatut) => STATUTS.find(x => x.v === s) || STATUTS[0]
 
@@ -57,6 +63,7 @@ export default function CmsSocialPage() {
   const [form, setForm] = useState<Omit<SocialPost, 'id' | 'created_at' | 'updated_at'>>({ ...EMPTY })
   const [saving, setSaving] = useState(false)
   const [err, setErr] = useState<string | null>(null)
+  const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()))
 
   const load = () => socialPostsService.getAll().then(setPosts).catch(e => setErr(e.message?.includes('social_posts') ? 'table_absente' : e.message))
   useEffect(() => { load() }, [])
@@ -67,6 +74,11 @@ export default function CmsSocialPage() {
       plateforme: p.plateforme, format: p.format, titre: p.titre, legende: p.legende, hashtags: p.hashtags,
       lien: p.lien, visuel_url: p.visuel_url, date_prevue: p.date_prevue, statut: p.statut,
     } : { ...EMPTY })
+  }
+
+  const openAt = (date: string, plat: SocialPlateforme) => {
+    setEditing('new')
+    setForm({ ...EMPTY, date_prevue: date, plateforme: plat, format: FORMATS[plat][0].v })
   }
 
   const save = async (e: React.FormEvent) => {
@@ -161,6 +173,11 @@ export default function CmsSocialPage() {
       <div className="flex gap-3 mt-5">
         <button type="submit" disabled={saving} className="px-5 py-2.5 rounded-lg text-white text-sm font-semibold disabled:opacity-50" style={{ background: '#F4521E' }}>{saving ? 'Enregistrement…' : 'Enregistrer'}</button>
         <button type="button" onClick={() => setEditing(null)} className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>Annuler</button>
+        {editing && editing !== 'new' && (
+          <button type="button" onClick={() => { del(editing); setEditing(null) }} className="ml-auto flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid #FECACA', color: '#DC2626' }}>
+            <Trash2 className="w-4 h-4" /> Supprimer
+          </button>
+        )}
       </div>
     </form>
   )
@@ -185,40 +202,80 @@ export default function CmsSocialPage() {
         { label: 'Publiés', value: posts.filter(p => p.statut === 'publie').length, icon: CheckCircle2, color: '#16A34A' },
       ]} />
 
-      {posts.length === 0 && (
-        <div className="rounded-xl p-12 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>
-          Aucun post planifié. Clique « Nouveau post » — ou attends le lundi : l&apos;automatisation « Posts réseaux de la semaine » t&apos;en proposera.
+      {/* Navigation de semaine */}
+      <div className="flex items-center justify-between mb-3">
+        <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }} title="Semaine précédente"><ChevronLeft className="w-4 h-4" style={{ color: '#6B7280' }} /></button>
+        <p className="text-sm font-semibold" style={{ color: '#111827' }}>
+          Semaine du {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au {addDays(weekStart, 6).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+        </p>
+        <div className="flex gap-2">
+          <button onClick={() => setWeekStart(mondayOf(new Date()))} className="text-xs px-3 py-1.5 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>Aujourd&apos;hui</button>
+          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }} title="Semaine suivante"><ChevronRight className="w-4 h-4" style={{ color: '#6B7280' }} /></button>
         </div>
-      )}
+      </div>
 
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {posts.map(p => {
-          const sm = statutMeta(p.statut)
-          const Plat = p.plateforme === 'linkedin' ? LinkedinIcon : InstagramIcon
+      {/* Calendrier : jours en lignes, plateformes en colonnes */}
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #E9ECEF' }}>
+        <div className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', background: '#F8F9FA', borderBottom: '1px solid #E9ECEF' }}>
+          <div className="p-2.5" />
+          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#0A66C2', borderLeft: '1px solid #E9ECEF' }}><LinkedinIcon className="w-3.5 h-3.5" /> LinkedIn</div>
+          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#C13584', borderLeft: '1px solid #E9ECEF' }}><InstagramIcon className="w-3.5 h-3.5" /> Instagram</div>
+        </div>
+        {DAYS.map((dlabel, i) => {
+          const day = addDays(weekStart, i)
+          const ds = ymd(day)
+          const isToday = ds === ymd(new Date())
+          const cell = (plat: SocialPlateforme) => (
+            <div className="p-2 space-y-1 group" style={{ borderLeft: '1px solid #E9ECEF', minHeight: 60 }}>
+              {posts.filter(p => p.date_prevue === ds && p.plateforme === plat).map(p => {
+                const sm = statutMeta(p.statut)
+                return (
+                  <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-2 py-1 rounded-md hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sm.dot }} />
+                    <span className="text-[11px] truncate" style={{ color: '#374151' }}>{p.titre || p.format}</span>
+                  </button>
+                )
+              })}
+              <button onClick={() => openAt(ds, plat)} className="w-full text-[11px] py-1 rounded-md opacity-0 group-hover:opacity-100 transition" style={{ color: '#9CA3AF', border: '1px dashed #E5E7EB' }}>+ ajouter</button>
+            </div>
+          )
           return (
-            <div key={p.id} className="rounded-xl overflow-hidden flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-              {p.visuel_url ? <img src={p.visuel_url} alt="" className="w-full h-32 object-cover" /> : <div className="w-full h-32 flex items-center justify-center" style={{ background: '#F8F9FA' }}><Plat className="w-7 h-7" style={{ color: '#D1D5DB' }} /></div>}
-              <div className="p-4 flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="flex items-center gap-1.5 text-xs font-semibold" style={{ color: p.plateforme === 'linkedin' ? '#0A66C2' : '#C13584' }}>
-                    <Plat className="w-3.5 h-3.5" /> {p.format}
-                  </span>
-                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${sm.cls}`}>{sm.label}</span>
-                </div>
-                <p className="text-sm font-bold mb-1" style={{ color: '#111827' }}>{p.titre || '(sans titre)'}</p>
-                <p className="text-xs leading-relaxed mb-3 flex-1" style={{ color: '#6B7280' }}>{(p.legende || '').slice(0, 110)}{(p.legende || '').length > 110 ? '…' : ''}</p>
-                <div className="flex items-center justify-between pt-2" style={{ borderTop: '1px solid #F1F3F5' }}>
-                  <span className="text-[11px]" style={{ color: '#9CA3AF' }}>{p.date_prevue ? new Date(p.date_prevue).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : 'pas de date'}</span>
-                  <div className="flex gap-1">
-                    <button onClick={() => open(p)} className="p-1.5 rounded-md" style={{ border: '1px solid #E5E7EB' }} title="Modifier"><Pencil className="w-3.5 h-3.5" style={{ color: '#6B7280' }} /></button>
-                    <button onClick={() => del(p.id)} className="p-1.5 rounded-md" style={{ border: '1px solid #E5E7EB' }} title="Supprimer"><Trash2 className="w-3.5 h-3.5" style={{ color: '#EF4444' }} /></button>
-                  </div>
-                </div>
+            <div key={dlabel} className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', borderBottom: i < 6 ? '1px solid #F1F3F5' : 'none', background: isToday ? '#FFF7F4' : '#fff' }}>
+              <div className="p-2.5 flex flex-col justify-center">
+                <span className="text-xs font-bold" style={{ color: isToday ? '#F4521E' : '#111827' }}>{dlabel}</span>
+                <span className="text-[10px]" style={{ color: '#9CA3AF' }}>{day.getDate()}</span>
               </div>
+              {cell('linkedin')}
+              {cell('instagram')}
             </div>
           )
         })}
       </div>
+
+      {/* Posts sans date ou hors de la semaine affichée */}
+      {(() => {
+        const weekDates = new Set(DAYS.map((_, i) => ymd(addDays(weekStart, i))))
+        const others = posts.filter(p => !p.date_prevue || !weekDates.has(p.date_prevue))
+        if (!others.length) return null
+        return (
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>À planifier (sans date ou hors semaine) — {others.length}</p>
+            <div className="flex flex-wrap gap-2">
+              {others.map(p => {
+                const sm = statutMeta(p.statut)
+                const Plat = p.plateforme === 'linkedin' ? LinkedinIcon : InstagramIcon
+                return (
+                  <button key={p.id} onClick={() => open(p)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+                    <Plat className="w-3 h-3" style={{ color: p.plateforme === 'linkedin' ? '#0A66C2' : '#C13584' }} />
+                    <span className="truncate max-w-[160px]" style={{ color: '#374151' }}>{p.titre || p.format}</span>
+                    <span className="w-1.5 h-1.5 rounded-full" style={{ background: sm.dot }} />
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
 
       <p className="text-xs mt-5 flex items-center gap-1.5" style={{ color: '#9CA3AF' }}>
         <Send className="w-3 h-3" /> Astuce : sur Instagram, seule la <b>story</b> permet un lien cliquable — planifie 1 story/semaine vers une page de conversion.
