@@ -13,6 +13,8 @@ const WEBMAIL = ['gmail.', 'orange.fr', 'free.fr', 'wanadoo.fr', 'hotmail.', 'ou
 
 const parseCommune = (n?: string) => (n?.match(/·\s*([^·]+?)\s*\(8\d{4}\)/) || [])[1] || ''
 const parseScore = (n?: string) => { const m = n?.match(/score\s+(\d+)\/10/i); return m ? parseInt(m[1]) : 0 }
+// Canal de prospection recommandé, issu du tag de nettoyage [clean … reco=X]
+const parseReco = (n?: string) => (n?.match(/reco=([A-Z]+)/) || [])[1] || ''
 const emailKind = (e?: string) => { if (!e) return 'none'; const d = (e.split('@')[1] || '').toLowerCase(); return WEBMAIL.some(w => d.includes(w)) ? 'perso' : 'pro' }
 const isContacted = (c: Client) => !!c.notes?.includes('EMAIL ENVOYÉ')
 const hasContact = (c: Client) => !!(c.email || c.telephone)
@@ -46,7 +48,7 @@ const SECTOR_CAT: Record<string, keyof typeof CAT_STYLE> = {
 }
 const sectorStyle = (s?: string) => CAT_STYLE[SECTOR_CAT[s || ''] || 'autre']
 
-type Segment = 'tous' | 'prospects' | 'a_contacter' | 'contactes' | 'clients' | 'sans_coord'
+type Segment = 'tous' | 'prospects' | 'a_contacter' | 'contactes' | 'clients' | 'sans_coord' | 'sms' | 'email' | 'recherche' | 'ecarter'
 
 export default function CmsClientsPage() {
   const [clients, setClients] = useState<Client[]>([])
@@ -95,6 +97,10 @@ export default function CmsClientsPage() {
     a_contacter: clients.filter(c => c.statut === 'prospect' && hasContact(c) && !isContacted(c)).length,
     contactes: clients.filter(c => isContacted(c)).length,
     sans_coord: clients.filter(c => c.statut === 'prospect' && !hasContact(c)).length,
+    sms: clients.filter(c => parseReco(c.notes) === 'SMS').length,
+    email: clients.filter(c => parseReco(c.notes) === 'EMAIL').length,
+    recherche: clients.filter(c => parseReco(c.notes) === 'RECHERCHE').length,
+    ecarter: clients.filter(c => parseReco(c.notes) === 'DROP').length,
   }), [clients])
 
   const secteurs = useMemo(() => Array.from(new Set(clients.map(c => c.secteur).filter(Boolean))).sort() as string[], [clients])
@@ -106,6 +112,10 @@ export default function CmsClientsPage() {
       case 'a_contacter': return c.statut === 'prospect' && hasContact(c) && !isContacted(c)
       case 'contactes': return isContacted(c)
       case 'sans_coord': return c.statut === 'prospect' && !hasContact(c)
+      case 'sms': return parseReco(c.notes) === 'SMS'
+      case 'email': return parseReco(c.notes) === 'EMAIL'
+      case 'recherche': return parseReco(c.notes) === 'RECHERCHE'
+      case 'ecarter': return parseReco(c.notes) === 'DROP'
       default: return true
     }
   }
@@ -176,6 +186,10 @@ export default function CmsClientsPage() {
     { key: 'contactes', label: 'Contactés', n: counts.contactes },
     { key: 'clients', label: 'Clients', n: counts.clients },
     { key: 'sans_coord', label: 'Sans coordonnées', n: counts.sans_coord },
+    { key: 'sms', label: '📱 SMS-ready', n: counts.sms },
+    { key: 'email', label: '📧 Email-ready', n: counts.email },
+    { key: 'recherche', label: '🔎 À rechercher', n: counts.recherche },
+    { key: 'ecarter', label: '🗑️ À écarter', n: counts.ecarter },
   ]
 
   return (
