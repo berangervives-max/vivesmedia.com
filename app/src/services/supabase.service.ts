@@ -1,6 +1,33 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
-import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation } from '@/types'
+import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation, SocialPost } from '@/types'
 import type { RealisationData } from '@/data/realisations-data'
+
+// ── RÉSEAUX SOCIAUX (calendrier éditorial) ──────────────────────
+export const socialPostsService = {
+  async getAll() {
+    const sb = createClient()
+    const { data, error } = await sb.from('social_posts').select('*').order('date_prevue', { ascending: true, nullsFirst: false }).order('created_at', { ascending: false })
+    if (error) throw error
+    return data as SocialPost[]
+  },
+  async create(payload: Omit<SocialPost, 'id' | 'created_at' | 'updated_at'>) {
+    const sb = createClient()
+    const { data, error } = await sb.from('social_posts').insert(payload).select().single()
+    if (error) throw error
+    return data as SocialPost
+  },
+  async update(id: string, payload: Partial<SocialPost>) {
+    const sb = createClient()
+    const { data, error } = await sb.from('social_posts').update(payload).eq('id', id).select().single()
+    if (error) throw error
+    return data as SocialPost
+  },
+  async delete(id: string) {
+    const sb = createClient()
+    const { error } = await sb.from('social_posts').delete().eq('id', id)
+    if (error) throw error
+  },
+}
 
 // ── CLIENTS ──────────────────────────────────────────────────
 export const clientsService = {

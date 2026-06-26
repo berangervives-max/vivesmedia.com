@@ -143,6 +143,24 @@ export interface Temoignage {
   created_at: string
 }
 
+export type SocialPlateforme = 'linkedin' | 'instagram'
+export type SocialFormat = 'carrousel' | 'reel' | 'post' | 'story'
+export type SocialStatut = 'idee' | 'a_valider' | 'planifie' | 'publie'
+export interface SocialPost {
+  id: string
+  plateforme: SocialPlateforme
+  format: SocialFormat
+  titre: string
+  legende: string
+  hashtags: string
+  lien: string
+  visuel_url: string
+  date_prevue: string | null
+  statut: SocialStatut
+  created_at: string
+  updated_at: string
+}
+
 export interface Newsletter {
   id: string
   email: string
