@@ -1,6 +1,27 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
-import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation, SocialPost } from '@/types'
+import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation, SocialPost, Proposal } from '@/types'
 import type { RealisationData } from '@/data/realisations-data'
+
+// ── PROPOSITIONS À VALIDER (cockpit) ────────────────────────────
+export const proposalsService = {
+  async getAll() {
+    const sb = createClient()
+    const { data, error } = await sb.from('proposals').select('*').order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Proposal[]
+  },
+  async update(id: string, payload: Partial<Proposal>) {
+    const sb = createClient()
+    const { data, error } = await sb.from('proposals').update(payload).eq('id', id).select().single()
+    if (error) throw error
+    return data as Proposal
+  },
+  async delete(id: string) {
+    const sb = createClient()
+    const { error } = await sb.from('proposals').delete().eq('id', id)
+    if (error) throw error
+  },
+}
 
 // ── RÉSEAUX SOCIAUX (calendrier éditorial) ──────────────────────
 export const socialPostsService = {

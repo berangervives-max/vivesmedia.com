@@ -143,6 +143,25 @@ export interface Temoignage {
   created_at: string
 }
 
+export type ProposalType = 'post_social' | 'email' | 'campagne' | 'visuel' | 'veille' | 'autre'
+export type ProposalStatut = 'a_valider' | 'valide' | 'refuse'
+export interface Proposal {
+  id: string
+  type: ProposalType
+  titre: string
+  recherche: string      // ce que l'agent a cherché / compris (+ sources)
+  contenu: string        // le contenu proposé (légende, texte email, action…)
+  visuel_url: string
+  ton: string            // ton choisi + pourquoi (conversion + SEO)
+  retombees: string      // retombées estimées, sourcées et proratées
+  cible_url: string      // lien vers l'onglet d'exécution
+  statut: ProposalStatut
+  modif_demandee: string // modif dictée/écrite par Béranger
+  source: string         // quel agent / automatisation a proposé
+  created_at: string
+  updated_at: string
+}
+
 export type SocialPlateforme = 'linkedin' | 'instagram'
 export type SocialFormat = 'carrousel' | 'reel' | 'post' | 'story'
 export type SocialStatut = 'idee' | 'a_valider' | 'planifie' | 'publie'

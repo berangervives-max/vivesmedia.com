@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
   BookOpen, Star, Mail, BarChart3, Globe, CalendarDays, Send,
   Zap, Settings, LogOut, Menu, X, ExternalLink, Briefcase,
-  Package, GraduationCap, Activity, Share2
+  Package, GraduationCap, Activity, Share2, CheckCircle2
 } from 'lucide-react'
 
 const NAV_SECTIONS = [
@@ -15,6 +15,7 @@ const NAV_SECTIONS = [
     label: 'Pilotage',
     items: [
       { href: '/cms/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { href: '/cms/validation', label: 'À valider', icon: CheckCircle2 },
       { href: '/cms/stats', label: 'Statistiques', icon: BarChart3 },
       { href: '/cms/trafic', label: 'Trafic web', icon: Globe },
     ],
