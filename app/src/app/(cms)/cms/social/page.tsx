@@ -246,8 +246,10 @@ export default function CmsSocialPage() {
               {posts.filter(p => p.date_prevue === ds && p.plateforme === plat).sort((a, b) => (a.heure || '').localeCompare(b.heure || '')).map(p => {
                 const sm = statutMeta(p.statut)
                 return (
-                  <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-2 py-1 rounded-md hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sm.dot }} />
+                  <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+                    {p.visuel_url
+                      ? <img src={p.visuel_url} alt="" className="w-6 h-6 rounded object-cover shrink-0" />
+                      : <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sm.dot }} />}
                     {p.heure ? <span className="text-[10px] font-semibold shrink-0" style={{ color: '#9CA3AF' }}>{p.heure}</span> : null}
                     <span className="text-[11px] truncate" style={{ color: '#374151' }}>{p.titre || p.format}</span>
                   </button>
