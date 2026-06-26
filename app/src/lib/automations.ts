@@ -40,6 +40,13 @@ const li = (s: string) => `<li style="margin:4px 0">${s}</li>`
 const wrap = (title: string, body: string) =>
   `<div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#111827"><h2 style="font-size:16px;margin:0 0 12px">${title}</h2>${body}<p style="font-size:12px;color:#9CA3AF;margin-top:16px">— Automatisation vivesmedia.com</p></div>`
 
+// Bouton CTA + carte de recommandation pour l'email « Conseiller hebdo » (chantier E).
+const SITE = 'https://vivesmedia.com'
+const ctaBtn = (label: string, path: string) =>
+  `<a href="${SITE}${path}" style="display:inline-block;margin-top:8px;padding:8px 14px;background:#F4521E;color:#fff;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">${label} →</a>`
+const recoCard = (titre: string, pourquoi: string, impact: string, source: string, cta: string) =>
+  `<div style="border:1px solid #EFF0F2;border-radius:12px;padding:14px;margin:0 0 12px"><p style="font-weight:700;margin:0 0 6px;color:#111827">${titre}</p><p style="margin:0 0 6px;color:#374151;font-size:13px">${pourquoi}</p><p style="margin:0 0 4px;color:#166534;font-size:13px">📈 Impact estimé : ${impact}</p><p style="margin:0 0 2px;color:#9CA3AF;font-size:11px">Source : ${source}</p>${cta}</div>`
+
 // Nettoie un nom d'entreprise open-data (forme juridique + parenthèses + MAJUSCULES) pour l'affichage.
 const LEGAL_FORMS = /\b(SARLU|SARL|SASU|SAS|EURL|EIRL|EI|SNC|SCIC|SCI|SCM|SELARL|SELAS|SCOP|GAEC|SCEA|SA|ETS|ETABLISSEMENTS?)\b\.?/gi
 function cleanCompanyName(raw?: string): string {
@@ -138,6 +145,65 @@ export const AUTOMATIONS: Automation[] = [
       if ((d?.length ?? 0) > 0 || (c?.length ?? 0) > 0) return { count: 0 }
       await mailAdmin('Activité calme depuis 7 jours', wrap('Aucune nouvelle demande depuis 7 jours', '<p>Pense à relancer ta visibilité : un post, un article, une campagne, ou de la prospection.</p>'))
       return { count: 1 }
+    },
+  },
+
+  // ════════ PILOTAGE — Conseiller (propositions à valider) ════════
+  {
+    id: 'conseiller_hebdo', onglet: 'Pilotage', cible: 'Dashboard', cadence: 'hebdo',
+    label: 'Conseiller hebdo (propositions à valider)',
+    desc: 'Chaque lundi : analyse tes données et propose 2 à 4 actions concrètes (newsletter, relance devis, article, prospection) avec impact estimé sourcé et un lien 1-clic vers le bon onglet. Ne lance RIEN automatiquement — tu valides.',
+    run: async ({ sb, ago, mailAdmin }) => {
+      const recos: string[] = []
+      // 1) Newsletter — abonnés actifs + aucune campagne depuis 14 j
+      const { data: subs } = await sb.from('newsletter').select('id').eq('actif', true)
+      const A = subs?.length ?? 0
+      const { data: lastCamp } = await sb.from('automation_logs').select('created_at').eq('type', 'campagne').order('created_at', { ascending: false }).limit(1)
+      const lastAt = lastCamp?.[0]?.created_at as string | undefined
+      if (A > 0 && (!lastAt || new Date(lastAt).getTime() < Date.now() - 14 * DAY)) {
+        const opens = Math.round(A * 0.37), clics = Math.max(1, Math.round(A * 0.025))
+        recos.push(recoCard('Envoyer une newsletter',
+          `Tu as <b>${A}</b> abonné(s) actif(s) et aucune campagne depuis 2 semaines. Entretenir le lien ramène du trafic et des opportunités.`,
+          `~${opens} ouverture(s) et ~${clics} clic(s) vers ton site`,
+          'taux d\'ouverture moyen TPE 35-40 %, CTR ~2,5 % (benchmarks email 2025)',
+          ctaBtn('Composer la campagne', '/cms/campagnes')))
+      }
+      // 2) Relance des devis « nouveau » depuis +3 j
+      const { data: dev } = await sb.from('devis').select('id').eq('statut', 'nouveau').lte('created_at', ago(3))
+      const D = dev?.length ?? 0
+      if (D > 0) {
+        const recup = Math.max(1, Math.round(D * 0.12))
+        recos.push(recoCard('Relancer les devis sans réponse',
+          `<b>${D}</b> demande(s) de devis non traitée(s) depuis plus de 3 jours. Une relance rattrape une partie des opportunités.`,
+          `~${recup} devis potentiellement réactivé(s)`,
+          'une relance récupère ~10-15 % des opportunités dormantes (études sales follow-up)',
+          ctaBtn('Voir les devis', '/cms/devis')))
+      }
+      // 3) Article SEO — rien publié depuis 10 j
+      const { data: pub } = await sb.from('articles').select('id').eq('publie', true).gte('date_pub', ago(10))
+      if ((pub?.length ?? 0) === 0) {
+        recos.push(recoCard('Publier un article',
+          'Aucun article publié depuis 10 jours. Un article local bien ciblé construit ta visibilité Google sur la durée.',
+          'effet SEO progressif sur 3-6 mois (domaine jeune) — investissement long terme',
+          'Google met plusieurs mois à classer un nouveau contenu sur un domaine récent',
+          ctaBtn('Gérer le blog', '/cms/articles')))
+      }
+      // 4) Prospection — prospects en base
+      const { data: pros } = await sb.from('site_clients').select('id').eq('statut', 'prospect')
+      const P = pros?.length ?? 0
+      if (P > 0) {
+        const rep = Math.max(1, Math.round(Math.min(P, 20) * 0.03))
+        recos.push(recoCard('Contacter des prospects',
+          `<b>${P}</b> prospect(s) en base. À 3-5 emails personnalisés par jour, tu entretiens un flux régulier d\'opportunités.`,
+          `à 3 % de réponse, ~${rep} réponse(s) sur 20 contacts ciblés`,
+          'taux de réponse cold email B2B ciblé ~1-5 % (benchmarks 2025)',
+          ctaBtn('Ouvrir la prospection', '/cms/clients')))
+      }
+      if (!recos.length) return { count: 0 }
+      const top = recos.slice(0, 4)
+      await mailAdmin(`Tes ${top.length} action(s) de la semaine`, wrap(`Propositions à valider — semaine du ${new Date().toLocaleDateString('fr-FR')}`,
+        `<p style="font-size:13px;color:#374151;margin:0 0 14px">Voici ce que je te recommande cette semaine. <b>Rien n'est envoyé automatiquement</b> — clique pour décider.</p>${top.join('')}<p style="font-size:11px;color:#9CA3AF;margin-top:8px">Estimations indicatives, calibrées sur une activité solo en démarrage. Elles s'affineront avec tes vraies données (PostHog / Search Console).</p>`))
+      return { count: 1, payload: { recos: top.length, abonnes: A, devis_relance: D, prospects: P } }
     },
   },
 
