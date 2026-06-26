@@ -1,5 +1,5 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { socialPostsService } from '@/services/supabase.service'
 import type { SocialPost, SocialPlateforme, SocialFormat, SocialStatut } from '@/types'
 import Kpis from '@/components/cms/Kpis'
@@ -78,6 +78,22 @@ export default function CmsSocialPage() {
 
   const load = () => socialPostsService.getAll().then(setPosts).catch(e => setErr(e.message?.includes('social_posts') ? 'table_absente' : e.message))
   useEffect(() => { load() }, [])
+
+  // À l'arrivée des posts : si la semaine affichée est vide, sauter à la semaine
+  // qui contient le prochain post planifié (sinon le calendrier paraît « vide »).
+  const jumped = useRef(false)
+  useEffect(() => {
+    if (jumped.current || !posts.length) return
+    const dated = posts.map(p => p.date_prevue).filter((d): d is string => !!d).sort()
+    if (!dated.length) { jumped.current = true; return }
+    const ws = ymd(weekStart), we = ymd(addDays(weekStart, 6))
+    if (!dated.some(d => d >= ws && d <= we)) {
+      const today = ymd(new Date())
+      const next = dated.find(d => d >= today) || dated[0]
+      setWeekStart(mondayOf(new Date(next + 'T00:00:00')))
+    }
+    jumped.current = true
+  }, [posts, weekStart])
 
   const open = (p?: SocialPost) => {
     setEditing(p?.id || 'new')
