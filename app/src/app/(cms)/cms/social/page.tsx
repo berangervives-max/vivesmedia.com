@@ -17,8 +17,15 @@ const EMPTY: Omit<SocialPost, 'id' | 'created_at' | 'updated_at'> = {
 
 const PLATEFORMES: { v: SocialPlateforme; label: string }[] = [{ v: 'linkedin', label: 'LinkedIn' }, { v: 'instagram', label: 'Instagram' }]
 const FORMATS: Record<SocialPlateforme, { v: SocialFormat; label: string }[]> = {
-  linkedin: [{ v: 'carrousel', label: 'Carrousel (PDF)' }, { v: 'post', label: 'Post texte' }],
-  instagram: [{ v: 'reel', label: 'Reel (vidéo)' }, { v: 'carrousel', label: 'Carrousel (images)' }, { v: 'post', label: 'Post (image)' }, { v: 'story', label: 'Story (lien cliquable)' }],
+  linkedin: [{ v: 'carrousel', label: 'Carrousel (PDF)' }, { v: 'post', label: 'Post texte' }, { v: 'video', label: 'Vidéo' }],
+  instagram: [
+    { v: 'reel', label: 'Reel (vidéo, hors grille)' },
+    { v: 'reel_grille', label: 'Reel affiché sur la grille' },
+    { v: 'post', label: 'Post image (grille)' },
+    { v: 'carrousel', label: 'Carrousel d\'images (grille)' },
+    { v: 'story', label: 'Story (lien cliquable)' },
+    { v: 'story_alaune', label: 'Story à la une (permanente)' },
+  ],
 }
 const STATUTS: { v: SocialStatut; label: string; cls: string }[] = [
   { v: 'idee', label: 'Idée', cls: 'bg-gray-100 text-gray-600' },
@@ -31,9 +38,12 @@ const statutMeta = (s: SocialStatut) => STATUTS.find(x => x.v === s) || STATUTS[
 // Conseils inline tirés du playbook STRATEGIE_SOCIALE_2026.md
 const TIPS: Record<SocialFormat, string> = {
   carrousel: 'Slide 1 = hook fort · 1 idée/slide · dernière slide = 1 seul CTA · lien en légende/commentaire (pas dans le PDF).',
-  reel: '< 60 s · 9:16 · hook dans les 3 premières secondes · sous-titres · CTA « DM-moi SITE ».',
-  post: 'Hook en 1re ligne (avant « plus ») · 1 idée · finir par une question.',
-  story: 'Le SEUL format Instagram avec lien cliquable → mets le sticker « Lien » vers une page de conversion.',
+  reel: '< 60 s · 9:16 · hook dans les 3 premières secondes · sous-titres · CTA « DM-moi SITE ». Découverte (+36 % reach).',
+  reel_grille: 'Même règles qu\'un Reel, mais gardé sur la grille du profil → preuve d\'activité visible. Réglage à la publication.',
+  post: 'Image soignée (vitrine/réalisation) · hook en 1re ligne · 1 idée · finir par une question.',
+  story: 'Le SEUL format Instagram avec lien cliquable → sticker « Lien » vers une page de conversion. + sticker sondage/question.',
+  story_alaune: 'Story épinglée en « À la une » = menu permanent du profil (Réalisations, Avis, Tarifs, Contact). Le visiteur froid s\'y renseigne.',
+  video: 'Vidéo native (sous-titres, hook 3 s). Sur LinkedIn, garde-la courte et orientée valeur.',
 }
 
 const inputCls = 'w-full px-3 py-2 rounded-lg text-sm outline-none'

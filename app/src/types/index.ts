@@ -163,7 +163,7 @@ export interface Proposal {
 }
 
 export type SocialPlateforme = 'linkedin' | 'instagram'
-export type SocialFormat = 'carrousel' | 'reel' | 'post' | 'story'
+export type SocialFormat = 'carrousel' | 'reel' | 'reel_grille' | 'post' | 'story' | 'story_alaune' | 'video'
 export type SocialStatut = 'idee' | 'a_valider' | 'planifie' | 'publie'
 export interface SocialPost {
   id: string
