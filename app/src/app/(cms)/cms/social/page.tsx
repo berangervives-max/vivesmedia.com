@@ -18,7 +18,18 @@ function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).pa
 
 const EMPTY: Omit<SocialPost, 'id' | 'created_at' | 'updated_at'> = {
   plateforme: 'linkedin', format: 'carrousel', titre: '', legende: '', hashtags: '', lien: '', visuel_url: '',
-  date_prevue: new Date().toISOString().slice(0, 10), statut: 'idee',
+  date_prevue: new Date().toISOString().slice(0, 10), heure: '09:00', statut: 'idee',
+}
+
+// Dimensions/format recommandés du visuel par type (le « bon format »).
+const FORMAT_DIMS: Record<SocialFormat, string> = {
+  carrousel: '1080×1350 px (portrait 4:5) ou 1080×1080 (carré)',
+  reel: '1080×1920 px (vertical 9:16) · vidéo < 60 s',
+  reel_grille: '1080×1920 px (9:16) · vidéo < 60 s',
+  post: '1080×1350 px (4:5) ou 1080×1080 (carré)',
+  story: '1080×1920 px (9:16)',
+  story_alaune: '1080×1920 px (9:16)',
+  video: '1920×1080 px (paysage 16:9) ou 1080×1080 (carré)',
 }
 
 const PLATEFORMES: { v: SocialPlateforme; label: string }[] = [{ v: 'linkedin', label: 'LinkedIn' }, { v: 'instagram', label: 'Instagram' }]
@@ -72,7 +83,7 @@ export default function CmsSocialPage() {
     setEditing(p?.id || 'new')
     setForm(p ? {
       plateforme: p.plateforme, format: p.format, titre: p.titre, legende: p.legende, hashtags: p.hashtags,
-      lien: p.lien, visuel_url: p.visuel_url, date_prevue: p.date_prevue, statut: p.statut,
+      lien: p.lien, visuel_url: p.visuel_url, date_prevue: p.date_prevue, heure: p.heure || '09:00', statut: p.statut,
     } : { ...EMPTY })
   }
 
@@ -155,12 +166,17 @@ export default function CmsSocialPage() {
         <div>
           <label className={labelCls} style={labelStyle}>Visuel (URL image/vidéo)</label>
           <input value={form.visuel_url} onChange={e => setForm(p => ({ ...p, visuel_url: e.target.value }))} className={inputCls} style={inputStyle} placeholder="Colle l'URL du visuel généré (vérifié par visual-qc)" />
+          <p className="text-[11px] mt-1" style={{ color: '#0369A1' }}>📐 Format recommandé : <b>{FORMAT_DIMS[form.format]}</b></p>
           {form.visuel_url ? <img src={form.visuel_url} alt="" className="mt-2 rounded-lg max-h-44 object-cover" /> : null}
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className={labelCls} style={labelStyle}>Date prévue</label>
             <input type="date" value={form.date_prevue || ''} onChange={e => setForm(p => ({ ...p, date_prevue: e.target.value || null }))} className={inputCls} style={inputStyle} />
+          </div>
+          <div>
+            <label className={labelCls} style={labelStyle}>Heure</label>
+            <input type="time" value={form.heure || ''} onChange={e => setForm(p => ({ ...p, heure: e.target.value }))} className={inputCls} style={inputStyle} />
           </div>
           <div>
             <label className={labelCls} style={labelStyle}>Statut</label>
@@ -227,11 +243,12 @@ export default function CmsSocialPage() {
           const isToday = ds === ymd(new Date())
           const cell = (plat: SocialPlateforme) => (
             <div className="p-2 space-y-1 group" style={{ borderLeft: '1px solid #E9ECEF', minHeight: 60 }}>
-              {posts.filter(p => p.date_prevue === ds && p.plateforme === plat).map(p => {
+              {posts.filter(p => p.date_prevue === ds && p.plateforme === plat).sort((a, b) => (a.heure || '').localeCompare(b.heure || '')).map(p => {
                 const sm = statutMeta(p.statut)
                 return (
                   <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-2 py-1 rounded-md hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
                     <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sm.dot }} />
+                    {p.heure ? <span className="text-[10px] font-semibold shrink-0" style={{ color: '#9CA3AF' }}>{p.heure}</span> : null}
                     <span className="text-[11px] truncate" style={{ color: '#374151' }}>{p.titre || p.format}</span>
                   </button>
                 )
