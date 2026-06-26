@@ -24,7 +24,22 @@ export default function AutomationsBoard({ meta, lastRun, journal }: { meta: Met
   const router = useRouter()
   const [busy, setBusy] = useState<string | null>(null)
   const [done, setDone] = useState<Record<string, 'ok' | 'err'>>({})
+  const [testing, setTesting] = useState(false)
+  const [testMsg, setTestMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const labelById = Object.fromEntries(meta.map(m => [m.id, m.label]))
+
+  const testEmail = async () => {
+    setTesting(true); setTestMsg(null)
+    try {
+      const r = await fetch('/api/cms/test-email', { method: 'POST' })
+      const d = await r.json().catch(() => ({}))
+      setTestMsg(d.ok
+        ? { ok: true, text: 'Email envoyé ✓ — regarde ta boîte (et l\'onglet Promotions/Spam de Gmail).' }
+        : { ok: false, text: d.error || 'Échec inconnu.' })
+    } catch (e) {
+      setTestMsg({ ok: false, text: `Erreur réseau : ${(e as Error).message}` })
+    } finally { setTesting(false) }
+  }
 
   const run = async (id: string) => {
     setBusy(id)
@@ -50,6 +65,19 @@ export default function AutomationsBoard({ meta, lastRun, journal }: { meta: Met
           <p className="text-sm mt-1" style={{ color: '#166534' }}>
             Elles s'exécutent <strong>toutes seules</strong> via le robot quotidien : les <strong>quotidiennes chaque jour à 9h</strong>, les <strong>hebdo le lundi</strong>, les <strong>mensuelles le 1er</strong>. Le bouton <strong>« Tester »</strong> sert juste à en lancer une <em>tout de suite</em> pour vérifier — il n'est jamais obligatoire.
           </p>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <button onClick={testEmail} disabled={testing}
+              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg text-white disabled:opacity-50"
+              style={{ background: '#16A34A' }}>
+              {testing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Zap className="w-3.5 h-3.5" />}
+              {testing ? 'Envoi…' : "M'envoyer un email de test"}
+            </button>
+            {testMsg && (
+              <span className="text-xs font-medium" style={{ color: testMsg.ok ? '#166534' : '#DC2626' }}>
+                {testMsg.ok ? '✓ ' : '✗ '}{testMsg.text}
+              </span>
+            )}
+          </div>
         </div>
       </div>
 
