@@ -174,6 +174,7 @@ export interface SocialPost {
   hashtags: string
   lien: string
   visuel_url: string
+  visuels: string[]
   date_prevue: string | null
   heure: string
   statut: SocialStatut

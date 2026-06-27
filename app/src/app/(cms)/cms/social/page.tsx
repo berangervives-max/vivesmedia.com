@@ -17,7 +17,7 @@ function addDays(d: Date, n: number) { const x = new Date(d); x.setDate(x.getDat
 function ymd(d: Date) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
 
 const EMPTY: Omit<SocialPost, 'id' | 'created_at' | 'updated_at'> = {
-  plateforme: 'linkedin', format: 'carrousel', titre: '', legende: '', hashtags: '', lien: '', visuel_url: '',
+  plateforme: 'linkedin', format: 'carrousel', titre: '', legende: '', hashtags: '', lien: '', visuel_url: '', visuels: [],
   date_prevue: new Date().toISOString().slice(0, 10), heure: '09:00', statut: 'idee',
 }
 
@@ -76,13 +76,25 @@ export default function CmsSocialPage() {
   const [err, setErr] = useState<string | null>(null)
   const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()))
   const [view, setView] = useState<'calendrier' | 'feed'>('calendrier')
-  const [zoom, setZoom] = useState<string | null>(null)
+  const [zoom, setZoom] = useState<{ imgs: string[]; i: number } | null>(null)
+  // Ouvre le lightbox sur la galerie d'un post (cover + slides du carrousel).
+  const openZoom = (p: { visuel_url?: string; visuels?: string[] }) => {
+    const imgs = [p.visuel_url, ...(p.visuels || [])].filter((u): u is string => !!u)
+    if (imgs.length) setZoom({ imgs, i: 0 })
+  }
 
-  // Lightbox : clic sur un visuel → aperçu plein écran à la vraie dimension du format.
+  // Lightbox : aperçu plein écran à la vraie dimension du format, navigable si plusieurs slides.
   const lightbox = zoom ? (
-    <div onClick={() => setZoom(null)} className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(0,0,0,.85)' }}>
-      <img src={zoom} alt="" className="max-h-[92vh] max-w-[92vw] rounded-lg shadow-2xl" style={{ objectFit: 'contain' }} />
+    <div onClick={() => setZoom(null)} className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(0,0,0,.88)' }}>
+      <img src={zoom.imgs[zoom.i]} alt="" className="max-h-[90vh] max-w-[92vw] rounded-lg shadow-2xl" style={{ objectFit: 'contain' }} />
       <button onClick={() => setZoom(null)} className="absolute top-4 right-4 text-white text-sm px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,.15)' }}>✕ Fermer</button>
+      {zoom.imgs.length > 1 && (
+        <>
+          <button onClick={e => { e.stopPropagation(); setZoom(z => z && ({ ...z, i: (z.i - 1 + z.imgs.length) % z.imgs.length })) }} className="absolute left-4 text-white text-2xl px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,.15)' }}>‹</button>
+          <button onClick={e => { e.stopPropagation(); setZoom(z => z && ({ ...z, i: (z.i + 1) % z.imgs.length })) }} className="absolute right-4 top-1/2 text-white text-2xl px-3 py-2 rounded-lg" style={{ background: 'rgba(255,255,255,.15)' }}>›</button>
+          <span className="absolute bottom-5 text-white text-xs px-3 py-1 rounded-full" style={{ background: 'rgba(255,255,255,.15)' }}>{zoom.i + 1} / {zoom.imgs.length}</span>
+        </>
+      )}
     </div>
   ) : null
 
@@ -109,7 +121,7 @@ export default function CmsSocialPage() {
     setEditing(p?.id || 'new')
     setForm(p ? {
       plateforme: p.plateforme, format: p.format, titre: p.titre, legende: p.legende, hashtags: p.hashtags,
-      lien: p.lien, visuel_url: p.visuel_url, date_prevue: p.date_prevue, heure: p.heure || '09:00', statut: p.statut,
+      lien: p.lien, visuel_url: p.visuel_url, visuels: p.visuels || [], date_prevue: p.date_prevue, heure: p.heure || '09:00', statut: p.statut,
     } : { ...EMPTY })
   }
 
@@ -195,12 +207,29 @@ export default function CmsSocialPage() {
           <input value={form.visuel_url} onChange={e => setForm(p => ({ ...p, visuel_url: e.target.value }))} className={inputCls} style={inputStyle} placeholder="Colle l'URL du visuel généré (vérifié par visual-qc)" />
           <p className="text-[11px] mt-1" style={{ color: '#0369A1' }}>📐 Format recommandé : <b>{FORMAT_DIMS[form.format]}</b></p>
           {form.visuel_url ? (
-            <button type="button" onClick={() => setZoom(form.visuel_url)} className="block mt-2 group relative">
+            <button type="button" onClick={() => openZoom(form)} className="block mt-2 group relative">
               <img src={form.visuel_url} alt="" className="rounded-lg max-h-56 object-cover" />
               <span className="absolute bottom-2 left-2 text-[11px] text-white px-2 py-0.5 rounded" style={{ background: 'rgba(0,0,0,.55)' }}>🔍 Cliquer pour agrandir (format réseau)</span>
             </button>
           ) : null}
         </div>
+        {(form.format === 'carrousel' || form.format === 'post') && (
+          <div>
+            <label className={labelCls} style={labelStyle}>Slides supplémentaires (carrousel) — {form.visuels.length}</label>
+            <p className="text-[11px] mb-2" style={{ color: '#9CA3AF' }}>Le visuel ci-dessus = slide 1 (couverture). Ajoute ici les slides 2, 3, 4… Le carrousel complet s&apos;ouvre en grand avec ← / →.</p>
+            <div className="flex flex-wrap gap-2 mb-2">
+              {form.visuels.map((u, i) => (
+                <div key={i} className="relative">
+                  <button type="button" onClick={() => openZoom(form)}><img src={u} alt="" className="w-20 h-24 object-cover rounded-md" style={{ border: '1px solid #E5E7EB' }} /></button>
+                  <button type="button" onClick={() => setForm(p => ({ ...p, visuels: p.visuels.filter((_, j) => j !== i) }))} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ background: '#DC2626' }}>✕</button>
+                  <span className="absolute bottom-0.5 left-0.5 text-[9px] text-white px-1 rounded" style={{ background: 'rgba(0,0,0,.55)' }}>{i + 2}</span>
+                </div>
+              ))}
+            </div>
+            <input placeholder="Coller l'URL d'une slide puis Entrée" className={inputCls} style={inputStyle}
+              onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); const v = (e.target as HTMLInputElement).value.trim(); if (v) { setForm(p => ({ ...p, visuels: [...p.visuels, v] })); (e.target as HTMLInputElement).value = '' } } }} />
+          </div>
+        )}
         <div className="grid grid-cols-3 gap-4">
           <div>
             <label className={labelCls} style={labelStyle}>Date prévue</label>
@@ -352,10 +381,11 @@ export default function CmsSocialPage() {
               <div className="grid grid-cols-3 gap-1">
                 {grid.length === 0 && <div className="col-span-3 text-center text-sm py-12 rounded-lg" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun post de grille pour l&apos;instant.</div>}
                 {grid.map(p => (
-                  <button key={p.id} onClick={() => p.visuel_url ? setZoom(p.visuel_url) : open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
+                  <button key={p.id} onClick={() => p.visuel_url ? openZoom(p) : open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
                     {p.visuel_url
                       ? <img src={p.visuel_url} alt="" className="w-full h-full object-cover" />
                       : <span className="absolute inset-0 flex items-center justify-center text-[10px] px-1.5 text-center leading-tight" style={{ color: '#9CA3AF' }}>{p.titre || p.format}</span>}
+                    {(p.visuels?.length ?? 0) > 0 && <span className="absolute top-1 right-1 text-[10px] text-white px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,0,0,.6)' }}>▦ {(p.visuels?.length ?? 0) + 1}</span>}
                   </button>
                 ))}
               </div>
