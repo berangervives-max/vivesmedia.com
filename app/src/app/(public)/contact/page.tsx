@@ -299,6 +299,30 @@ export default function ContactPage() {
             {status === 'loading' ? 'Envoi en cours...' : (!googleVerified && !codeSent) ? 'Vérifiez votre email d\'abord' : (!googleVerified && code.length !== 6) ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
         </form>
+
+        {/* Preuve : vraies réalisations (rassure au moment de décider) */}
+        <div className="mt-16">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color: '#F4521E' }}>Ils m'ont fait confiance</p>
+          <p className="text-center text-muted-foreground text-sm mb-6">Des projets réels, livrés de A à Z.</p>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {[
+              { slug: 'marine-caro', name: 'Marine Caro', label: 'Architecte · Provence', img: '/images/realisations/marine-desktop.jpg' },
+              { slug: 'stoop', name: 'Stoop', label: 'Logistique · B2B', img: '/images/realisations/stoop-desktop.jpg' },
+              { slug: 'vives-reports', name: 'Vives Reports', label: 'SaaS · Reporting', img: '/images/realisations/vivesreports-desktop.png' },
+            ].map(r => (
+              <a key={r.slug} href={`/realisations/${r.slug}`} className="group rounded-2xl overflow-hidden border border-border bg-white hover:shadow-md transition-shadow">
+                <img src={r.img} alt={r.name} className="w-full h-36 object-cover object-top" />
+                <div className="p-4">
+                  <p className="font-semibold text-foreground text-sm">{r.name}</p>
+                  <p className="text-xs text-muted-foreground">{r.label}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+          <p className="text-center mt-6">
+            <a href="/realisations" className="text-sm font-medium hover:underline" style={{ color: '#F4521E' }}>Voir toutes mes réalisations →</a>
+          </p>
+        </div>
       </div>
     </div>
   )
