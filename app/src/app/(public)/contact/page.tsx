@@ -40,6 +40,22 @@ export default function ContactPage() {
   const [codeMsg, setCodeMsg] = useState<{ ok: boolean; text: string } | null>(null)
   const [googleVerified, setGoogleVerified] = useState(false)
   const [googleErr, setGoogleErr] = useState('')
+  // Chemin faible friction : rappel (nom + tél)
+  const [rNom, setRNom] = useState('')
+  const [rTel, setRTel] = useState('')
+  const [rStatus, setRStatus] = useState<'idle' | 'loading' | 'ok' | 'error'>('idle')
+  const WHATSAPP = (process.env.NEXT_PUBLIC_WHATSAPP || '').replace(/[^\d]/g, '')
+
+  const sendRappel = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setRStatus('loading')
+    try {
+      const r = await fetch('/api/rappel', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ nom: rNom, telephone: rTel }) })
+      if (!r.ok) throw new Error()
+      track('devis_started', { source: 'rappel' })
+      setRStatus('ok')
+    } catch { setRStatus('error') }
+  }
 
   // Au retour de Google : pré-remplit nom/email et marque l'email comme vérifié.
   useEffect(() => {
@@ -135,6 +151,35 @@ export default function ContactPage() {
           </h1>
           <p className="text-muted-foreground mb-10">Réponse garantie sous 24h, sans engagement.</p>
         </motion.div>
+
+        {/* Chemin RAPIDE (faible friction) — alternative au formulaire long */}
+        <div className="mb-10 rounded-2xl p-6" style={{ background: '#0F172A' }}>
+          <p className="text-white font-semibold mb-1">Pressé ? Le plus rapide 👇</p>
+          <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,.6)' }}>Laissez juste votre prénom + numéro, je vous rappelle. Ou écrivez-moi sur WhatsApp.</p>
+          {rStatus === 'ok' ? (
+            <p className="text-sm flex items-center gap-2" style={{ color: '#4ade80' }}><Check className="w-4 h-4" /> Merci {rNom} ! Je vous rappelle très vite.</p>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-3">
+              <form onSubmit={sendRappel} className="flex flex-1 flex-col sm:flex-row gap-2">
+                <input value={rNom} onChange={e => setRNom(e.target.value)} required placeholder="Prénom"
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
+                <input value={rTel} onChange={e => setRTel(e.target.value)} required inputMode="tel" placeholder="06 12 34 56 78"
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
+                <button type="submit" disabled={rStatus === 'loading' || !rNom || !rTel}
+                  className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: '#F4521E' }}>
+                  {rStatus === 'loading' ? '…' : 'Être rappelé'}
+                </button>
+              </form>
+              {WHATSAPP && (
+                <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap" style={{ background: '#25D366', color: '#0F172A' }}>
+                  WhatsApp
+                </a>
+              )}
+            </div>
+          )}
+          {rStatus === 'error' && <p className="text-xs mt-2" style={{ color: '#FCA5A5' }}>Erreur — réessayez ou utilisez le formulaire ci-dessous.</p>}
+        </div>
 
         <div className="mb-8">
           <div className="flex justify-between items-center text-xs mb-1.5">

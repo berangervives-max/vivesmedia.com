@@ -37,5 +37,5 @@ export function middleware(req: NextRequest) {
 
 // Limité aux endpoints publics sensibles (formulaires + tracking + paiement).
 export const config = {
-  matcher: ['/api/devis/:path*', '/api/newsletter/:path*', '/api/checkout/:path*', '/api/track/:path*'],
+  matcher: ['/api/devis/:path*', '/api/rappel/:path*', '/api/newsletter/:path*', '/api/checkout/:path*', '/api/track/:path*'],
 }
