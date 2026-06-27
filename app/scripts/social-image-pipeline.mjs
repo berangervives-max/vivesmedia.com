@@ -27,14 +27,41 @@ export const FORMATS = {
   ig_reel: [1080, 1920], li_carrousel: [1080, 1350], li_post: [1200, 1200],
 }
 
-// Télécharge + recadre (cover, recentrage intelligent) + héberge → URL publique.
-export async function processImage(url, format = 'ig_post') {
+// Overlay typographique (DA Station : grosse typo impactante, accent orange, scrim).
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+function wrapText(text, max) {
+  const words = String(text).split(/\s+/); const lines = []; let l = ''
+  for (const w of words) { if ((l + ' ' + w).trim().length > max) { if (l) lines.push(l); l = w } else l = (l + ' ' + w).trim() }
+  if (l) lines.push(l); return lines
+}
+function overlaySVG(w, h, { text = '', subtitle = '', kicker = '' }) {
+  const ts = Math.round(w * 0.078)           // taille du titre
+  const lineH = Math.round(ts * 1.05)
+  const lines = wrapText(text.toUpperCase(), Math.max(8, Math.floor(w / (ts * 0.6))))
+  const x = Math.round(w * 0.06)
+  let y = h - Math.round(h * 0.08) - (subtitle ? ts * 0.9 : 0) - (lines.length - 1) * lineH
+  const FONT = 'Segoe UI, Arial Black, Arial, sans-serif'
+  let s = `<svg width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">`
+  s += `<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#000" stop-opacity="0"/><stop offset="100%" stop-color="#000" stop-opacity="0.6"/></linearGradient></defs>`
+  s += `<rect x="0" y="${Math.round(h * 0.42)}" width="${w}" height="${Math.round(h * 0.58)}" fill="url(#g)"/>`
+  if (kicker) s += `<text x="${x}" y="${y - ts * 0.55}" font-family="${FONT}" font-size="${Math.round(ts * 0.3)}" letter-spacing="4" fill="#F4521E" font-weight="700">${esc(kicker.toUpperCase())}</text>`
+  for (const ln of lines) { s += `<text x="${x}" y="${y}" font-family="${FONT}" font-size="${ts}" fill="#ffffff" font-weight="800" letter-spacing="-1">${esc(ln)}</text>`; y += lineH }
+  if (subtitle) s += `<text x="${x}" y="${y + ts * 0.2}" font-family="${FONT}" font-size="${Math.round(ts * 0.36)}" fill="#ECECEC" font-weight="400">${esc(subtitle)}</text>`
+  return Buffer.from(s + '</svg>')
+}
+
+// Télécharge + recadre (cover, recentrage intelligent) + (option) overlay texte + héberge → URL.
+export async function processImage(url, format = 'ig_post', opts = {}) {
   const dims = FORMATS[format]
   if (!dims) throw new Error(`Format inconnu: ${format} (dispo: ${Object.keys(FORMATS).join(', ')})`)
   const r = await fetch(url, { headers: UA })
   if (!r.ok) throw new Error(`Téléchargement échoué (HTTP ${r.status}) : ${url}`)
   const buf = Buffer.from(await r.arrayBuffer())
-  const out = await sharp(buf).resize(dims[0], dims[1], { fit: 'cover', position: 'attention' }).jpeg({ quality: 88 }).toBuffer()
+  let img = sharp(buf).resize(dims[0], dims[1], { fit: 'cover', position: 'attention' })
+  if (opts.text || opts.kicker || opts.subtitle) {
+    img = sharp(await img.toBuffer()).composite([{ input: overlaySVG(dims[0], dims[1], opts), top: 0, left: 0 }])
+  }
+  const out = await img.jpeg({ quality: 88 }).toBuffer()
   const path = `social/${format}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.jpg`
   const { error } = await sb.storage.from('realisations').upload(path, out, { contentType: 'image/jpeg', upsert: true })
   if (error) throw new Error(`Upload Supabase échoué : ${error.message}`)
@@ -57,10 +84,11 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
   const format = arg('--format') || 'ig_post'
   const urls = (arg('--url') ? [arg('--url')] : (arg('--urls') || '').split(',').filter(Boolean))
   const attach = arg('--attach')
-  if (!urls.length) { console.error('Fournis --url <URL> ou --urls "u1,u2"'); process.exit(1) }
+  const opts = { text: arg('--text') || '', subtitle: arg('--subtitle') || '', kicker: arg('--kicker') || '' }
+  if (!urls.length) { console.error('Fournis --url <URL> ou --urls "u1,u2" [--text "TITRE" --subtitle "..." --kicker "..."]'); process.exit(1) }
   for (const u of urls) {
     try {
-      const pub = await processImage(u.trim(), format)
+      const pub = await processImage(u.trim(), format, opts)
       let msg = `OK [${format}] -> ${pub}`
       if (attach) { const t = await attachToPost(attach, pub); msg += t ? ` · attaché à « ${t} »` : ' · (post à attacher introuvable)' }
       console.log(msg)
