@@ -2,6 +2,16 @@ import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
 import { devisService } from '@/services/supabase.service'
 import { sendDevisReceived } from '@/services/email.service'
+import { createServerSupabaseClient } from '@/lib/supabase-server'
+
+// Email réel prouvé soit par le code OTP, soit par une session Google (email vérifié).
+async function emailVerifiedBySession(email: string): Promise<boolean> {
+  try {
+    const sb = await createServerSupabaseClient()
+    const { data: { user } } = await sb.auth.getUser()
+    return !!user?.email && user.email.toLowerCase() === email.toLowerCase()
+  } catch { return false }
+}
 
 // Vérifie le code à 6 chiffres scellé dans le token HMAC (voir /api/devis/send-code).
 const SECRET = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.CRON_SECRET || 'dev-secret'
@@ -33,9 +43,9 @@ export async function POST(req: NextRequest) {
     if (nom.length > 120 || email.length > 254 || String(message ?? '').length > 5000 || String(telephone ?? '').length > 30) {
       return NextResponse.json({ error: 'Contenu trop long' }, { status: 400 })
     }
-    // Vérification email obligatoire : le code reçu par email prouve qu'il est réel.
-    if (!verifyCode(token, email, code)) {
-      return NextResponse.json({ error: 'Email non vérifié. Saisissez le code reçu par email.' }, { status: 400 })
+    // Vérification email obligatoire : code OTP reçu par email OU session Google (email vérifié).
+    if (!verifyCode(token, email, code) && !(await emailVerifiedBySession(email))) {
+      return NextResponse.json({ error: 'Email non vérifié. Saisissez le code reçu par email ou connectez-vous avec Google.' }, { status: 400 })
     }
 
     const devis = await devisService.create({ nom, email, telephone: telephone || '', service: service || '', budget: budget || '', message: message || '', statut: 'nouveau', lu: false })
