@@ -7,7 +7,7 @@ import { createClient as createSb } from '@supabase/supabase-js'
 //   [ENVOI_PROGRAMME id=<resendId> when=<ISO> to=<email> statut=programmé|annulé]
 // GET  → liste · POST {action:'cancel'|'reschedule', prospectId, id, when?} → agit sur Resend + maj du marqueur.
 
-const RE = /\[ENVOI_PROGRAMME id=([\w-]+) when=([^\s]+) to=([^\s]+) statut=(\w+)\]/g
+const RE = /\[ENVOI_PROGRAMME id=([\w-]+) when=(\S+) to=(\S+) statut=([^\]\s]+)\]/g
 const admin = () => createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
 async function requireAdmin() {
@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   if (action === 'cancel') {
     const r = await fetch(`https://api.resend.com/emails/${id}/cancel`, { method: 'POST', headers: { Authorization: `Bearer ${KEY}` } })
     if (!r.ok && r.status !== 404) return NextResponse.json({ error: `Resend: ${await r.text()}` }, { status: 502 })
-    notes = notes.replace(new RegExp(`(\\[ENVOI_PROGRAMME id=${id} when=[^\\s]+ to=[^\\s]+ statut=)\\w+(\\])`), `$1annulé$2`)
+    notes = notes.replace(new RegExp(`(\\[ENVOI_PROGRAMME id=${id} when=\\S+ to=\\S+ statut=)[^\\]\\s]+(\\])`), `$1annulé$2`)
     await sb.from('site_clients').update({ notes }).eq('id', prospectId)
     return NextResponse.json({ ok: true })
   }
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify({ scheduled_at: when }),
     })
     if (!r.ok) return NextResponse.json({ error: `Resend: ${await r.text()}` }, { status: 502 })
-    notes = notes.replace(new RegExp(`(\\[ENVOI_PROGRAMME id=${id} when=)[^\\s]+( to=[^\\s]+ statut=)\\w+(\\])`), `$1${when}$2programmé$3`)
+    notes = notes.replace(new RegExp(`(\\[ENVOI_PROGRAMME id=${id} when=)\\S+( to=\\S+ statut=)[^\\]\\s]+(\\])`), `$1${when}$2programmé$3`)
     await sb.from('site_clients').update({ notes }).eq('id', prospectId)
     return NextResponse.json({ ok: true })
   }
