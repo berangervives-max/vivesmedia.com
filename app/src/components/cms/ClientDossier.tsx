@@ -102,10 +102,18 @@ function parseCustomEmail(notes?: string): { subject: string; body: string } | n
 function templates(c: Client, commune: string) {
   const ent = cleanCompany(c.entreprise || c.nom) || 'votre entreprise'
   const lieu = commune ? ` à ${commune}` : ''
-  const prenom = firstNameOf(parseInfo(c.notes).dirigeant)
+  const info = parseInfo(c.notes)
+  const prenom = firstNameOf(info.dirigeant)
   const hello = prenom ? `Bonjour ${prenom},` : 'Bonjour,'
   const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
   const custom = parseCustomEmail(c.notes)
+  const metier = (c.secteur || '').toLowerCase().trim()
+  const aSite = !!info.site && !info.noSite
+  const caTxt = info.ca ? ` (~${info.ca} € de chiffre d'affaires)` : ''
+  // 1er contact adapté aux dernières données : site/pas de site + CA
+  const firstBody = aSite
+    ? `${hello}\n\nJe suis tombé sur ${ent}${lieu} et j'ai regardé votre site. Le souci : il n'est pas vraiment pensé pour le mobile, alors que près de 3 clients sur 4 vous cherchent depuis leur téléphone. Une partie de ces visiteurs repart${caTxt ? `, et sur un chiffre d'affaires comme le vôtre${caTxt} ça représente vite plusieurs milliers d'euros par an` : ''}.\n\nJe refais des sites pour les pros${lieu} (vivesmedia.com), pensés mobile + référencement local, en abonnement (dès 89 €/mois, tout compris) et prêts en moins d'une semaine.\n\nJe peux vous montrer à quoi ressemblerait le nouveau site de ${ent} ? 10 min, sans engagement.${sign}`
+    : `${hello}\n\nJe suis tombé sur ${ent}${lieu}… mais pas sur votre site. Aujourd'hui, près de 3 clients sur 4 cherchent ${metier ? `un ${metier}` : 'un pro'}${lieu} depuis leur téléphone — sans site ni fiche Google à jour, ce sont autant de clients qui vont chez un concurrent visible en ligne.\n\nJe crée des sites pour les pros${lieu} (vivesmedia.com) : site + référencement local + fiche Google, en abonnement (dès 89 €/mois, tout compris) et prêt en moins d'une semaine.\n\nÇa vous intéresse que je vous montre ce que ça donnerait pour ${ent} ? 10 min, sans engagement.${sign}`
   return {
     contact: custom ? {
       label: '1er contact (perso)',
@@ -113,8 +121,8 @@ function templates(c: Client, commune: string) {
       body: custom.body,
     } : {
       label: '1er contact',
-      subject: `${ent} sur Google`,
-      body: `${hello}\n\nJe suis tombé sur ${ent}${lieu} et j'ai pris le temps de regarder votre présence en ligne — votre site et votre visibilité sur Google.\n\nC'est justement mon métier chez vivesmedia.com : créer des sites pour les pros${lieu} et les aider à mieux ressortir sur Google, pour transformer plus de visiteurs en clients.\n\nCela vous intéresserait-il que je vous partage 2 ou 3 idées concrètes pour ${ent} ? C'est sans engagement.${sign}`,
+      subject: aSite ? `Le site de ${ent} sur mobile` : `${ent} sur Google`,
+      body: firstBody,
     },
     relance: {
       label: 'Relance',
@@ -154,7 +162,12 @@ function parseInfo(notes?: string) {
   return {
     commune: g(/·\s*([^·]+?)\s*\(8\d{4}\)/), cp: g(/\((8\d{4})\)/), naf: g(/NAF\s+([0-9.A-Z]+)/i),
     an: g(/créé\s+(\d{4})/i), eff: g(/effectif\s+(\S+?)(?:\s·|$)/i), siren: g(/SIREN\s+(\d{9})/i),
-    dirigeant: g(/dirigeant\s+([^·]+?)(?:\s·|$)/i), score: g(/score\s+(\d+)\/10/i),
+    dirigeant: g(/dirigeant\s+([^·]+?)(?:\s·|$)/i) || g(/·\s*dir\.\s*([^·\]]+?)(?:\s*\(|·|\])/i),
+    score: g(/score\s+(\d+)\/10/i),
+    // données enrichies (API gouv) : CA + résultat net + présence de site
+    caYear: g(/CA\s+(\d{4})\s/i), ca: g(/CA\s+\d{4}\s+([\d\s.  ]+?)\s*€/i).replace(/[\s  ]/g, ' ').trim(),
+    site: g(/·\s*ENRICHI[^·]*site\s+(https?:\/\/\S+)/i) || g(/site\s+(https?:\/\/[^\s·\]]+)/i),
+    noSite: /site=aucun|site=invalide/i.test(n),
   }
 }
 const NAF_LABELS: Record<string, string> = {
