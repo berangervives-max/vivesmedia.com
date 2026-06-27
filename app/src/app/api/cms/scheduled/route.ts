@@ -19,7 +19,8 @@ async function requireAdmin() {
 export async function GET() {
   if (!(await requireAdmin())) return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   const sb = admin()
-  const { data } = await sb.from('site_clients').select('id,nom,entreprise,email,notes')
+  // Ne récupère que les fiches qui contiennent un envoi programmé (évite le plafond de 1000 lignes).
+  const { data } = await sb.from('site_clients').select('id,nom,entreprise,email,notes').ilike('notes', '%ENVOI_PROGRAMME%')
   const out: Record<string, unknown>[] = []
   for (const c of data || []) {
     const notes = (c as { notes?: string }).notes || ''
