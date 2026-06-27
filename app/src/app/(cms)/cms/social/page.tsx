@@ -76,6 +76,15 @@ export default function CmsSocialPage() {
   const [err, setErr] = useState<string | null>(null)
   const [weekStart, setWeekStart] = useState(() => mondayOf(new Date()))
   const [view, setView] = useState<'calendrier' | 'feed'>('calendrier')
+  const [zoom, setZoom] = useState<string | null>(null)
+
+  // Lightbox : clic sur un visuel → aperçu plein écran à la vraie dimension du format.
+  const lightbox = zoom ? (
+    <div onClick={() => setZoom(null)} className="fixed inset-0 z-50 flex items-center justify-center p-6" style={{ background: 'rgba(0,0,0,.85)' }}>
+      <img src={zoom} alt="" className="max-h-[92vh] max-w-[92vw] rounded-lg shadow-2xl" style={{ objectFit: 'contain' }} />
+      <button onClick={() => setZoom(null)} className="absolute top-4 right-4 text-white text-sm px-3 py-1.5 rounded-lg" style={{ background: 'rgba(255,255,255,.15)' }}>✕ Fermer</button>
+    </div>
+  ) : null
 
   const load = () => socialPostsService.getAll().then(setPosts).catch(e => setErr(e.message?.includes('social_posts') ? 'table_absente' : e.message))
   useEffect(() => { load() }, [])
@@ -138,6 +147,7 @@ export default function CmsSocialPage() {
 
   if (editing) return (
     <form onSubmit={save} className="max-w-3xl">
+      {lightbox}
       <div className="flex items-center justify-between mb-5">
         <h1 className="text-xl font-bold" style={{ color: '#111827' }}>{editing === 'new' ? 'Nouveau post' : 'Modifier le post'}</h1>
         <button type="button" onClick={() => setEditing(null)} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }}><X className="w-4 h-4" /></button>
@@ -184,7 +194,12 @@ export default function CmsSocialPage() {
           <label className={labelCls} style={labelStyle}>Visuel (URL image/vidéo)</label>
           <input value={form.visuel_url} onChange={e => setForm(p => ({ ...p, visuel_url: e.target.value }))} className={inputCls} style={inputStyle} placeholder="Colle l'URL du visuel généré (vérifié par visual-qc)" />
           <p className="text-[11px] mt-1" style={{ color: '#0369A1' }}>📐 Format recommandé : <b>{FORMAT_DIMS[form.format]}</b></p>
-          {form.visuel_url ? <img src={form.visuel_url} alt="" className="mt-2 rounded-lg max-h-44 object-cover" /> : null}
+          {form.visuel_url ? (
+            <button type="button" onClick={() => setZoom(form.visuel_url)} className="block mt-2 group relative">
+              <img src={form.visuel_url} alt="" className="rounded-lg max-h-56 object-cover" />
+              <span className="absolute bottom-2 left-2 text-[11px] text-white px-2 py-0.5 rounded" style={{ background: 'rgba(0,0,0,.55)' }}>🔍 Cliquer pour agrandir (format réseau)</span>
+            </button>
+          ) : null}
         </div>
         <div className="grid grid-cols-3 gap-4">
           <div>
@@ -217,6 +232,7 @@ export default function CmsSocialPage() {
 
   return (
     <div>
+      {lightbox}
       <div className="mb-5 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Réseaux sociaux</h1>
@@ -336,7 +352,7 @@ export default function CmsSocialPage() {
               <div className="grid grid-cols-3 gap-1">
                 {grid.length === 0 && <div className="col-span-3 text-center text-sm py-12 rounded-lg" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun post de grille pour l&apos;instant.</div>}
                 {grid.map(p => (
-                  <button key={p.id} onClick={() => open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
+                  <button key={p.id} onClick={() => p.visuel_url ? setZoom(p.visuel_url) : open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
                     {p.visuel_url
                       ? <img src={p.visuel_url} alt="" className="w-full h-full object-cover" />
                       : <span className="absolute inset-0 flex items-center justify-center text-[10px] px-1.5 text-center leading-tight" style={{ color: '#9CA3AF' }}>{p.titre || p.format}</span>}
