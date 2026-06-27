@@ -11,7 +11,8 @@ function PostHogPageView() {
   const ph = usePostHog()
 
   useEffect(() => {
-    if (pathname && ph) {
+    // On ne track PAS le back-office (admin) : ça fausse les stats publiques.
+    if (pathname && ph && !pathname.startsWith('/cms') && !pathname.startsWith('/hub')) {
       let url = window.origin + pathname
       const search = searchParams?.toString()
       if (search) url += `?${search}`
@@ -35,6 +36,14 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
       capture_dead_clicks: true,       // clics sans effet (frustration)
       autocapture: true,               // clics/soumissions sur tous les éléments
       capture_performance: true,       // Core Web Vitals (LCP/CLS/INP) par page
+      // Exclut TOUT le back-office (pageviews, autocapture, heatmaps…) des analytics publiques.
+      before_send: (event) => {
+        if (typeof window !== 'undefined') {
+          const p = window.location.pathname
+          if (p.startsWith('/cms') || p.startsWith('/hub')) return null
+        }
+        return event
+      },
     })
   }, [])
 
