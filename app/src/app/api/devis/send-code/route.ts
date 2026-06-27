@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import crypto from 'crypto'
+import { validateEmail } from '@/lib/email-validation'
+import { createServiceClient } from '@/lib/supabase'
 
 // Envoie un code à 6 chiffres sur l'email saisi, pour PROUVER qu'il est réel
 // avant d'accepter le devis. Stateless : le code est scellé dans un token HMAC
@@ -25,6 +27,20 @@ export async function POST(req: NextRequest) {
   if (DISPOSABLE.test(email)) {
     return NextResponse.json({ error: 'Les adresses email temporaires ne sont pas acceptées. Utilisez votre vraie adresse.' }, { status: 400 })
   }
+
+  // Validation de délivrabilité réelle (s'active dès qu'une clé API est posée).
+  const check = await validateEmail(email)
+  // Tracking : on journalise chaque vérification (succès/échec) pour le suivi CMS.
+  try {
+    createServiceClient().from('automation_logs').insert({
+      type: 'email_validation',
+      payload: { email: email.toLowerCase(), ok: check.ok, status: check.status, provider: check.provider, skipped: !!check.skipped, at: new Date().toISOString() },
+    }).then(() => {}, () => {})
+  } catch { /* best-effort */ }
+  if (!check.ok) {
+    return NextResponse.json({ error: 'Cette adresse email semble invalide ou injoignable. Vérifiez-la ou utilisez « Continuer avec Google ».' }, { status: 400 })
+  }
+
   const code = String(Math.floor(100000 + Math.random() * 900000))
   const token = signCode({ email: email.toLowerCase(), code, exp: Date.now() + 10 * 60 * 1000 }) // 10 min
 
