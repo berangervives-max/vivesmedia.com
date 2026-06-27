@@ -54,9 +54,15 @@ export const socialPostsService = {
 export const clientsService = {
   async getAll() {
     const sb = createClient()
-    const { data, error } = await sb.from('site_clients').select('*').order('created_at', { ascending: false })
-    if (error) throw error
-    return data as Client[]
+    // Pagination : Supabase plafonne à 1000 lignes/requête → on boucle pour tout récupérer.
+    let all: Client[] = []
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await sb.from('site_clients').select('*').order('created_at', { ascending: false }).range(from, from + 999)
+      if (error) throw error
+      all = all.concat((data || []) as Client[])
+      if (!data || data.length < 1000) break
+    }
+    return all
   },
   async create(payload: Omit<Client, 'id' | 'created_at' | 'updated_at'>) {
     const sb = createClient()
