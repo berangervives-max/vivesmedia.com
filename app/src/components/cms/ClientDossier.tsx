@@ -84,14 +84,34 @@ function firstNameOf(dirigeant: string): string {
   return pick.charAt(0).toUpperCase() + pick.slice(1).toLowerCase()
 }
 
+// Email personnalisé stocké dans les notes (marqueur). S'il existe, il remplace le 1er contact générique.
+function parseCustomEmail(notes?: string): { subject: string; body: string } | null {
+  const n = notes || ''
+  const MARK = '==== EMAIL PERSONNALISÉ ===='
+  const i = n.indexOf(MARK)
+  if (i === -1) return null
+  const block = n.slice(i + MARK.length).trim()
+  const m = block.match(/^Objet\s*:\s*(.+)$/m)
+  if (!m) return null
+  const subject = m[1].trim()
+  const body = block.slice(block.indexOf(m[0]) + m[0].length).trim()
+  if (!body) return null
+  return { subject, body }
+}
+
 function templates(c: Client, commune: string) {
   const ent = cleanCompany(c.entreprise || c.nom) || 'votre entreprise'
   const lieu = commune ? ` à ${commune}` : ''
   const prenom = firstNameOf(parseInfo(c.notes).dirigeant)
   const hello = prenom ? `Bonjour ${prenom},` : 'Bonjour,'
   const sign = '\n\nBonne journée,\nBéranger Vives\nvivesmedia.com'
+  const custom = parseCustomEmail(c.notes)
   return {
-    contact: {
+    contact: custom ? {
+      label: '1er contact (perso)',
+      subject: custom.subject,
+      body: custom.body,
+    } : {
       label: '1er contact',
       subject: `${ent} sur Google`,
       body: `${hello}\n\nJe suis tombé sur ${ent}${lieu} et j'ai pris le temps de regarder votre présence en ligne — votre site et votre visibilité sur Google.\n\nC'est justement mon métier chez vivesmedia.com : créer des sites pour les pros${lieu} et les aider à mieux ressortir sur Google, pour transformer plus de visiteurs en clients.\n\nCela vous intéresserait-il que je vous partage 2 ou 3 idées concrètes pour ${ent} ? C'est sans engagement.${sign}`,
