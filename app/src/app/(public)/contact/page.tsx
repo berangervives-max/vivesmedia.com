@@ -26,9 +26,29 @@ const BUDGETS = [
 
 const EMPTY = { nom: '', email: '', telephone: '', service: '', budget: '', message: '', website: '' }
 
+const emailValid = (e: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)
+
 export default function ContactPage() {
   const [form, setForm] = useState(EMPTY)
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  // Vérification email par code (anti-faux email)
+  const [codeSent, setCodeSent] = useState(false)
+  const [sending, setSending] = useState(false)
+  const [token, setToken] = useState('')
+  const [code, setCode] = useState('')
+  const [codeMsg, setCodeMsg] = useState<{ ok: boolean; text: string } | null>(null)
+
+  const sendCode = async () => {
+    if (!emailValid(form.email)) { setCodeMsg({ ok: false, text: 'Entrez un email valide d\'abord.' }); return }
+    setSending(true); setCodeMsg(null)
+    try {
+      const r = await fetch('/api/devis/send-code', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: form.email }) })
+      const d = await r.json().catch(() => ({}))
+      if (r.ok && d.token) { setToken(d.token); setCodeSent(true); setCodeMsg({ ok: true, text: `Code envoyé à ${form.email}. Regarde ta boîte (et les spams).` }) }
+      else setCodeMsg({ ok: false, text: d.error || 'Envoi impossible.' })
+    } catch { setCodeMsg({ ok: false, text: 'Erreur réseau.' }) }
+    finally { setSending(false) }
+  }
 
   // Présélectionne le service (?service=) et la formule choisie (?formule=) passés par les boutons "Choisir"
   useEffect(() => {
@@ -48,6 +68,7 @@ export default function ContactPage() {
       startedRef.current = true
       track('devis_started', { source: form.service ? 'preselected' : 'direct', service: form.service || null })
     }
+    if (k === 'email') { setCodeSent(false); setToken(''); setCode(''); setCodeMsg(null) }
     setForm(p => ({ ...p, [k]: v }))
   }
   const filledCount = [form.service, form.budget, form.nom, form.email].filter(Boolean).length
@@ -57,7 +78,7 @@ export default function ContactPage() {
     e.preventDefault()
     setStatus('loading')
     try {
-      const res = await fetch('/api/devis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(form) })
+      const res = await fetch('/api/devis', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...form, code, token }) })
       if (!res.ok) throw new Error()
       track('devis_submitted', {
         service: form.service || null,
@@ -151,6 +172,30 @@ export default function ContactPage() {
                 </div>
               ))}
             </div>
+            {/* Vérification email (anti-faux email) */}
+            <div className="rounded-xl p-4" style={{ background: '#FFF7F4', border: '1px solid #FCD9CC' }}>
+              {!codeSent ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
+                    {sending ? 'Envoi…' : '✉️ Vérifier mon email'}
+                  </button>
+                  <span className="text-xs text-muted-foreground">On vous envoie un code à 6 chiffres pour confirmer votre adresse (obligatoire).</span>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">Code reçu par email</label>
+                  <div className="flex items-center gap-3">
+                    <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="123456"
+                      className="w-32 px-4 py-2.5 rounded-xl border border-border text-sm tracking-widest text-center focus:outline-none focus:border-foreground/30" />
+                    <button type="button" onClick={sendCode} disabled={sending} className="text-xs underline text-muted-foreground">Renvoyer le code</button>
+                    {code.length === 6 && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> prêt</span>}
+                  </div>
+                </div>
+              )}
+              {codeMsg && <p className="text-xs mt-2" style={{ color: codeMsg.ok ? '#16A34A' : '#DC2626' }}>{codeMsg.text}</p>}
+            </div>
+
             <div>
               <label className="text-sm font-medium text-foreground block mb-1.5">Message / Détails du projet</label>
               <textarea value={form.message} onChange={e => set('message', e.target.value)} rows={4} placeholder="Décrivez votre projet, vos contraintes, vos objectifs..."
@@ -170,10 +215,10 @@ export default function ContactPage() {
             ))}
           </div>
 
-          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email}
+          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !codeSent || code.length !== 6}
             className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
             style={{ backgroundColor: '#F4521E' }}>
-            {status === 'loading' ? 'Envoi en cours...' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
+            {status === 'loading' ? 'Envoi en cours...' : !codeSent ? 'Vérifiez votre email d\'abord' : code.length !== 6 ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
         </form>
       </div>
