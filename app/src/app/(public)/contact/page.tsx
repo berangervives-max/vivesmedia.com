@@ -3,7 +3,6 @@ import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, CheckCircle2, AlertCircle, Check } from 'lucide-react'
 import { track } from '@/lib/analytics'
-import { createClient } from '@/lib/supabase'
 
 const PROJECT_TYPES = [
   { id: 'site-vitrine', label: 'Site Vitrine', desc: 'Présentation de votre activité' },
@@ -38,8 +37,6 @@ export default function ContactPage() {
   const [token, setToken] = useState('')
   const [code, setCode] = useState('')
   const [codeMsg, setCodeMsg] = useState<{ ok: boolean; text: string } | null>(null)
-  const [googleVerified, setGoogleVerified] = useState(false)
-  const [googleErr, setGoogleErr] = useState('')
   // Chemin faible friction : rappel (nom + tél)
   const [rNom, setRNom] = useState('')
   const [rTel, setRTel] = useState('')
@@ -55,23 +52,6 @@ export default function ContactPage() {
       track('devis_started', { source: 'rappel' })
       setRStatus('ok')
     } catch { setRStatus('error') }
-  }
-
-  // Au retour de Google : pré-remplit nom/email et marque l'email comme vérifié.
-  useEffect(() => {
-    createClient().auth.getUser().then(({ data: { user } }) => {
-      if (user?.email) {
-        const name = (user.user_metadata?.full_name || user.user_metadata?.name || '') as string
-        setForm(p => ({ ...p, email: user.email as string, nom: p.nom || name }))
-        setGoogleVerified(true)
-      }
-    }).catch(() => {})
-  }, [])
-
-  const signInGoogle = async () => {
-    setGoogleErr('')
-    const { error } = await createClient().auth.signInWithOAuth({ provider: 'google', options: { redirectTo: window.location.origin + '/contact' } })
-    if (error) setGoogleErr('Connexion Google indisponible (à activer dans Supabase).')
   }
 
   const sendCode = async () => {
@@ -237,41 +217,28 @@ export default function ContactPage() {
                 </div>
               ))}
             </div>
-            {/* Vérification email (anti-faux email) : Google OU code */}
+            {/* Vérification email (anti-faux email) par code */}
             <div className="rounded-xl p-4" style={{ background: '#FFF7F4', border: '1px solid #FCD9CC' }}>
-              {googleVerified ? (
-                <p className="text-sm flex items-center gap-2" style={{ color: '#16A34A' }}><Check className="w-4 h-4" /> Email vérifié via Google ({form.email}).</p>
-              ) : (
-                <>
-                  <button type="button" onClick={signInGoogle}
-                    className="w-full flex items-center justify-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-lg mb-3 hover:bg-foreground/5 transition" style={{ border: '1px solid #E5E7EB', background: '#fff' }}>
-                    <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 0-24c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 1 0 24 44a20 20 0 0 0 19.6-23.5z"/><path fill="#FF3D00" d="m6.3 14.7 6.6 4.8A12 12 0 0 1 24 12c3 0 5.8 1.1 7.9 3l5.7-5.7A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C39.9 36.5 44 31 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>
-                    Continuer avec Google
+              {!codeSent ? (
+                <div className="flex flex-wrap items-center gap-3">
+                  <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
+                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
+                    {sending ? 'Envoi…' : '✉️ Vérifier mon email'}
                   </button>
-                  {googleErr && <p className="text-xs mb-2" style={{ color: '#DC2626' }}>{googleErr}</p>}
-                  <div className="flex items-center gap-2 mb-3"><span className="flex-1 h-px" style={{ background: '#FCD9CC' }} /><span className="text-[11px] text-muted-foreground">ou vérifie par code</span><span className="flex-1 h-px" style={{ background: '#FCD9CC' }} /></div>
-                  {!codeSent ? (
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
-                        className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
-                        {sending ? 'Envoi…' : '✉️ Recevoir un code'}
-                      </button>
-                      <span className="text-xs text-muted-foreground">Code à 6 chiffres pour confirmer ton adresse.</span>
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="text-sm font-medium text-foreground block mb-1.5">Code reçu par email</label>
-                      <div className="flex items-center gap-3">
-                        <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="123456"
-                          className="w-32 px-4 py-2.5 rounded-xl border border-border text-sm tracking-widest text-center focus:outline-none focus:border-foreground/30" />
-                        <button type="button" onClick={sendCode} disabled={sending} className="text-xs underline text-muted-foreground">Renvoyer le code</button>
-                        {code.length === 6 && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> prêt</span>}
-                      </div>
-                    </div>
-                  )}
-                  {codeMsg && <p className="text-xs mt-2" style={{ color: codeMsg.ok ? '#16A34A' : '#DC2626' }}>{codeMsg.text}</p>}
-                </>
+                  <span className="text-xs text-muted-foreground">On vous envoie un code à 6 chiffres pour confirmer votre adresse (obligatoire).</span>
+                </div>
+              ) : (
+                <div>
+                  <label className="text-sm font-medium text-foreground block mb-1.5">Code reçu par email</label>
+                  <div className="flex items-center gap-3">
+                    <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="123456"
+                      className="w-32 px-4 py-2.5 rounded-xl border border-border text-sm tracking-widest text-center focus:outline-none focus:border-foreground/30" />
+                    <button type="button" onClick={sendCode} disabled={sending} className="text-xs underline text-muted-foreground">Renvoyer le code</button>
+                    {code.length === 6 && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> prêt</span>}
+                  </div>
+                </div>
               )}
+              {codeMsg && <p className="text-xs mt-2" style={{ color: codeMsg.ok ? '#16A34A' : '#DC2626' }}>{codeMsg.text}</p>}
             </div>
 
             <div>
@@ -293,10 +260,10 @@ export default function ContactPage() {
             ))}
           </div>
 
-          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || (!googleVerified && (!codeSent || code.length !== 6))}
+          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !codeSent || code.length !== 6}
             className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
             style={{ backgroundColor: '#F4521E' }}>
-            {status === 'loading' ? 'Envoi en cours...' : (!googleVerified && !codeSent) ? 'Vérifiez votre email d\'abord' : (!googleVerified && code.length !== 6) ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
+            {status === 'loading' ? 'Envoi en cours...' : !codeSent ? 'Vérifiez votre email d\'abord' : code.length !== 6 ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
         </form>
 
