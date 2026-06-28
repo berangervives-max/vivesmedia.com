@@ -33,7 +33,7 @@ const DEFAULTS: Settings = {
   delaiPaiement: '30',
   googleReviewUrl: '',
   calendlyUrl: 'https://calendly.com/vivesmedia',
-  calcomUrl: 'https://cal.com/vivesmedia',
+  calcomUrl: 'https://cal.com/vives-beranger-4xsrgx',
   googleAgendaUrl: 'https://calendar.google.com/calendar/r/eventedit?text=Appel%20d%C3%A9couverte%20vivesmedia&description=Appel%20d%C3%A9couverte%2030%20minutes%20avec%20vivesmedia.com%20-%20Full%20remote',
 }
 

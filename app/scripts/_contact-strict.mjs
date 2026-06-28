@@ -122,6 +122,24 @@ function deobfuscate(t) {
     .replace(/\s*[\(\[]\s*(?:dot|point)\s*[\)\]]\s*/gi, '.')
     .replace(/\s+(?:dot|point)\s+/gi, '.')
 }
+// Téléphone via ANNUAIRE (fiable : rattaché à l'entreprise par nom+ville). Email JAMAIS depuis un annuaire.
+const DIR_PHONE = ['infobel', 'pagesjaunes', 'cylex', '118712', '118000', 'justacote', 'findglocal', 'mappy', 'telephone-annuaire', 'annuaire-horaire', 'kompass', 'manageo', 'pages24', 'yellowpages']
+async function directoryPhone(results, toks, ville, cp) {
+  for (const r of results) {
+    const url = r.url || ''; const d = domainOf(url); if (!d) continue
+    if (!DIR_PHONE.some(a => d.includes(a))) continue
+    const dd = deburr(url + ' ' + (r.title || ''))
+    if (!toks.some(t => dd.includes(t))) continue   // la fiche doit concerner CETTE entreprise
+    // infobel encode le téléphone dans l'URL : FR<siret>-<tel>
+    const inf = url.match(/infobel\.[a-z.]+\/[A-Z]{2}\d+-(\d{9,10})/)
+    if (inf) { const ph = classifyPhones(inf[1]); if (ph.fixe || ph.mobile) return { ...ph, src: 'https://' + d } }
+    const t = await jina('https://' + d + url.replace(/^https?:\/\/[^/]+/, ''))
+    if (t && pageBelongs(t, toks, ville, cp)) { const ph = classifyPhones(t); if (ph.fixe || ph.mobile) return { ...ph, src: 'https://' + d } }
+    await sleep(150)
+  }
+  return null
+}
+
 async function scrapeSite(site) {
   let text = await jina(site)            // home → contient le footer (email/tél souvent ici)
   for (const p of ['/contact', '/mentions-legales']) {   // pages à plus forte valeur seulement (vitesse)
@@ -150,12 +168,18 @@ async function enrich(entreprise, ville, cp) {
       await sleep(120)
     }
   }
-  if (!site) return { site: '', reason: 'pas de site officiel trouvé' }
-
-  const dom = domainOf(site)
-  const email = emailsFrom(text, dom)
-  const { fixe, mobile } = classifyPhones(text)
-  const desc = description(text, entreprise)
+  let email = '', fixe = '', mobile = '', desc = ''
+  if (site) {
+    email = emailsFrom(text, domainOf(site))
+    const ph = classifyPhones(text); fixe = ph.fixe; mobile = ph.mobile
+    desc = description(text, entreprise)
+  }
+  // Fallback téléphone via annuaire (fiable) si aucun numéro depuis le site officiel
+  if (!fixe && !mobile) {
+    const dp = await directoryPhone(results, toks, ville, cp)
+    if (dp) { fixe = dp.fixe || ''; mobile = dp.mobile || ''; if (!site) site = dp.src }
+  }
+  if (!site && !email && !fixe && !mobile) return { site: '', reason: 'pas de site officiel trouvé' }
   return { site, email, fixe, mobile, desc, reason: 'ok' }
 }
 

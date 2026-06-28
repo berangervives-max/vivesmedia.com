@@ -3,7 +3,9 @@
 
 export const BOOKING = {
   calendly: 'https://calendly.com/vivesmedia',
-  calcom: 'https://cal.com/vivesmedia',
+  // Username réel du compte Cal.com (le username « vivesmedia » est réservé/premium côté Cal.com,
+  // non modifiable par API). À basculer sur https://cal.com/vivesmedia si Béranger le réclame dans l'UI.
+  calcom: 'https://cal.com/vives-beranger-4xsrgx',
 }
 
 export const BOOKING_EVENT = 'vm-open-booking'
