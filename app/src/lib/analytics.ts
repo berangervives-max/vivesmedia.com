@@ -11,6 +11,7 @@ import posthog from 'posthog-js'
  */
 export type FunnelEvent =
   | 'cta_clicked'          // clic sur un appel à l'action (props: location, label, destination)
+  | 'booking_provider_selected' // choix de l'outil de réservation dans la modale (props: provider)
   | 'service_viewed'       // page service consultée (props: slug, title, price)
   | 'pricing_viewed'       // page tarifs consultée
   | 'devis_started'        // 1re interaction avec le formulaire de devis (props: source, service)

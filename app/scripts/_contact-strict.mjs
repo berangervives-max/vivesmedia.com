@@ -22,7 +22,10 @@ const deburr = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCa
 // agrégateurs / réseaux / annuaires = JAMAIS le site officiel
 const AGG = ['pagesjaunes', 'societe.com', 'verif.com', 'facebook', 'instagram', 'linkedin', 'michelin', 'vroomly', 'google.', 'mappy', 'kompass', 'rubypayeur', 'infogreffe', 'pappers', 'tripadvisor', 'yelp', 'leboncoin', 'indeed', 'wikipedia', 'youtube', 'twitter', 'x.com', '.gouv.fr', 'manageo', 'bodacc', 'tel.local', 'cylex', '118000', 'justacote', 'allo-pro', 'annuaire', 'pages-blanches', 'pagespro', 'go-pro.fr', 'b-reputation', 'dirigeants', 'score3', 'ellisphere', 'lefigaro', 'amazon.', 'doctolib', 'resagolf']
 // mots génériques de secteur / forme juridique → pas distinctifs pour matcher un domaine
-const STOP = new Set(['sarl', 'sas', 'sasu', 'eurl', 'sci', 'snc', 'scop', 'eirl', 'ei', 'sa', 'scm', 'selarl', 'ets', 'etablissements', 'societe', 'ste', 'cie', 'compagnie', 'groupe', 'group', 'france', 'and', 'des', 'les', 'del', 'duo', 'pro', 'service', 'services', 'conseil', 'auto', 'garage', 'drone', 'restaurant', 'cafe', 'bar', 'boulangerie', 'coiffure', 'institut', 'menuiserie', 'plomberie', 'electricite', 'batiment', 'travaux', 'maison', 'atelier', 'studio', 'agence', 'cabinet', 'transport', 'transports', 'distribution', 'immobilier', 'pizza', 'sushi', 'optique', 'pharmacie', 'centre', 'espace', 'art', 'design', 'creation', 'concept', 'consulting'])
+const STOP = new Set(['sarl', 'sas', 'sasu', 'eurl', 'sci', 'snc', 'scop', 'eirl', 'ei', 'sa', 'scm', 'selarl', 'ets', 'etablissements', 'societe', 'ste', 'cie', 'compagnie', 'groupe', 'group', 'france', 'and', 'des', 'les', 'del', 'duo', 'pro', 'service', 'services', 'conseil', 'auto', 'garage', 'drone', 'restaurant', 'cafe', 'bar', 'boulangerie', 'coiffure', 'institut', 'menuiserie', 'plomberie', 'electricite', 'batiment', 'travaux', 'maison', 'atelier', 'studio', 'agence', 'cabinet', 'transport', 'transports', 'distribution', 'immobilier', 'pizza', 'sushi', 'optique', 'pharmacie', 'centre', 'espace', 'art', 'design', 'creation', 'concept', 'consulting',
+  'assurance', 'assurances', 'mutuelle', 'finance', 'finances', 'gestion', 'patrimoine', 'sante', 'beaute', 'coiffeur', 'fleuriste',
+  'taxi', 'peinture', 'carrelage', 'toiture', 'couverture', 'chauffage', 'climatisation', 'jardin', 'jardinier', 'paysage',
+  'renovation', 'isolation', 'informatique', 'telecom', 'location', 'negoce', 'commerce', 'boutique', 'magasin', 'sas', 'sarl'])
 
 function tokens(name) {
   return deburr(name).replace(/[^a-z0-9]+/g, ' ').split(' ').filter(t => t.length >= 4 && !STOP.has(t)).sort((a, b) => b.length - a.length)
@@ -77,9 +80,10 @@ function classifyPhones(text) {
 }
 // le site est DÉJÀ validé comme étant bien le leur → tout email de la page est légitime.
 // Priorité à l'email du domaine du site, sinon email perso (gmail/orange/wanadoo…) présent sur LEUR page.
+const EMAIL_JUNK = /sentry|wixpress|example|mailservice|mymail|moderation|yourmail|yourname|your-?email|john\.?doe|jane\.?doe|placeholder|prenom\.nom|nom\.prenom|votre|@domaine|@email\.|@adresse|@mail\.com|@mailer|noreply|no-reply|godaddy|cloudflare|\.(?:png|jpe?g|gif|webp|svg)$|@(?:sentry|wix|squarespace|shopify|wordpress|email|domain|yourdomain|test|demo)\b|^(?:test|demo|email|nom|prenom)@|\+\w+\.\w+@/
 function emailsFrom(text, siteDomain) {
   const ems = [...new Set((text.match(/[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}/gi) || []).map(e => e.toLowerCase()))]
-    .filter(e => !/sentry|wixpress|example|\.png|\.jpg|\.gif|\.webp|\.svg|godaddy|cloudflare|@(?:sentry|wix|squarespace|shopify|wordpress)\b|noreply|no-reply|votre@|nom@|email@|prenom\.nom|@domaine|@email|@adresse|placeholder/.test(e))
+    .filter(e => !EMAIL_JUNK.test(e))
   if (!ems.length) return ''
   const token = siteDomain.replace(/^www\./, '').split('.')[0]
   const own = ems.find(e => (e.split('@')[1] || '').includes(token))
@@ -92,18 +96,22 @@ function description(text, name) {
   return snip.replace(/\s+\S*$/, '').trim()
 }
 
-// Recherche de site : Firecrawl en premier (1000/mois), repli Tavily si dispo.
-async function firecrawlSearch(q) {
-  const r = await fetch('https://api.firecrawl.dev/v1/search', { method: 'POST', headers: { Authorization: `Bearer ${FIRECRAWL}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, limit: 6 }) })
-  if (!r.ok) { if ([402, 429, 429].includes(r.status)) throw new Error('QUOTA'); return [] }
-  const j = await r.json().catch(() => ({})); return (j.data || j.results || []).map(x => ({ url: x.url || x.link || '', title: x.title || '', content: x.description || x.content || '' }))
+// Recherche de site GRATUITE & ILLIMITÉE : Jina lit une page de résultats DuckDuckGo lite.
+// (Tavily + Firecrawl épuisés ; DDG via Jina = pas de quota, recall un peu plus faible.)
+void FIRECRAWL; void TAVILY
+async function ddgSearch(q) {
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const r = await fetch('https://r.jina.ai/https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(q))
+    if (r.status === 429) { await sleep(2500); continue }
+    if (!r.ok) return []
+    const t = await r.text()
+    let urls = [...t.matchAll(/uddg=([^&")\s]+)/g)].map(m => { try { return decodeURIComponent(m[1]) } catch { return '' } }).filter(Boolean)
+    if (!urls.length) urls = [...t.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(m => m[1]).filter(u => !/duckduckgo|jina\.ai|w3\.org/.test(u))
+    return [...new Set(urls)].slice(0, 10).map(u => ({ url: u, title: '', content: '' }))
+  }
+  return []
 }
-async function tavily(q) {
-  if (FIRECRAWL) return firecrawlSearch(q)
-  const r = await fetch('https://api.tavily.com/search', { method: 'POST', headers: { Authorization: `Bearer ${TAVILY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, max_results: 6, search_depth: 'basic', country: 'France' }) })
-  if (!r.ok) { if ([429, 432, 433].includes(r.status)) throw new Error('QUOTA'); return [] }
-  const j = await r.json(); return j.results || []
-}
+async function tavily(q) { return ddgSearch(q) }
 
 // décode les emails masqués : "contact (at) domaine .fr", "nom [arobase] x point fr", "&#64;"
 function deobfuscate(t) {

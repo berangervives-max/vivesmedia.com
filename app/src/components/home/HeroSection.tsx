@@ -5,9 +5,7 @@ import { motion } from 'framer-motion'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
 import { GoogleGLogo } from '@/components/BrandLogos'
 import { track } from '@/lib/analytics'
-
-// Page de réservation publique (appel découverte 30 min, sans engagement).
-const CALENDLY_URL = 'https://calendly.com/vivesmedia'
+import { openBooking } from '@/lib/booking'
 
 export default function HeroSection() {
   return (
@@ -27,20 +25,22 @@ export default function HeroSection() {
           Sites sur-mesure, rapides, pensés pour convertir. Livraison en 3 semaines, full remote, partout en France.
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
-          className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
-            className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
-            style={{ backgroundColor: '#F4521E' }}>
-            Lancer mon projet <ArrowUpRight className="w-4 h-4" />
-          </Link>
-          <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer"
-            onClick={() => track('cta_clicked', { location: 'hero', label: 'Réserver un appel', destination: CALENDLY_URL })}
-            className="flex items-center gap-2 font-semibold px-8 py-4 rounded-full border transition-colors hover:bg-foreground/5"
-            style={{ borderColor: 'rgba(17,24,39,0.18)', color: '#111827' }}>
-            <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} /> Réserver un appel
-          </a>
+          className="mt-10 flex flex-col items-center gap-6">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
+              className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
+              style={{ backgroundColor: '#F4521E' }}>
+              Lancer mon projet <ArrowUpRight className="w-4 h-4" />
+            </Link>
+            <button type="button"
+              onClick={() => { track('cta_clicked', { location: 'hero', label: 'Réserver un appel', destination: 'booking_modal' }); openBooking() }}
+              className="flex items-center gap-2 font-semibold px-8 py-4 rounded-full border transition-colors hover:bg-foreground/5"
+              style={{ borderColor: 'rgba(17,24,39,0.18)', color: '#111827' }}>
+              <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} /> Réserver un appel
+            </button>
+          </div>
           <a href="https://g.page/r/CVrzNHW-E9f0EAE/review" target="_blank" rel="noopener noreferrer"
-            className="flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity">
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity">
             <div className="flex -space-x-2">
               {[
                 '/images/42247233d_6a15c44f5826e1ea74a830ea_Ellipse24.jpg',

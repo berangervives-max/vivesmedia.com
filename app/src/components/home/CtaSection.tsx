@@ -2,8 +2,7 @@
 import Link from 'next/link'
 import { ArrowUpRight, CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
-
-const CALENDLY_URL = 'https://calendly.com/vivesmedia'
+import { openBooking } from '@/lib/booking'
 
 export default function CtaSection() {
   return (
@@ -26,9 +25,9 @@ export default function CtaSection() {
               <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-8 py-4 rounded-full hover:bg-white/90 transition-all hover:scale-105">
                 Lancer mon projet <ArrowUpRight className="w-4 h-4" />
               </Link>
-              <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-8 py-4 rounded-full hover:border-white/60 transition-colors">
+              <button type="button" onClick={openBooking} className="inline-flex items-center gap-2 border border-white/30 text-white font-medium px-8 py-4 rounded-full hover:border-white/60 transition-colors">
                 <CalendarClock className="w-4 h-4" /> Réserver un appel de 30 min
-              </a>
+              </button>
             </div>
           </div>
         </motion.div>
