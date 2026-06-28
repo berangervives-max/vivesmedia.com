@@ -73,6 +73,40 @@ export default function EnrichissementPage() {
         <Card icon={<TrendingUp className="w-4 h-4" />} label="Sans coordonnées" value={s.sansCoord} sub="restant" color="#94A3B8" />
       </div>
 
+      {/* Taux de remplissage avec objectif 45% */}
+      <div className="rounded-2xl p-5 mb-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="flex items-center justify-between mb-4">
+          <span className="text-sm font-semibold" style={{ color: '#111827' }}>Taux de remplissage</span>
+          <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#F1F5F9', color: '#475569' }}>Objectif 45 %</span>
+        </div>
+        {([
+          { label: 'Téléphone', icon: <Phone className="w-3.5 h-3.5" />, n: s.avecTel, color: '#0EA5E9' },
+          { label: 'Email', icon: <Mail className="w-3.5 h-3.5" />, n: s.avecMail, color: '#F4521E' },
+        ]).map(row => {
+          const p = s.total ? (row.n / s.total) * 100 : 0
+          const reached = p >= 45
+          return (
+            <div key={row.label} className="mb-4 last:mb-0">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="flex items-center gap-1.5 text-xs font-medium" style={{ color: '#374151' }}>
+                  <span style={{ color: row.color }}>{row.icon}</span>{row.label}
+                  <span style={{ color: '#9CA3AF' }}>· {row.n.toLocaleString('fr-FR')} / {s.total.toLocaleString('fr-FR')}</span>
+                </span>
+                <span className="text-sm font-bold tabular-nums" style={{ color: reached ? '#059669' : row.color }}>
+                  {p.toFixed(1)} %{reached ? ' ✓' : ''}
+                </span>
+              </div>
+              <div className="relative h-3 rounded-full overflow-hidden" style={{ background: '#F1F3F5' }}>
+                {/* repère objectif 45% */}
+                <div className="absolute top-0 bottom-0 z-10" style={{ left: '45%', width: '2px', background: '#94A3B8' }} />
+                <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(100, p)}%`, background: reached ? '#10B981' : `linear-gradient(90deg,${row.color},${row.color}aa)` }} />
+              </div>
+            </div>
+          )
+        })}
+        <p className="text-[11px] mt-1" style={{ color: '#9CA3AF' }}>Le trait gris = objectif 45 %. Barre verte une fois l'objectif atteint.</p>
+      </div>
+
       {/* Progression du batch */}
       <div className="rounded-2xl p-5 mb-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
         <div className="flex items-center justify-between mb-2">
