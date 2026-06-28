@@ -151,11 +151,29 @@ async function directoryPhone(results, toks, ville, cp) {
 
 async function scrapeSite(site) {
   let text = await jina(site)            // home → contient le footer (email/tél souvent ici)
-  for (const p of ['/contact', '/mentions-legales']) {   // pages à plus forte valeur seulement (vitesse)
-    if (text.length > 14000) break
-    const t = await jina(site + p); if (t) text += '\n' + t; await sleep(100)
+  for (const p of ['/contact', '/mentions-legales', '/a-propos', '/qui-sommes-nous', '/coordonnees']) {
+    if (text.length > 16000) break
+    const t = await jina(site + p); if (t) text += '\n' + t; await sleep(90)
   }
   return deobfuscate(text)
+}
+// devine les domaines probables à partir du nom, à VÉRIFIER ensuite (page doit contenir nom+ville)
+function guessDomains(toks) {
+  const t = toks.filter(x => x.length >= 4).slice(0, 2)
+  const bases = []
+  if (t[0]) bases.push(t[0])
+  if (t[0] && t[1]) { bases.push(t[0] + t[1], t[0] + '-' + t[1]) }
+  const out = []
+  for (const b of bases) for (const tld of ['.fr', '.com']) out.push('https://' + b + tld)
+  return out.slice(0, 6)
+}
+// email depuis une page Facebook de l'entreprise (validée nom+ville) — beaucoup de TPE y mettent leur email
+async function facebookEmail(results, toks, ville, cp) {
+  const fb = (results || []).map(r => r.url || '').find(u => /facebook\.com/.test(u) && toks.some(t => deburr(u).includes(t)))
+  if (!fb) return ''
+  const t = await jina(fb)
+  if (t && pageBelongs(t, toks, ville, cp)) { const e = emailsFrom(t, 'facebook.com'); if (e) return e }
+  return ''
 }
 
 // cœur : pour une entreprise+ville+cp → {site, email, fixe, mobile, desc} STRICT
@@ -168,6 +186,15 @@ async function enrich(entreprise, ville, cp) {
   // Niveau A : domaine qui matche le nom → site sûr
   let site = strongSite(results, toks), text = ''
   if (site) text = await scrapeSite(site)
+
+  // Niveau A bis : devinette de domaine (nom.fr/.com), retenu seulement si la page contient nom+ville
+  if (!site) {
+    for (const g of guessDomains(toks)) {
+      const home = await jina(g)
+      if (home && pageBelongs(home, toks, ville, cp)) { site = g; text = await scrapeSite(g); break }
+      await sleep(90)
+    }
+  }
 
   // Niveau B : sinon, on valide d'abord la PAGE D'ACCUEIL du candidat (1 lecture), puis on lit tout seulement si c'est bien eux
   if (!site) {
@@ -190,6 +217,8 @@ async function enrich(entreprise, ville, cp) {
     if (dp) { fixe = dp.fixe || ''; mobile = dp.mobile || ''; telSource = dp.src }  // annuaire ≠ site officiel : on ne l'enregistre pas comme site
   }
   void telSource
+  // dernier recours email : page Facebook de l'entreprise (validée nom+ville)
+  if (!email) { const fe = await facebookEmail(results, toks, ville, cp); if (fe) email = fe }
   if (!site && !email && !fixe && !mobile) return { site: '', reason: 'pas de site officiel trouvé' }
   return { site, email, fixe, mobile, desc, reason: 'ok' }
 }

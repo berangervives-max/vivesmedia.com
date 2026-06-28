@@ -31,7 +31,7 @@ function ProjectTile({ p, index, big = false }: { p: ProjectCard; index: number;
     >
       <Link
         href={p.href}
-        className={`group relative block w-full overflow-hidden rounded-3xl bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[21/9]' : 'aspect-[4/3]'}`}
+        className={`group relative block w-full overflow-hidden rounded-3xl bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[16/9]' : 'aspect-[16/10]'}`}
       >
         <img
           src={p.img}
