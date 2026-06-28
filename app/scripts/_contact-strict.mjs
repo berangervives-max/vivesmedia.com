@@ -55,11 +55,15 @@ function pageBelongs(text, toks, ville, cp) {
 }
 
 async function jina(url) {
-  try {
-    const r = await fetch('https://r.jina.ai/' + url, { headers: { 'X-Return-Format': 'text', Accept: 'text/plain' } })
-    if (!r.ok) return ''
-    return await r.text()
-  } catch { return '' }
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const r = await fetch('https://r.jina.ai/' + url, { headers: { 'X-Return-Format': 'text', Accept: 'text/plain' } })
+      if (r.status === 429) { await sleep(2000); continue }  // anti rate-limit Jina : 1 retry
+      if (!r.ok) return ''
+      return await r.text()
+    } catch { return '' }
+  }
+  return ''
 }
 
 const phoneRe = /(?:\+33[\s.]?|0)[1-9](?:[\s.\-]?\d{2}){4}/g
@@ -112,9 +116,9 @@ function deobfuscate(t) {
 }
 async function scrapeSite(site) {
   let text = await jina(site)            // home → contient le footer (email/tél souvent ici)
-  for (const p of ['/contact', '/contact.html', '/contact.php', '/mentions-legales', '/nous-contacter', '/contactez-nous', '/a-propos', '/qui-sommes-nous']) {
-    if (text.length > 16000) break
-    const t = await jina(site + p); if (t) text += '\n' + t; await sleep(120)
+  for (const p of ['/contact', '/mentions-legales']) {   // pages à plus forte valeur seulement (vitesse)
+    if (text.length > 14000) break
+    const t = await jina(site + p); if (t) text += '\n' + t; await sleep(100)
   }
   return deobfuscate(text)
 }
@@ -192,12 +196,14 @@ if (args[0] === '--run') {
   const ville = villeOf
   let all = []
   for (let f = 0; ; f += 1000) { const { data } = await sb.from('site_clients').select('id,entreprise,nom,secteur,email,telephone,notes').range(f, f + 999); all = all.concat(data); if (data.length < 1000) break }
-  const targets = all.filter(c => (empty(c.email) || empty(c.telephone)) && !(c.notes || '').includes('[STRICT'))
+  let targets = all.filter(c => (empty(c.email) || empty(c.telephone)) && !(c.notes || '').includes('[STRICT'))
   const score = c => ((c.notes || '').match(/score\s+(\d+)\/10/i) || [])[1] | 0
   targets.sort((a, b) => ((b.notes || '').includes('[PRIORITAIRE') - (a.notes || '').includes('[PRIORITAIRE')) || (score(b) - score(a)))
-  // 'rev' = ouvrier parallèle qui attaque par le bas du lot (évite les doublons avec l'ouvrier principal)
+  // 'rev' = attaque par le bas. 'part=I/N' = ouvrier I sur N, prend 1 fiche sur N (partition sans collision).
   if (args.includes('rev')) targets.reverse()
-  console.log(`Cibles: ${targets.length} · plafond ce run: ${CAP}${args.includes('rev') ? ' (sens inverse)' : ''}`)
+  const partArg = (args.find(a => a.startsWith('part=')) || '').slice(5)
+  if (partArg) { const [pi, pn] = partArg.split('/').map(Number); if (pn > 1) targets = targets.filter((_, idx) => idx % pn === pi) }
+  console.log(`Cibles: ${targets.length} · plafond ce run: ${CAP}${partArg ? ' (part ' + partArg + ')' : ''}`)
   let okMail = 0, okTel = 0, none = 0, done = 0
   for (const c of targets) {
     if (done >= CAP) break

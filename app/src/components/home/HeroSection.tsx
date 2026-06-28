@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { ArrowUpRight, Star, CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
+import { GoogleGLogo } from '@/components/BrandLogos'
 import { track } from '@/lib/analytics'
 
 // Page de réservation publique (appel découverte 30 min, sans engagement).
@@ -52,7 +53,9 @@ export default function HeroSection() {
             </div>
             <div className="text-left">
               <div className="flex items-center gap-0.5">{[1,2,3,4,5].map((i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
-              <p className="text-xs text-muted-foreground mt-0.5">+25 avis · 5,0/5</p>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+                <GoogleGLogo size={13} /> Avis Google · 5,0/5
+              </p>
             </div>
           </a>
         </motion.div>
