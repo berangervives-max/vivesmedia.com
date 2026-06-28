@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { CalendarDays, Video, Phone, ExternalLink, Clock, CheckCircle2, CalendarPlus } from 'lucide-react'
 import Kpis from '@/components/cms/Kpis'
+import { CalendlyLogo, GoogleCalendarLogo, CalcomLogo } from '@/components/BrandLogos'
 
 const ORANGE = '#F4521E'
 
@@ -9,7 +10,7 @@ type AgendaLinks = { calendlyUrl: string; calcomUrl: string; googleAgendaUrl: st
 
 const DEFAULT_LINKS: AgendaLinks = {
   calendlyUrl: 'https://calendly.com/vivesmedia',
-  calcomUrl: '',
+  calcomUrl: 'https://cal.com/vivesmedia',
   googleAgendaUrl: 'https://calendar.google.com/calendar/r/eventedit?text=Appel%20d%C3%A9couverte%20vivesmedia&description=Appel%20d%C3%A9couverte%2030%20minutes%20avec%20vivesmedia.com%20-%20Full%20remote',
 }
 
@@ -39,7 +40,7 @@ export default function AgendaPage() {
         const s = JSON.parse(raw)
         setLinks({
           calendlyUrl: s.calendlyUrl || DEFAULT_LINKS.calendlyUrl,
-          calcomUrl: s.calcomUrl || '',
+          calcomUrl: s.calcomUrl || DEFAULT_LINKS.calcomUrl,
           googleAgendaUrl: s.googleAgendaUrl || DEFAULT_LINKS.googleAgendaUrl,
         })
       }
@@ -49,6 +50,7 @@ export default function AgendaPage() {
   const TOOLS = [
     {
       name: 'Calendly',
+      Logo: CalendlyLogo,
       connected: Boolean(links.calendlyUrl),
       role: 'Réservation publique — tes prospects choisissent leur créneau, le RDV tombe dans ton agenda. Visio Google Meet générée automatiquement.',
       href: links.calendlyUrl,
@@ -57,6 +59,7 @@ export default function AgendaPage() {
     },
     {
       name: 'Google Agenda + Meet',
+      Logo: GoogleCalendarLogo,
       connected: Boolean(links.googleAgendaUrl),
       role: 'Création directe d\'un RDV avec visio Google Meet — pour caler un rendez-vous toi-même avec un client (lien identique à celui de l\'ancien site).',
       href: links.googleAgendaUrl,
@@ -65,8 +68,9 @@ export default function AgendaPage() {
     },
     {
       name: 'cal.com',
+      Logo: CalcomLogo,
       connected: Boolean(links.calcomUrl),
-      role: 'Alternative open-source à Calendly. Renseigne ton lien cal.com dans Paramètres → Liens connectés pour l\'activer ici.',
+      role: 'Alternative open-source à Calendly. Modifie ton lien cal.com dans Paramètres → Liens connectés.',
       href: links.calcomUrl || 'https://app.cal.com',
       manage: 'https://app.cal.com/bookings/upcoming',
       manageLabel: 'Mes RDV cal.com',
@@ -147,7 +151,10 @@ export default function AgendaPage() {
         {TOOLS.map(tool => (
           <div key={tool.name} className="rounded-xl p-5 flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-bold" style={{ color: '#111827' }}>{tool.name}</p>
+              <div className="flex items-center gap-2 min-w-0">
+                <tool.Logo size={26} className="shrink-0" />
+                <p className="text-sm font-bold truncate" style={{ color: '#111827' }}>{tool.name}</p>
+              </div>
               {tool.connected ? (
                 <span className="flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ background: '#DCFCE7', color: '#16A34A' }}>
                   <CheckCircle2 className="w-2.5 h-2.5" /> Connecté
