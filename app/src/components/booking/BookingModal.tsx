@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { X, ExternalLink, CalendarClock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CalendlyLogo, CalcomLogo } from '@/components/BrandLogos'
-import { BOOKING, BOOKING_EVENT } from '@/lib/booking'
+import { BOOKING, BOOKING_EVENT, CALCOM_LIVE } from '@/lib/booking'
 import { track } from '@/lib/analytics'
 
 type Provider = {
@@ -110,30 +110,48 @@ export default function BookingModal() {
               })}
             </div>
 
-            {/* Planning live embarqué */}
+            {/* Planning live embarqué (ou panneau d'activation pour Cal.com tant qu'il n'est pas publié) */}
             <div className="flex-1 overflow-hidden px-5 sm:px-6 py-4">
-              <div className="w-full h-full rounded-xl overflow-hidden" style={{ border: '1px solid #F1F3F5', minHeight: 480 }}>
-                <iframe
-                  key={active.id}
-                  src={active.src}
-                  title={`Réservation ${active.name}`}
-                  className="w-full"
-                  style={{ height: '60vh', minHeight: 480, border: 'none' }}
-                />
+              <div className="w-full h-full rounded-xl overflow-hidden flex items-center justify-center" style={{ border: '1px solid #F1F3F5', minHeight: 480 }}>
+                {active.id === 'calcom' && !CALCOM_LIVE ? (
+                  <div className="text-center px-8 py-12 max-w-sm">
+                    <span className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style={{ background: '#0E0E10' }}>
+                      <active.Logo size={30} />
+                    </span>
+                    <p className="font-bold text-base mb-2" style={{ color: '#111827' }}>Réservation Cal.com en cours d'activation</p>
+                    <p className="text-sm leading-relaxed mb-5" style={{ color: '#6B7280' }}>
+                      Notre page Cal.com sera disponible très bientôt. En attendant, réserve ton créneau via <strong>Calendly</strong> — c'est exactement le même appel découverte de 30 min.
+                    </p>
+                    <button type="button" onClick={() => { setActiveId('calendly'); track('booking_provider_selected', { provider: 'calendly' }) }}
+                      className="inline-flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl text-white" style={{ background: '#006BFF' }}>
+                      <CalendlyLogo size={18} /> Réserver via Calendly
+                    </button>
+                  </div>
+                ) : (
+                  <iframe
+                    key={active.id}
+                    src={active.src}
+                    title={`Réservation ${active.name}`}
+                    className="w-full h-full"
+                    style={{ height: '60vh', minHeight: 480, border: 'none' }}
+                  />
+                )}
               </div>
             </div>
 
             {/* Repli : ouvrir dans un onglet (si l'embed est bloqué côté outil) */}
-            <div className="px-5 sm:px-6 pb-4 -mt-1">
-              <a
-                href={active.open} target="_blank" rel="noopener noreferrer"
-                onClick={() => track('cta_clicked', { location: 'booking_modal', label: `Ouvrir ${active.name}`, destination: active.open })}
-                className="flex items-center justify-center gap-1.5 text-xs font-medium"
-                style={{ color: active.color }}
-              >
-                Le planning ne s'affiche pas ? Ouvrir {active.name} dans un nouvel onglet <ExternalLink className="w-3 h-3" />
-              </a>
-            </div>
+            {(active.id !== 'calcom' || CALCOM_LIVE) && (
+              <div className="px-5 sm:px-6 pb-4 -mt-1">
+                <a
+                  href={active.open} target="_blank" rel="noopener noreferrer"
+                  onClick={() => track('cta_clicked', { location: 'booking_modal', label: `Ouvrir ${active.name}`, destination: active.open })}
+                  className="flex items-center justify-center gap-1.5 text-xs font-medium"
+                  style={{ color: active.color }}
+                >
+                  Le planning ne s'affiche pas ? Ouvrir {active.name} dans un nouvel onglet <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            )}
           </motion.div>
         </motion.div>
       )}

@@ -10,6 +10,10 @@ export const BOOKING = {
 
 export const BOOKING_EVENT = 'vm-open-booking'
 
+// Passer à true dès que la page publique cal.com/<username> répond (200).
+// Tant que false, l'onglet Cal.com de la modale montre « activation en cours » au lieu d'un 404.
+export const CALCOM_LIVE = false
+
 export function openBooking() {
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent(BOOKING_EVENT))

@@ -99,17 +99,26 @@ function description(text, name) {
 // Recherche de site GRATUITE & ILLIMITÉE : Jina lit une page de résultats DuckDuckGo lite.
 // (Tavily + Firecrawl épuisés ; DDG via Jina = pas de quota, recall un peu plus faible.)
 void FIRECRAWL; void TAVILY
-async function ddgSearch(q) {
-  for (let attempt = 0; attempt < 2; attempt++) {
-    const r = await fetch('https://r.jina.ai/https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(q))
-    if (r.status === 429) { await sleep(2500); continue }
-    if (!r.ok) return []
-    const t = await r.text()
-    let urls = [...t.matchAll(/uddg=([^&")\s]+)/g)].map(m => { try { return decodeURIComponent(m[1]) } catch { return '' } }).filter(Boolean)
-    if (!urls.length) urls = [...t.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(m => m[1]).filter(u => !/duckduckgo|jina\.ai|w3\.org/.test(u))
-    return [...new Set(urls)].slice(0, 10).map(u => ({ url: u, title: '', content: '' }))
+async function readEngine(searchUrl) {
+  for (let a = 0; a < 2; a++) {
+    try {
+      const r = await fetch('https://r.jina.ai/' + searchUrl)
+      if (r.status === 429) { await sleep(2500); continue }
+      if (!r.ok) return ''
+      return await r.text()
+    } catch { return '' }
   }
-  return []
+  return ''
+}
+function extractUrls(t) {
+  let urls = [...t.matchAll(/uddg=([^&")\s]+)/g)].map(m => { try { return decodeURIComponent(m[1]) } catch { return '' } }).filter(Boolean)
+  if (!urls.length) urls = [...t.matchAll(/\]\((https?:\/\/[^)]+)\)/g)].map(m => m[1]).filter(u => !/duckduckgo|jina\.ai|w3\.org|bing\.com|microsoft|msn\.com/.test(u))
+  return [...new Set(urls)].slice(0, 12)
+}
+async function ddgSearch(q) {
+  let urls = extractUrls(await readEngine('https://lite.duckduckgo.com/lite/?q=' + encodeURIComponent(q)))
+  if (!urls.length) urls = extractUrls(await readEngine('https://www.bing.com/search?q=' + encodeURIComponent(q)))  // repli si DDG sature
+  return urls.map(u => ({ url: u, title: '', content: '' }))
 }
 async function tavily(q) { return ddgSearch(q) }
 
@@ -175,10 +184,12 @@ async function enrich(entreprise, ville, cp) {
     desc = description(text, entreprise)
   }
   // Fallback téléphone via annuaire (fiable) si aucun numéro depuis le site officiel
+  let telSource = ''
   if (!fixe && !mobile) {
     const dp = await directoryPhone(results, toks, ville, cp)
-    if (dp) { fixe = dp.fixe || ''; mobile = dp.mobile || ''; if (!site) site = dp.src }
+    if (dp) { fixe = dp.fixe || ''; mobile = dp.mobile || ''; telSource = dp.src }  // annuaire ≠ site officiel : on ne l'enregistre pas comme site
   }
+  void telSource
   if (!site && !email && !fixe && !mobile) return { site: '', reason: 'pas de site officiel trouvé' }
   return { site, email, fixe, mobile, desc, reason: 'ok' }
 }
