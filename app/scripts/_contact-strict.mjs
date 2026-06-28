@@ -16,6 +16,7 @@ const sleep = ms => new Promise(r => setTimeout(r, ms))
 function findKey(o, k) { if (!o || typeof o !== 'object') return null; for (const key of Object.keys(o)) { if (key === k && typeof o[key] === 'string') return o[key]; const r = findKey(o[key], k); if (r) return r } return null }
 const cfg = JSON.parse(readFileSync(process.env.USERPROFILE + '/.claude.json', 'utf8'))
 const TAVILY = findKey(cfg, 'TAVILY_API_KEY')
+const FIRECRAWL = findKey(cfg, 'FIRECRAWL_API_KEY')
 
 const deburr = s => (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
 // agrégateurs / réseaux / annuaires = JAMAIS le site officiel
@@ -87,7 +88,14 @@ function description(text, name) {
   return snip.replace(/\s+\S*$/, '').trim()
 }
 
+// Recherche de site : Firecrawl en premier (1000/mois), repli Tavily si dispo.
+async function firecrawlSearch(q) {
+  const r = await fetch('https://api.firecrawl.dev/v1/search', { method: 'POST', headers: { Authorization: `Bearer ${FIRECRAWL}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, limit: 6 }) })
+  if (!r.ok) { if ([402, 429, 429].includes(r.status)) throw new Error('QUOTA'); return [] }
+  const j = await r.json().catch(() => ({})); return (j.data || j.results || []).map(x => ({ url: x.url || x.link || '', title: x.title || '', content: x.description || x.content || '' }))
+}
 async function tavily(q) {
+  if (FIRECRAWL) return firecrawlSearch(q)
   const r = await fetch('https://api.tavily.com/search', { method: 'POST', headers: { Authorization: `Bearer ${TAVILY}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ query: q, max_results: 6, search_depth: 'basic', country: 'France' }) })
   if (!r.ok) { if ([429, 432, 433].includes(r.status)) throw new Error('QUOTA'); return [] }
   const j = await r.json(); return j.results || []
@@ -122,12 +130,12 @@ async function enrich(entreprise, ville, cp) {
   let site = strongSite(results, toks), text = ''
   if (site) text = await scrapeSite(site)
 
-  // Niveau B : sinon, on teste les candidats non-agrégateurs et on valide par le contenu de la page
+  // Niveau B : sinon, on valide d'abord la PAGE D'ACCUEIL du candidat (1 lecture), puis on lit tout seulement si c'est bien eux
   if (!site) {
     for (const cand of candidates(results).slice(0, 3)) {
-      const t = await scrapeSite(cand)
-      if (t && pageBelongs(t, toks, ville, cp)) { site = cand; text = t; break }
-      await sleep(150)
+      const home = await jina(cand)
+      if (home && pageBelongs(home, toks, ville, cp)) { site = cand; text = await scrapeSite(cand); break }
+      await sleep(120)
     }
   }
   if (!site) return { site: '', reason: 'pas de site officiel trouvé' }
@@ -157,6 +165,8 @@ if (args[0] === '--test') {
 const empty = v => !v || !String(v).trim()
 const villeOf = n => ((n || '').match(/·\s*([^·]+?)\s*\(8\d{4}\)/) || [])[1] || ''
 const cpOf = n => ((n || '').match(/\((8\d{4})\)/) || [])[1] || ''
+// pose/remplace le tag de canal recommandé lu par le Hub (buckets SMS-ready / Email-ready)
+const setReco = (notes, val) => /reco=[A-Z]+/.test(notes || '') ? (notes || '').replace(/reco=[A-Z]+/, `reco=${val}`) : `${notes || ''} reco=${val}`.trim()
 
 if (args[0] === '--sample') {
   const N = args[1] ? parseInt(args[1], 10) : 12
@@ -199,9 +209,13 @@ if (args[0] === '--run') {
       const upd = {}
       if (res.email) { upd.email = res.email; okMail++ }
       const tel = res.fixe || res.mobile; if (tel) { upd.telephone = res.mobile ? `${res.fixe || ''}${res.fixe && res.mobile ? ' · ' : ''}${res.mobile}`.trim() : res.fixe; okTel++ }
-      upd.notes = (c.notes || '') +
+      let notes = (c.notes || '') +
         `\n[STRICT 2026-06-28 site ${res.site}${res.email ? ' email ' + res.email : ''}${res.fixe ? ' fixe ' + res.fixe : ''}${res.mobile ? ' mobile ' + res.mobile : ''}]` +
         (res.desc ? `\n[DESC ${res.desc}]` : '')
+      // canal recommandé : email prioritaire, sinon SMS si mobile → fait monter les buckets du Hub
+      if (res.email) notes = setReco(notes, 'EMAIL')
+      else if (res.mobile) notes = setReco(notes, 'SMS')
+      upd.notes = notes
       await sb.from('site_clients').update(upd).eq('id', c.id)
     } else {
       none++

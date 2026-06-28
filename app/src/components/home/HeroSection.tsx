@@ -1,9 +1,12 @@
 'use client'
 import Link from 'next/link'
-import { ArrowUpRight, Star } from 'lucide-react'
+import { ArrowUpRight, Star, CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
 import { track } from '@/lib/analytics'
+
+// Page de réservation publique (appel découverte 30 min, sans engagement).
+const CALENDLY_URL = 'https://calendly.com/vivesmedia'
 
 export default function HeroSection() {
   return (
@@ -29,6 +32,12 @@ export default function HeroSection() {
             style={{ backgroundColor: '#F4521E' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>
+          <a href={CALENDLY_URL} target="_blank" rel="noopener noreferrer"
+            onClick={() => track('cta_clicked', { location: 'hero', label: 'Réserver un appel', destination: CALENDLY_URL })}
+            className="flex items-center gap-2 font-semibold px-8 py-4 rounded-full border transition-colors hover:bg-foreground/5"
+            style={{ borderColor: 'rgba(17,24,39,0.18)', color: '#111827' }}>
+            <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} /> Réserver un appel
+          </a>
           <a href="https://g.page/r/CVrzNHW-E9f0EAE/review" target="_blank" rel="noopener noreferrer"
             className="flex items-center gap-3 ml-2 hover:opacity-80 transition-opacity">
             <div className="flex -space-x-2">
@@ -49,7 +58,7 @@ export default function HeroSection() {
         </motion.div>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.5 }}
           className="mt-5 text-xs sm:text-sm text-muted-foreground">
-          Devis gratuit · réponse sous 24&nbsp;h · validation à chaque étape, sans engagement
+          Devis gratuit ou appel de 30&nbsp;min · réponse sous 24&nbsp;h · sans engagement
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.55 }}
           className="mt-16 flex flex-wrap justify-center gap-12">
