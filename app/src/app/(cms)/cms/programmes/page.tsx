@@ -2,7 +2,21 @@
 import { useEffect, useState } from 'react'
 import { Clock, X, CalendarClock, RefreshCw, CheckCircle2, Ban } from 'lucide-react'
 
-type Item = { prospectId: string; nom?: string; entreprise?: string; id: string; when: string; to: string; statut: string }
+type Item = { prospectId: string; nom?: string; entreprise?: string; id: string; when: string; to: string; statut: string; statutReel?: string | null }
+
+// statut réel Resend → libellé + couleurs
+const STATUT: Record<string, { label: string; color: string; bg: string }> = {
+  scheduled: { label: 'Programmé', color: '#92400E', bg: '#FEF3C7' },
+  sent: { label: 'Envoyé', color: '#1E40AF', bg: '#DBEAFE' },
+  delivered: { label: 'Livré ✓', color: '#065F46', bg: '#D1FAE5' },
+  delivery_delayed: { label: 'Envoi différé', color: '#92400E', bg: '#FEF3C7' },
+  opened: { label: 'Ouvert 👀', color: '#065F46', bg: '#D1FAE5' },
+  clicked: { label: 'Cliqué 🔗', color: '#065F46', bg: '#D1FAE5' },
+  bounced: { label: 'Rejeté (adresse invalide)', color: '#991B1B', bg: '#FEE2E2' },
+  complained: { label: 'Marqué spam', color: '#991B1B', bg: '#FEE2E2' },
+  canceled: { label: 'Annulé', color: '#6B7280', bg: '#F3F4F6' },
+}
+const statutOf = (it: Item) => STATUT[it.statutReel || ''] || STATUT[it.statut === 'annulé' ? 'canceled' : it.statut === 'envoyé' ? 'sent' : 'scheduled']
 
 const fmt = (iso: string) => { try { return new Date(iso).toLocaleString('fr-FR', { weekday: 'short', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }) } catch { return iso } }
 // ISO local (datetime-local) → ISO avec offset Paris (+02:00 été)
@@ -29,8 +43,9 @@ export default function ProgrammesPage() {
   const cancel = (it: Item) => { if (confirm(`Annuler l'envoi à ${it.to} (${it.entreprise || it.nom}) ?`)) act({ action: 'cancel', prospectId: it.prospectId, id: it.id }) }
   const reschedule = (it: Item) => act({ action: 'reschedule', prospectId: it.prospectId, id: it.id, when: toParisIso(when) })
 
-  const active = items.filter(i => i.statut === 'programmé')
-  const past = items.filter(i => i.statut !== 'programmé')
+  const isPending = (i: Item) => (i.statutReel ? i.statutReel === 'scheduled' : i.statut === 'programmé')
+  const active = items.filter(isPending)
+  const past = items.filter(i => !isPending(i))
 
   return (
     <div className="max-w-4xl">
@@ -54,7 +69,7 @@ export default function ProgrammesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-semibold text-sm" style={{ color: '#111827' }}>{it.entreprise || it.nom}</span>
-                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: '#FEF3C7', color: '#92400E' }}>Programmé</span>
+                      <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: statutOf(it).bg, color: statutOf(it).color }}>{statutOf(it).label}</span>
                     </div>
                     <p className="text-xs mt-1" style={{ color: '#6B7280' }}>→ {it.to}</p>
                     <p className="text-sm mt-1 font-medium" style={{ color: '#F4521E' }}>{fmt(it.when)}</p>
@@ -92,10 +107,11 @@ export default function ProgrammesPage() {
               <div className="space-y-2">
                 {past.map(it => (
                   <div key={it.id} className="rounded-lg p-3 flex items-center gap-3 text-sm" style={{ background: '#fff', border: '1px solid #F1F3F5', color: '#9CA3AF' }}>
-                    {it.statut === 'annulé' ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                    {(it.statutReel === 'bounced' || it.statutReel === 'complained' || it.statut === 'annulé') ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
                     <span className="font-medium" style={{ color: '#6B7280' }}>{it.entreprise || it.nom}</span>
                     <span>→ {it.to}</span>
-                    <span className="ml-auto">{fmt(it.when)} · {it.statut}</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: statutOf(it).bg, color: statutOf(it).color }}>{statutOf(it).label}</span>
+                    <span className="ml-auto">{fmt(it.when)}</span>
                   </div>
                 ))}
               </div>

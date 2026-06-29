@@ -32,6 +32,20 @@ export async function GET() {
       })
     }
   }
+  // Statut RÉEL via Resend (delivered / sent / scheduled / bounced…) → la page n'affiche plus un statut périmé.
+  const KEY = process.env.RESEND_API_KEY
+  if (KEY) {
+    await Promise.all(out.map(async it => {
+      try {
+        const r = await fetch(`https://api.resend.com/emails/${it.id}`, { headers: { Authorization: `Bearer ${KEY}` } })
+        if (r.ok) {
+          const e = await r.json()
+          it.statutReel = e.last_event || null
+          if (e.scheduled_at) it.when = e.scheduled_at
+        }
+      } catch { /* garde le statut du marqueur */ }
+    }))
+  }
   out.sort((a, b) => String(a.when).localeCompare(String(b.when)))
   return NextResponse.json({ items: out })
 }
