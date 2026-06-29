@@ -30,8 +30,9 @@ export async function POST(req: NextRequest) {
   if (!user || user.email !== 'berangervives@gmail.com') {
     return NextResponse.json({ error: 'Non autorisé' }, { status: 401 })
   }
-  const { to, subject, body, kind, clientId } = await req.json().catch(() => ({}))
+  const { to, subject, body, kind, clientId, scheduledAt } = await req.json().catch(() => ({}))
   if (!to || !subject || !body) return NextResponse.json({ error: 'to, subject, body requis' }, { status: 400 })
+  const isScheduled = typeof scheduledAt === 'string' && /^\d{4}-\d{2}-\d{2}T/.test(scheduledAt)
   // Tags Resend (ASCII/chiffres/_/- uniquement) → permettent d'attribuer ouvertures/clics
   const tags: { name: string; value: string }[] = []
   if (typeof kind === 'string' && /^[A-Za-z0-9_-]{1,40}$/.test(kind)) tags.push({ name: 'kind', value: kind })
@@ -51,26 +52,37 @@ export async function POST(req: NextRequest) {
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ from: FROM, to, subject, html, reply_to: NOTIFY, ...(tags.length ? { tags } : {}) }),
+    body: JSON.stringify({ from: FROM, to, subject, html, reply_to: NOTIFY, ...(tags.length ? { tags } : {}), ...(isScheduled ? { scheduled_at: scheduledAt } : {}) }),
   })
   if (!res.ok) {
     const err = await res.text()
     return NextResponse.json({ error: `Resend : ${err}` }, { status: 502 })
   }
   const sent = await res.json().catch(() => ({}))
+  const admin = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
 
-  // Copie dans la boîte Gmail (trace perso) — best-effort, sans bloquer la réponse
+  // Copie immédiate dans la boîte Gmail — uniquement pour un envoi immédiat (pas pour un programmé)
+  if (!isScheduled) {
+    try {
+      const copyHtml = `<p style="font-family:Arial,sans-serif;font-size:13px;color:#888;margin:0 0 8px">📤 Copie — email de prospection envoyé à <b>${esc(String(to))}</b> le ${new Date().toLocaleString('fr-FR')}. Les réponses arriveront directement ici.</p><hr style="border:none;border-top:1px solid #eee"/>${plainHtml}`
+      await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ from: FROM, to: NOTIFY, subject: `📤 ${to} — ${subject}`, html: copyHtml }),
+      })
+    } catch { /* copie best-effort */ }
+  }
+  // Trace dans le suivi (apparaît dans « Suivi prospection ») — même pour un envoi programmé
   try {
-    const copyHtml = `<p style="font-family:Arial,sans-serif;font-size:13px;color:#888;margin:0 0 8px">📤 Copie — email de prospection envoyé à <b>${esc(String(to))}</b> le ${new Date().toLocaleString('fr-FR')}. Les réponses arriveront directement ici.</p><hr style="border:none;border-top:1px solid #eee"/>${plainHtml}`
-    await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ from: FROM, to: NOTIFY, subject: `📤 ${to} — ${subject}`, html: copyHtml }),
-    })
-  } catch { /* copie best-effort */ }
-  try {
-    const admin = createSb(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
-    await admin.from('automation_logs').insert({ type: 'prospect_email', payload: { to: String(to).toLowerCase(), subject, kind: kind || null, prospect_id: clientId || null, email_id: sent?.id || null, at: new Date().toISOString() } })
+    await admin.from('automation_logs').insert({ type: 'prospect_email', payload: { to: String(to).toLowerCase(), subject, kind: kind || null, prospect_id: clientId || null, email_id: sent?.id || null, scheduled: isScheduled || undefined, at: isScheduled ? scheduledAt : new Date().toISOString() } })
   } catch { /* trace best-effort */ }
-  return NextResponse.json({ ok: true })
+  // Pour un envoi programmé : marqueur gérable depuis « Envois programmés »
+  if (isScheduled && clientId && sent?.id) {
+    try {
+      const { data: row } = await admin.from('site_clients').select('notes').eq('id', clientId).single()
+      const marker = `\n[ENVOI_PROGRAMME id=${sent.id} when=${scheduledAt} to=${String(to).toLowerCase()} statut=programmé]`
+      await admin.from('site_clients').update({ notes: (row?.notes || '') + marker }).eq('id', clientId)
+    } catch { /* marqueur best-effort */ }
+  }
+  return NextResponse.json({ ok: true, scheduled: isScheduled, id: sent?.id })
 }

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { Send, Eye, MousePointerClick, Phone, MessageSquare, MessageCircle, Mail, Activity, Search, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
-type Evt = { id: string; type: string; payload: { to?: string; subject?: string; kind?: string; link?: string; note?: string; at?: string }; created_at: string; client: { id: string; nom: string; secteur?: string } | null }
+type Evt = { id: string; type: string; payload: { to?: string; subject?: string; kind?: string; link?: string; note?: string; at?: string; scheduled?: boolean }; created_at: string; client: { id: string; nom: string; secteur?: string } | null }
 
 const META: Record<string, { label: string; icon: LucideIcon; bg: string; fg: string; chan: string }> = {
   prospect_email: { label: 'Email envoyé', icon: Send, bg: '#FFF1EC', fg: '#F4521E', chan: 'email' },
@@ -91,14 +91,16 @@ export default function SuiviPage() {
                 {list.map(e => {
                   const m = META[e.type] || META.prospect_email
                   const name = e.client?.nom || e.payload?.to || '—'
-                  const detail = e.type === 'prospect_email' && e.payload?.kind ? `(${e.payload.kind})` : e.payload?.subject ? `« ${e.payload.subject} »` : e.payload?.link ? `→ ${e.payload.link}` : e.payload?.note || ''
                   const d = new Date(e.payload?.at || e.created_at)
+                  const isFutureSched = !!e.payload?.scheduled && d.getTime() > Date.now()
+                  const label = isFutureSched ? 'Email programmé ⏰' : m.label
+                  const detail = e.type === 'prospect_email' && e.payload?.kind ? `(${e.payload.kind})` : e.payload?.subject ? `« ${e.payload.subject} »` : e.payload?.link ? `→ ${e.payload.link}` : e.payload?.note || ''
                   return (
                     <div key={e.id} className="flex items-center gap-3 py-2.5 px-1">
                       <span className="w-8 h-8 rounded-full flex items-center justify-center shrink-0" style={{ background: m.bg }}><m.icon className="w-4 h-4" style={{ color: m.fg }} /></span>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm truncate" style={{ color: '#111827' }}><span className="font-semibold">{name}</span> {e.client?.secteur ? <span className="text-xs" style={{ color: '#9CA3AF' }}>· {e.client.secteur}</span> : null}</p>
-                        <p className="text-xs truncate" style={{ color: '#6B7280' }}><span style={{ color: m.fg, fontWeight: 600 }}>{m.label}</span> {detail}</p>
+                        <p className="text-xs truncate" style={{ color: '#6B7280' }}><span style={{ color: m.fg, fontWeight: 600 }}>{label}</span> {detail}</p>
                       </div>
                       <span className="text-xs shrink-0 text-right" style={{ color: '#9CA3AF' }}>{d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })}<br />{d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>

@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { crmService, clientsService, type ClientDossier as Dossier } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, Trash2, type LucideIcon } from 'lucide-react'
+import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, Trash2, Clock, type LucideIcon } from 'lucide-react'
 
 const ORANGE = '#F4521E'
 // Métadonnées d'affichage de la timeline de suivi
@@ -216,6 +216,9 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const [copied, setCopied] = useState(false)
   const [sendingMail, setSendingMail] = useState(false)
   const [mailSent, setMailSent] = useState(false)
+  const [schedAt, setSchedAt] = useState('')
+  const [scheduling, setScheduling] = useState(false)
+  const [scheduled, setScheduled] = useState(false)
   const validTo = /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(to.trim())
 
   // Suivi (timeline) du prospect : emails envoyés/ouverts/cliqués, appels, SMS
@@ -258,6 +261,28 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       setTimeout(refreshActs, 900)
     } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') }
     finally { setSendingMail(false) }
+  }
+
+  // Programmation de l'envoi (date/heure locale → ISO Paris). Apparaît dans « Envois programmés » + « Suivi prospection ».
+  const scheduleViaApp = async () => {
+    if (!validTo) { alert('Renseigne une adresse email destinataire valide.'); return }
+    if (!schedAt) { alert('Choisis une date et une heure d\'envoi.'); return }
+    const iso = `${schedAt}:00+02:00`
+    if (new Date(iso).getTime() < Date.now() + 60000) { alert('Choisis un horaire dans le futur.'); return }
+    const dest = to.trim()
+    if (!confirm(`Programmer l'envoi à ${dest} le ${new Date(iso).toLocaleString('fr-FR')} ?`)) return
+    setScheduling(true)
+    try {
+      const r = await fetch('/api/cms/prospect-email', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ to: dest, subject, body, kind: active, clientId: client.id, scheduledAt: iso }) })
+      const dd = await r.json()
+      if (!r.ok) throw new Error(dd.error || 'Erreur programmation')
+      setScheduled(true)
+      const patch: Partial<Client> = {}
+      if (!client.email && dest) patch.email = dest
+      if (Object.keys(patch).length) clientsService.update(client.id, patch).catch(() => {})
+      setTimeout(refreshActs, 900)
+    } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') }
+    finally { setScheduling(false) }
   }
 
   const pickTpl = (k: keyof ReturnType<typeof templates>) => { setActive(k); setSubject(tpl[k].subject); setBody(tpl[k].body) }
@@ -599,7 +624,17 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               </button>
             )}
           </div>
-          <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Ouvrir dans ma messagerie » envoie depuis ta boîte perso (idéal pour le tout 1er contact à froid). Sans email, utilise l'appel / le SMS.</p>
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px dashed #E5E7EB' }}>
+            <span className="text-xs font-medium" style={{ color: '#6B7280' }}>⏰ Ou programmer&nbsp;:</span>
+            <input type="datetime-local" value={schedAt} onChange={e => setSchedAt(e.target.value)}
+              className="text-sm px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid #E5E7EB', color: '#111827' }} />
+            <button onClick={scheduleViaApp} disabled={scheduling || scheduled || !validTo || !schedAt}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: scheduled ? '#16A34A' : '#0F172A' }}>
+              {scheduled ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />} {scheduled ? 'Programmé ✓' : scheduling ? 'Programmation…' : 'Programmer l\'envoi'}
+            </button>
+            <a href="/cms/programmes" className="text-[11px]" style={{ color: '#9CA3AF' }}>voir les envois programmés →</a>
+          </div>
+          <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Programmer » planifie l'envoi (visible dans Envois programmés + Suivi prospection). « Ouvrir dans ma messagerie » part de ta boîte perso. Sans email, utilise l'appel / le SMS.</p>
         </div>
       </div>
 
