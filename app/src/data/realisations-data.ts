@@ -14,6 +14,12 @@ export type RealisationData = {
   testimonial?: { text: string; name: string; role: string }
   stack: string[]
   services: { label: string; href: string }[]
+  /** Parti pris design — nuancier de la charte du site livré (swatches). */
+  palette?: { hex: string; name: string; text?: 'light' | 'dark' }[]
+  /** Parti pris design — spécimens typographiques (police + rôle + échantillon). */
+  typography?: { font: string; role: string; sample: string; note?: string; serif?: boolean }[]
+  /** Les détails qui comptent — gros plans annotés sur des choix d'UI/ergonomie. */
+  uiDetails?: { title: string; why: string; image?: string; mobile?: boolean }[]
 }
 
 export const REALISATIONS_DATA: RealisationData[] = [
@@ -351,6 +357,130 @@ export const REALISATIONS_DATA: RealisationData[] = [
   },
 ]
 
+// ── PARTI PRIS DESIGN par projet (palette réelle extraite du site livré + typo + choix d'ergonomie) ──
+// Séparé du contenu éditorial ci-dessus pour rester lisible. Fusionné dans getRealisationBySlug.
+type DesignData = Pick<RealisationData, 'palette' | 'typography' | 'uiDetails'>
+
+const DESIGN_BY_SLUG: Record<string, DesignData> = {
+  cadence: {
+    palette: [
+      { hex: '#000000', name: 'Noir absolu' },
+      { hex: '#151515', name: 'Encre' },
+      { hex: '#7F7C81', name: 'Gris cendre' },
+      { hex: '#F9F9F9', name: 'Blanc cassé' },
+      { hex: '#FFFFFF', name: 'Blanc' },
+    ],
+    typography: [
+      { role: 'Titres', font: 'Archivo', sample: 'Trouve ta cadence.', note: 'Grotesque à chasse large — titres XXL qui débordent du viewport pour l’énergie.' },
+      { role: 'Corps', font: 'Inter', sample: 'Bouger, performer, récupérer.', note: 'Sans-serif neutre et lisible, au service du contenu.' },
+    ],
+    uiDetails: [
+      { title: 'Un sélecteur « par où tu commences ? »', why: 'Plutôt qu’un mur de formules, 3 profils (remise en forme, sportif confirmé, compétition) orientent chacun vers les bonnes disciplines et la bonne formule. On réduit la charge de décision : le visiteur se reconnaît en un clic.', image: '/images/realisations/cadence-detail-parcours.png' },
+      { title: 'Une grille éditoriale de disciplines', why: 'Chaque discipline = une image plein cadre + un verbe d’action (« Découvrir »). On navigue à l’instinct, comme on feuillette un magazine, pas comme on lit un menu déroulant.', image: '/images/realisations/cadence-detail-disciplines.png' },
+      { title: 'Une typographie qui déborde de l’écran', why: 'Les titres géants coupés par le bord du viewport créent du mouvement et de la tension — un code emprunté aux marques running premium, à l’opposé du fitness low-cost.' },
+      { title: 'Un bandeau d’essai gratuit permanent', why: 'L’offre « 1re séance offerte » reste visible en haut de chaque page : le call-to-action principal ne quitte jamais l’écran, sans jamais gêner la lecture.' },
+    ],
+  },
+  'marine-caro': {
+    palette: [
+      { hex: '#000000', name: 'Encre' },
+      { hex: '#707070', name: 'Pierre' },
+      { hex: '#F6F6F1', name: 'Beige doux' },
+      { hex: '#FFFFFF', name: 'Blanc' },
+    ],
+    typography: [
+      { role: 'Titres & corps', font: 'Geist', sample: 'Architecte en Provence', note: 'Sans-serif contemporaine, neutre et lisible — elle ne vole jamais la vedette à l’architecture.' },
+    ],
+    uiDetails: [
+      { title: 'Le vide comme parti pris', why: 'Beaucoup de blanc, de grandes images plein cadre : chaque projet a le poids d’une double page imprimée. On ne remplit pas l’écran, on le laisse respirer — c’est ce qui signale le haut de gamme.' },
+      { title: 'Des animations lentes, courbe sur-mesure', why: 'Les transitions posées (easing custom) donnent une sensation premium et sérieuse, à l’image d’un travail sur des mas en secteur sauvegardé. La lenteur est un choix, pas un défaut.' },
+      { title: 'Un formulaire qualifié par type de projet', why: 'Neuf, rénovation ou restauration : le visiteur se classe lui-même, et Marine reçoit une demande déjà cadrée plutôt qu’un simple « bonjour ».' },
+    ],
+  },
+  stoop: {
+    palette: [
+      { hex: '#F4F0E7', name: 'Crème' },
+      { hex: '#131110', name: 'Ink' },
+      { hex: '#E8500C', name: 'Orange brûlé' },
+      { hex: '#FFFFFF', name: 'Blanc' },
+    ],
+    typography: [
+      { role: 'Titres', font: 'Instrument Serif', sample: 'Seamless process.', serif: true, note: 'Serif éditoriale — la touche premium qui casse la froideur industrielle.' },
+      { role: 'Corps', font: 'DM Sans', sample: 'Entreposage, fret, dernier kilomètre.', note: 'Sans-serif technique et très lisible pour les contenus B2B.' },
+    ],
+    uiDetails: [
+      { title: 'Des sections services « pinnées » au scroll', why: 'Le contenu se fige et défile par blocs : on impose un rythme cinématographique qui retient l’attention sur chaque service, sans noyer le prospect.' },
+      { title: 'Des statistiques animées comme preuve', why: 'Les chiffres qui montent au scroll matérialisent la fiabilité et l’échelle — exactement ce qu’un expéditeur cherche à vérifier avant de confier sa logistique.' },
+      { title: 'Une page pricing transparente', why: 'Afficher des offres tarifées, rare en logistique B2B, transforme l’opacité habituelle en argument de confiance : le prospect se projette et arrive au contact déjà convaincu.' },
+    ],
+  },
+  'yannis-amielh': {
+    palette: [
+      { hex: '#121211', name: 'Nuit' },
+      { hex: '#FF3D1F', name: 'Rouge manga' },
+      { hex: '#E9A23B', name: 'Soleil méditerranéen' },
+      { hex: '#F4F2EE', name: 'Craie' },
+    ],
+    typography: [
+      { role: 'Titres & corps', font: 'General Sans', sample: 'Editorial · Campagne · Runway', note: 'Sans-serif éditoriale au caractère marqué — le book se lit comme un magazine de mode.' },
+    ],
+    uiDetails: [
+      { title: 'Une signature 3D temps réel', why: 'Un élément 3D dans le navigateur donne le ton « objet web » dès la première seconde — le book se démarque de centaines de fiches d’agence plates.' },
+      { title: 'Un book rangé par registre', why: 'Categories editorial / campagne / runway / lifestyle : le directeur de casting trouve en un regard le registre qu’il cherche, sans scroller au hasard.' },
+      { title: 'Pensé pouce d’abord', why: 'Les décideurs scrollent sur mobile : navigation au pouce, photos plein écran, contact accessible en permanence.' },
+    ],
+  },
+  'vives-reports': {
+    palette: [
+      { hex: '#0A0A0A', name: 'Nuit romaine' },
+      { hex: '#E63946', name: 'Rouge Rome' },
+      { hex: '#FACC15', name: 'Or' },
+      { hex: '#FFFFFF', name: 'Blanc' },
+    ],
+    typography: [
+      { role: 'Titres & corps', font: 'Inter', sample: 'Rome, testée à pied.', note: 'Sans-serif sobre et rapide — priorité à la lisibilité des longs contenus éditoriaux.' },
+    ],
+    uiDetails: [
+      { title: 'Une architecture en silos SEO', why: 'Quartiers, monuments, itinéraires, gastronomie : chaque silo nourrit une page pilier et capte la longue traîne autour. La structure sert le référencement autant que la lecture.' },
+      { title: 'Un maillage interne systématique', why: 'Chaque page renvoie vers 3 à 5 contenus connexes : le visiteur reste, et Google lit la profondeur thématique du site.' },
+      { title: 'Des CTA contextuels vers la réservation', why: 'Au fil de l’article, des appels à réserver une visite privée transforment un lecteur curieux en demande qualifiée, sans casser la lecture.' },
+    ],
+  },
+  'paul-et-louis-sport': {
+    palette: [
+      { hex: '#0D0D0D', name: 'Noir terrain' },
+      { hex: '#C8E600', name: 'Vert padel' },
+      { hex: '#F5F5F5', name: 'Gris clair' },
+      { hex: '#FFFFFF', name: 'Blanc' },
+    ],
+    typography: [
+      { role: 'Titres & corps', font: 'Inter', sample: 'Réserve ton terrain.', note: 'Sans-serif impactante et directe — l’énergie du jeu, sans fioriture.' },
+    ],
+    uiDetails: [
+      { title: 'Un CTA « Réserver un terrain » permanent', why: 'L’action principale suit le visiteur : de la découverte à la réservation en 2 clics maximum, on ne laisse jamais l’envie retomber.' },
+      { title: 'Pensé mobile d’abord', why: '80 % des joueurs consultent entre deux matchs, sur téléphone : chaque écran est calibré pour le pouce avant le desktop.' },
+      { title: 'Un SEO local padel', why: 'Optimisation « padel + ville » + Google Business : le club apparaît au moment exact où un joueur cherche un terrain dans la zone.' },
+    ],
+  },
+  ecoserre: {
+    uiDetails: [
+      { title: 'La pédagogie avant le prix', why: 'Sur un achat réfléchi à plusieurs milliers d’euros, on explique le fonctionnement bioclimatique et les économies d’énergie avant d’aborder le tarif : le prospect comprend la valeur d’abord.' },
+      { title: 'Un tunnel de devis progressif', why: 'Un formulaire en plusieurs étapes courtes, moins intimidant qu’un long questionnaire — meilleur taux de complétion sur un cycle de décision long.' },
+      { title: 'Une esthétique naturelle premium', why: 'Palette végétale, photos lumineuses, beaucoup d’espace blanc : le design incarne les valeurs écologiques du produit avant même la lecture.' },
+    ],
+  },
+  'wood-design': {
+    uiDetails: [
+      { title: 'Un devis pré-rempli par produit', why: 'Chaque fiche a son bouton « Demander un devis » avec la référence déjà remplie : l’artisan reçoit des demandes qualifiées au lieu de questions vagues.' },
+      { title: 'Des filtres simples (type, essence, prix)', why: 'Pas de panier ni de complexité e-commerce : le visiteur trouve sa pièce en quelques secondes, l’artisan garde la main sur le prix au projet.' },
+      { title: 'La mise en valeur du savoir-faire', why: 'Photos macro du grain du bois, des assemblages, de l’atelier : le site vend l’artisanat autant que le meuble.' },
+    ],
+  },
+}
+
 export function getRealisationBySlug(slug: string): RealisationData | undefined {
-  return REALISATIONS_DATA.find(r => r.slug === slug)
+  const base = REALISATIONS_DATA.find(r => r.slug === slug)
+  if (!base) return undefined
+  const design = DESIGN_BY_SLUG[slug]
+  return design ? { ...base, ...design } : base
 }

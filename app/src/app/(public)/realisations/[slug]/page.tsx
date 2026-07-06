@@ -15,11 +15,24 @@ import { realisationSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
 export const revalidate = 60
 export const dynamicParams = true
 
-/** Résout une réalisation par slug : d'abord la base (éditable via /cms), sinon les statiques (code, secours). */
+/**
+ * Résout une réalisation par slug : la base (éditable via /cms) pilote le contenu,
+ * mais on RÉ-INJECTE les champs « parti pris design » (palette / typo / détails UI)
+ * authorés en code — la base ne les porte pas encore.
+ */
 async function resolveRealisation(slug: string): Promise<RealisationData | undefined> {
+  const staticR = getRealisationBySlug(slug)
   const dbR = await realisationsService.getBySlug(slug).catch(() => null)
-  if (dbR) return dbToRealisationData(dbR)
-  return getRealisationBySlug(slug)
+  if (dbR) {
+    const mapped = dbToRealisationData(dbR)
+    return {
+      ...mapped,
+      palette: mapped.palette ?? staticR?.palette,
+      typography: mapped.typography ?? staticR?.typography,
+      uiDetails: mapped.uiDetails ?? staticR?.uiDetails,
+    }
+  }
+  return staticR
 }
 
 export async function generateStaticParams() {
@@ -63,6 +76,8 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
   if (!r) notFound()
 
   const hasContext = Boolean(r.context.client || r.context.problem)
+  const hasDesign = Boolean((r.palette && r.palette.length > 0) || (r.typography && r.typography.length > 0))
+  const uiDetails = r.uiDetails ?? []
   const process = getProcess(slug)
 
   // Navigation « projet suivant » + host pour le mockup navigateur
@@ -111,14 +126,12 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         )}
       </header>
 
-      {/* ── IMAGE HERO IMMERSIVE (quasi pleine largeur, dans un mockup navigateur) ── */}
+      {/* ── IMAGE HERO IMMERSIVE (quasi pleine largeur, dans un mockup navigateur, ratio naturel = jamais coupée) ── */}
       {r.heroImage && (
         <Reveal className="px-3 sm:px-6">
           <div className="mx-auto max-w-[1500px]">
             <BrowserFrame url={liveHost}>
-              <div className="relative aspect-[16/10] w-full sm:aspect-[16/9]">
-                <img src={r.heroImage} alt={`${r.name} — aperçu du projet`} className="absolute inset-0 h-full w-full object-cover object-top" />
-              </div>
+              <img src={r.heroImage} alt={`${r.name} — aperçu du projet`} className="block w-full" />
             </BrowserFrame>
           </div>
         </Reveal>
@@ -147,9 +160,55 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 3. LA SOLUTION (grands blocs numérotés) ── */}
-      {r.solution.length > 0 && (
+      {/* ── 3. LE PARTI PRIS DESIGN (palette + typographie) ── */}
+      {hasDesign && (
         <section className="border-t border-border bg-secondary/30 py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto max-w-5xl px-6">
+            <SectionHead eyebrow="Le parti pris design" title="La charte," accent="en clair." />
+            <div className="mt-14 grid gap-14 sm:mt-20 md:grid-cols-2 md:gap-16">
+              {r.palette && r.palette.length > 0 && (
+                <Reveal>
+                  <p className="mb-6 text-xs uppercase tracking-[0.2em] text-muted-foreground">Palette</p>
+                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+                    {r.palette.map((c) => (
+                      <div key={c.hex + c.name}>
+                        <div className="mb-2.5 h-20 rounded-2xl border border-border shadow-sm" style={{ backgroundColor: c.hex }} />
+                        <p className="font-mono text-xs text-foreground">{c.hex}</p>
+                        <p className="text-xs text-muted-foreground">{c.name}</p>
+                      </div>
+                    ))}
+                  </div>
+                </Reveal>
+              )}
+              {r.typography && r.typography.length > 0 && (
+                <Reveal>
+                  <p className="mb-6 text-xs uppercase tracking-[0.2em] text-muted-foreground">Typographie</p>
+                  <div className="space-y-8">
+                    {r.typography.map((t) => (
+                      <div key={t.font + t.role} className="border-t border-border pt-5">
+                        <p className="mb-1 text-xs uppercase tracking-[0.15em]" style={{ color: '#F4521E' }}>{t.role}</p>
+                        <p
+                          className={`text-4xl leading-none text-foreground sm:text-5xl ${t.serif ? 'italic' : 'font-bold tracking-tight'}`}
+                          style={{ fontFamily: `'${t.font}', ${t.serif ? 'serif' : 'sans-serif'}` }}
+                        >
+                          {t.sample}
+                        </p>
+                        <p className="mt-3 text-sm text-muted-foreground">
+                          <span className="font-semibold text-foreground">{t.font}</span>{t.note ? ` — ${t.note}` : ''}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </Reveal>
+              )}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 4. LA SOLUTION (grands blocs numérotés) ── */}
+      {r.solution.length > 0 && (
+        <section className="py-24 sm:py-32 lg:py-40">
           <div className="mx-auto max-w-4xl px-6">
             <SectionHead eyebrow="La solution" title="Ce qui a été" accent="conçu, et pourquoi." />
             <div className="mt-16 sm:mt-20">
@@ -169,7 +228,50 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 4. LE PROJET EN IMAGES (galerie pleine largeur) ── */}
+      {/* ── 5. LES DÉTAILS QUI COMPTENT (gros plans annotés sur l'ergonomie) ── */}
+      {uiDetails.length > 0 && (
+        <section className="border-t border-border bg-secondary/30 py-24 sm:py-32 lg:py-40">
+          <div className="mx-auto mb-14 max-w-3xl px-6 sm:mb-20">
+            <SectionHead eyebrow="Les détails qui comptent" title="Les choix" accent="d'interface." />
+            <Reveal>
+              <p className="mt-6 text-lg leading-relaxed text-muted-foreground">
+                Le design ne se juge pas qu'à la première image. Voici les décisions d'ergonomie qui font qu'on reste, qu'on comprend, et qu'on passe à l'action.
+              </p>
+            </Reveal>
+          </div>
+          <div className="mx-auto grid max-w-6xl gap-8 px-6 sm:gap-10 md:grid-cols-2">
+            {uiDetails.map((d) =>
+              d.image ? (
+                <Reveal key={d.title}>
+                  <figure className="flex h-full flex-col">
+                    {d.mobile ? (
+                      <div className="mx-auto w-full max-w-[240px]"><PhoneFrame><img src={d.image} alt={d.title} className="block w-full" /></PhoneFrame></div>
+                    ) : (
+                      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+                        <img src={d.image} alt={d.title} className="block w-full" />
+                      </div>
+                    )}
+                    <figcaption className="mt-5">
+                      <h3 className="text-lg font-bold text-foreground">{d.title}</h3>
+                      <p className="mt-2 text-[15px] leading-relaxed text-muted-foreground">{d.why}</p>
+                    </figcaption>
+                  </figure>
+                </Reveal>
+              ) : (
+                <Reveal key={d.title}>
+                  <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-7 sm:p-8">
+                    <span className="mb-4 h-1.5 w-8 rounded-full" style={{ backgroundColor: '#F4521E' }} />
+                    <h3 className="text-lg font-bold text-foreground">{d.title}</h3>
+                    <p className="mt-2.5 text-[15px] leading-relaxed text-muted-foreground">{d.why}</p>
+                  </div>
+                </Reveal>
+              )
+            )}
+          </div>
+        </section>
+      )}
+
+      {/* ── 6. LE PROJET EN IMAGES (galerie pleine largeur, ratio naturel) ── */}
       {r.gallery.length > 0 && (
         <section className="py-24 sm:py-32 lg:py-40">
           <div className="mx-auto mb-16 max-w-3xl px-6 sm:mb-20">
@@ -184,14 +286,14 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
                       <PhoneFrame>
                         {img.before
                           ? <BeforeAfter before={img.before} after={img.src} alt={img.caption} />
-                          : <img src={img.src} alt={img.caption} className="w-full" />}
+                          : <img src={img.src} alt={img.caption} className="block w-full" />}
                       </PhoneFrame>
                     </div>
                   ) : (
                     <BrowserFrame url={liveHost}>
                       {img.before
                         ? <BeforeAfter before={img.before} after={img.src} alt={img.caption} />
-                        : <img src={img.src} alt={img.caption} className="w-full object-cover object-top" />}
+                        : <img src={img.src} alt={img.caption} className="block w-full" />}
                     </BrowserFrame>
                   )}
                   {(img.caption || img.rationale) && (
@@ -207,7 +309,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 5. LA DÉMARCHE (liste verticale éditoriale) ── */}
+      {/* ── 7. LA DÉMARCHE (liste verticale éditoriale) ── */}
       {process.length > 0 && (
         <section className="border-t border-border bg-secondary/30 py-24 sm:py-32 lg:py-40">
           <div className="mx-auto max-w-4xl px-6">
@@ -229,7 +331,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 6. LES RÉSULTATS (bandeau sombre, grands chiffres) ── */}
+      {/* ── 8. LES RÉSULTATS (bandeau sombre, chiffres XXL orange) ── */}
       {r.results.length > 0 && (
         <section className="bg-foreground py-24 sm:py-32 lg:py-40">
           <div className="mx-auto max-w-5xl px-6">
@@ -238,8 +340,8 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               {r.results.map((stat, i) => (
                 <Reveal key={stat.label} delay={i * 0.06}>
                   <div className="border-t border-white/15 pt-6">
-                    <p className="text-4xl font-bold leading-none text-white sm:text-5xl">{stat.value}</p>
-                    <p className="mt-4 text-sm leading-snug text-white/50">{stat.label}</p>
+                    <p className="text-4xl font-bold leading-none tracking-tight sm:text-5xl" style={{ color: '#F4521E' }}>{stat.value}</p>
+                    <p className="mt-4 text-sm leading-snug text-white/55">{stat.label}</p>
                   </div>
                 </Reveal>
               ))}
@@ -248,7 +350,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 7. TÉMOIGNAGE (grande citation éditoriale) ── */}
+      {/* ── 9. TÉMOIGNAGE (grande citation éditoriale) ── */}
       {r.testimonial && (
         <section className="py-24 sm:py-32 lg:py-40">
           <div className="mx-auto max-w-3xl px-6 text-center">
@@ -264,7 +366,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 8. STACK & SERVICES (minimal) ── */}
+      {/* ── 10. STACK & SERVICES (minimal) ── */}
       {(r.stack.length > 0 || r.services.length > 0) && (
         <section className="border-t border-border py-20 sm:py-28">
           <div className="mx-auto grid max-w-4xl gap-14 px-6 md:grid-cols-2">
@@ -298,7 +400,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </section>
       )}
 
-      {/* ── 9. PROJET SUIVANT (grand, façon Cuberto) ── */}
+      {/* ── 11. PROJET SUIVANT (grand, façon Cuberto) ── */}
       {next && (
         <Link href={`/realisations/${next.slug}`} className="group relative block overflow-hidden border-t border-border">
           {next.heroImage && (
@@ -320,7 +422,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
         </Link>
       )}
 
-      {/* ── 10. CTA ── */}
+      {/* ── 12. CTA ── */}
       <section className="border-t border-border bg-background px-6 py-20 sm:py-28">
         <div className="mx-auto max-w-5xl">
           <div className="rounded-3xl bg-foreground p-8 text-center sm:p-14 md:p-16">
