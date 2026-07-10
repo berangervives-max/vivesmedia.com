@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowUpRight, Palette, Megaphone, Search, Workflow, GraduationCap, MapPin } from 'lucide-react'
+import Image from 'next/image'
+import { ArrowUpRight, GraduationCap, MapPin } from 'lucide-react'
 
 function LinkedinIcon({ className }: { className?: string }) {
   return (
@@ -25,10 +26,10 @@ const FACTS = [
 ]
 
 const EXPERTISE = [
-  { icon: Palette, title: 'Sites & UX/UI', items: ['Conception UX/UI (Adobe, Figma)', 'E-commerce (PrestaShop, Shopify)', 'Sites sur-mesure (Next.js, Framer)'] },
-  { icon: Megaphone, title: 'SEA & Social Ads', items: ['Google Ads (SEA)', 'Meta / Social Ads', 'Campagnes & acquisition de leads'] },
-  { icon: Search, title: 'SEO & contenu', items: ['Audits Ahrefs & Search Console', 'SEO technique & visibilité IA', 'Réseaux sociaux, emailing (Brevo)'] },
-  { icon: Workflow, title: 'Automatisation & IA', items: ['No-code (n8n, Make)', 'CRM & workflows sur-mesure', 'Agents IA & connexion des outils'] },
+  { img: '/images/about/about-ux.webp', title: 'Sites & UX/UI', items: ['Conception UX/UI (Adobe, Figma)', 'E-commerce (PrestaShop, Shopify)', 'Sites sur-mesure (Next.js, Framer)'] },
+  { img: '/images/about/about-ads.webp', title: 'SEA & Social Ads', items: ['Google Ads (SEA)', 'Meta / Social Ads', 'Campagnes & acquisition de leads'] },
+  { img: '/images/about/about-seo.webp', title: 'SEO & contenu', items: ['Audits Ahrefs & Search Console', 'SEO technique & visibilité IA', 'Réseaux sociaux, emailing (Brevo)'] },
+  { img: '/images/about/about-auto.webp', title: 'Automatisation & IA', items: ['No-code (n8n, Make)', 'CRM & workflows sur-mesure', 'Agents IA & connexion des outils'] },
 ]
 
 const FORMATION = [
@@ -111,13 +112,12 @@ export default function AProposPage() {
             Ce que je <span className="font-heading italic font-normal text-foreground/50">maîtrise</span>
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {EXPERTISE.map((e) => {
-              const Icon = e.icon
-              return (
-                <div key={e.title} className="rounded-2xl border border-border bg-white p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(244,82,30,0.08)' }}>
-                    <Icon className="w-5 h-5" style={{ color: '#F4521E' }} />
-                  </div>
+            {EXPERTISE.map((e) => (
+              <div key={e.title} className="group rounded-2xl border border-border bg-white overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow">
+                <div className="relative aspect-[3/2] border-b border-border bg-white">
+                  <Image src={e.img} alt={e.title} fill sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw" className="object-cover transition-transform duration-500 group-hover:scale-[1.03]" />
+                </div>
+                <div className="p-6 flex flex-col gap-3 flex-1">
                   <h3 className="text-base font-semibold text-foreground">{e.title}</h3>
                   <ul className="space-y-2">
                     {e.items.map((it) => (
@@ -128,8 +128,8 @@ export default function AProposPage() {
                     ))}
                   </ul>
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         </div>
 
