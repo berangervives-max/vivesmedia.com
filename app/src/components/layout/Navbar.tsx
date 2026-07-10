@@ -22,13 +22,13 @@ export default function Navbar() {
     <>
       <nav className="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-[95%] max-w-7xl">
         <div className="bg-white/85 backdrop-blur-xl border border-black/8 rounded-2xl shadow-sm px-5 py-3 flex items-center justify-between">
-          <Link href="/" className="flex-shrink-0">
+          <Link href="/" aria-label="Accueil vivesmedia.com" onClick={(e) => { if (pathname === '/') { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) } }} className="flex-shrink-0">
             <span className="font-bold text-xl text-foreground tracking-tight">vivesmedia<span style={{ color: '#F4521E' }}>.com</span></span>
           </Link>
           <ul className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
               <li key={link.label}>
-                <Link href={link.href} className={`px-4 py-2 text-sm transition-colors rounded-lg ${pathname === link.href ? 'text-foreground font-medium bg-black/6' : 'text-foreground/60 hover:text-foreground hover:bg-black/5'}`}>
+                <Link href={link.href} onClick={(e) => { if (pathname === link.href) { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }) } }} className={`px-4 py-2 text-sm transition-colors rounded-lg ${pathname === link.href ? 'text-foreground font-medium bg-black/6' : 'text-foreground/60 hover:text-foreground hover:bg-black/5'}`}>
                   {link.label}
                 </Link>
               </li>
@@ -59,7 +59,7 @@ export default function Navbar() {
               <ul className="space-y-1">
                 {NAV_LINKS.map((link) => (
                   <li key={link.label}>
-                    <Link href={link.href} onClick={() => setMobileOpen(false)} className={`block py-3 text-xl font-medium transition-colors ${pathname === link.href ? 'text-foreground' : 'text-foreground/60 hover:text-foreground'}`}>
+                    <Link href={link.href} onClick={() => { setMobileOpen(false); if (pathname === link.href) window.scrollTo({ top: 0, behavior: 'smooth' }) }} className={`block py-3 text-xl font-medium transition-colors ${pathname === link.href ? 'text-foreground' : 'text-foreground/60 hover:text-foreground'}`}>
                       {link.label}
                     </Link>
                   </li>
