@@ -15,10 +15,9 @@ export default function HeroSection() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/10 blur-[140px]" />
         <div className="absolute top-20 right-10 w-[300px] h-[300px] rounded-full bg-orange-200/30 blur-[100px]" />
       </div>
-      {/* Mont Ventoux — ancrage local (Avignon), se fond dans le blanc, adaptatif tous formats */}
-      <div className="absolute inset-x-0 bottom-0 z-0 pointer-events-none overflow-hidden h-[42vh] sm:h-[50vh] lg:h-[56vh]">
-        <Image src="/images/mont-ventoux.webp" alt="" fill priority sizes="100vw" className="object-cover object-bottom select-none" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#F9F9F9_0%,transparent_26%)]" />
+      {/* Mont Ventoux — ancrage local (Avignon), fondu SANS couture via multiply (le blanc de l'image disparaît dans le fond), adaptatif tous formats */}
+      <div className="absolute inset-x-0 bottom-0 z-0 pointer-events-none overflow-hidden h-[46vh] sm:h-[52vh] lg:h-[58vh]">
+        <Image src="/images/mont-ventoux.webp" alt="" fill priority sizes="100vw" className="object-cover object-bottom select-none mix-blend-multiply" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, #000 42%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, #000 42%)' }} />
       </div>
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
