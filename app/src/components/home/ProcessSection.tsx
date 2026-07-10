@@ -1,35 +1,36 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { MessageSquare, PenTool, Code2, Rocket, ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight } from 'lucide-react'
 
 const STEPS = [
   {
     num: '01',
-    icon: MessageSquare,
+    img: '/images/process/process-brief.webp',
     title: 'Brief & Découverte',
     desc: 'On échange sur votre projet, vos objectifs et vos concurrents. Je pose les vraies questions pour comprendre ce qui fera la différence pour vous.',
     duration: '1–2 jours',
   },
   {
     num: '02',
-    icon: PenTool,
+    img: '/images/process/process-design.webp',
     title: 'Design & Validation',
     desc: "Je conçois la maquette complète sous Figma. Vous validez chaque section avant qu'une seule ligne de code soit écrite. Rien n'est imposé.",
     duration: '3–5 jours',
   },
   {
     num: '03',
-    icon: Code2,
+    img: '/images/process/process-dev.webp',
     title: 'Développement',
     desc: 'Intégration en Next.js ou Framer, animations, SEO technique, performance. Vous avez accès à un lien de prévisualisation à chaque étape.',
     duration: '5–10 jours',
   },
   {
     num: '04',
-    icon: Rocket,
+    img: '/images/process/process-launch.webp',
     title: 'Mise en ligne & Suivi',
-    desc: "Déploiement sur votre domaine, formation CMS, rapport Analytics configuré. Je reste disponible 30 jours après livraison.",
+    desc: 'Déploiement sur votre domaine, formation CMS, rapport Analytics configuré. Je reste disponible 30 jours après livraison.',
     duration: '1–2 jours',
   },
 ]
@@ -53,40 +54,40 @@ export default function ProcessSection() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {STEPS.map((step, i) => {
-            const Icon = step.icon
-            return (
-              <motion.div
-                key={step.num}
-                initial={{ opacity: 0, y: 24 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: 0.1 * i }}
-                className="relative group"
-              >
-                {/* Connector line */}
-                {i < STEPS.length - 1 && (
-                  <div className="hidden lg:block absolute top-8 left-[calc(100%-0px)] w-6 h-px bg-border z-10" />
-                )}
-                <div className="bg-white rounded-2xl border border-border p-6 h-full flex flex-col gap-5 hover:shadow-md transition-shadow">
-                  <div className="flex items-start justify-between">
-                    <div className="w-11 h-11 rounded-xl flex items-center justify-center bg-secondary/80">
-                      <Icon className="w-5 h-5 text-foreground/70" />
-                    </div>
-                    <span className="text-3xl font-bold text-foreground/8 font-mono leading-none">{step.num}</span>
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#F4521E' }} />
-                    <span className="text-xs text-muted-foreground font-medium">{step.duration}</span>
-                  </div>
+          {STEPS.map((step, i) => (
+            <motion.div
+              key={step.num}
+              initial={{ opacity: 0, y: 24 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.4, delay: 0.1 * i }}
+              className="group bg-white rounded-2xl border border-border overflow-hidden h-full flex flex-col hover:shadow-md transition-shadow"
+            >
+              {/* Visuel de l'étape (généré dans la DA : blanc + trait + accent orange) */}
+              <div className="relative aspect-[3/2] border-b border-border bg-white">
+                <Image
+                  src={step.img}
+                  alt={`${step.title} — illustration de l'étape`}
+                  fill
+                  sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                />
+                <span className="absolute top-3 left-3 w-7 h-7 rounded-full bg-white/85 backdrop-blur border border-border flex items-center justify-center text-xs font-bold text-foreground/70 font-mono">
+                  {step.num}
+                </span>
+              </div>
+              <div className="p-6 flex flex-col gap-4 flex-1">
+                <div className="flex-1">
+                  <h3 className="text-base font-semibold text-foreground mb-2">{step.title}</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
-              </motion.div>
-            )
-          })}
+                <div className="flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#F4521E' }} />
+                  <span className="text-xs text-muted-foreground font-medium">{step.duration}</span>
+                </div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
