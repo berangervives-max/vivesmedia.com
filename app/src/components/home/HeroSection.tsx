@@ -19,6 +19,8 @@ export default function HeroSection() {
       <div className="absolute inset-x-0 bottom-0 z-0 pointer-events-none overflow-hidden h-[46vh] sm:h-[52vh] lg:h-[58vh]">
         <Image src="/images/mont-ventoux.webp" alt="" fill priority sizes="100vw" className="object-cover object-bottom select-none mix-blend-multiply" style={{ maskImage: 'linear-gradient(to bottom, transparent 0%, #000 42%)', WebkitMaskImage: 'linear-gradient(to bottom, transparent 0%, #000 42%)' }} />
       </div>
+      {/* Voile de lisibilité : lève le texte au-dessus de la montagne sans la masquer */}
+      <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: 'radial-gradient(125% 82% at 50% 38%, rgba(249,249,249,0.8) 0%, rgba(249,249,249,0.48) 50%, rgba(249,249,249,0) 74%)' }} />
       <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-bold text-foreground leading-[1.05] tracking-tight">
@@ -26,7 +28,7 @@ export default function HeroSection() {
           <span className="font-heading italic font-normal text-foreground">visiteurs en clients</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
-          className="mt-7 text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
+          className="mt-7 text-foreground/75 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
           Sites sur-mesure, rapides, pensés pour convertir. Livraison en 3 semaines, full remote, partout en France.
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
@@ -58,14 +60,14 @@ export default function HeroSection() {
             </div>
             <div className="text-left">
               <div className="flex items-center gap-0.5">{[1,2,3,4,5].map((i) => <Star key={i} className="w-3 h-3 fill-yellow-400 text-yellow-400" />)}</div>
-              <p className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
+              <p className="flex items-center gap-1 text-xs text-foreground/75 mt-0.5">
                 <GoogleGLogo size={13} /> Avis Google · 5,0/5
               </p>
             </div>
           </a>
         </motion.div>
         <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.5 }}
-          className="mt-5 text-xs sm:text-sm text-muted-foreground">
+          className="mt-5 text-xs sm:text-sm text-foreground/80 font-medium">
           Devis gratuit ou appel de 30&nbsp;min · réponse sous 24&nbsp;h · sans engagement
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.55 }}
@@ -73,7 +75,7 @@ export default function HeroSection() {
           {[{ num: 5, suffix: '+', label: "ans d'expérience" }, { num: 10, suffix: '+', label: 'projets livrés' }, { num: 100, suffix: '%', label: 'full remote · France' }].map((stat) => (
             <div key={stat.label} className="text-center">
               <AnimatedCounter value={stat.num} suffix={stat.suffix} className="block text-3xl font-bold text-foreground" />
-              <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+              <p className="text-sm text-foreground/75 mt-1 font-medium">{stat.label}</p>
             </div>
           ))}
         </motion.div>
