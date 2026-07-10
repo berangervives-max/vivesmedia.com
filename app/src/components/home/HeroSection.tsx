@@ -1,5 +1,6 @@
 'use client'
 import Link from 'next/link'
+import Image from 'next/image'
 import { ArrowUpRight, Star, CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
 import AnimatedCounter from '@/components/ui/AnimatedCounter'
@@ -14,7 +15,12 @@ export default function HeroSection() {
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/10 blur-[140px]" />
         <div className="absolute top-20 right-10 w-[300px] h-[300px] rounded-full bg-orange-200/30 blur-[100px]" />
       </div>
-      <div className="relative max-w-7xl mx-auto px-6 text-center">
+      {/* Mont Ventoux — ancrage local (Avignon), se fond dans le blanc, adaptatif tous formats */}
+      <div className="absolute inset-x-0 bottom-0 z-0 pointer-events-none overflow-hidden h-[42vh] sm:h-[50vh] lg:h-[56vh]">
+        <Image src="/images/mont-ventoux.webp" alt="" fill priority sizes="100vw" className="object-cover object-bottom select-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_bottom,#F9F9F9_0%,transparent_26%)]" />
+      </div>
+      <div className="relative z-10 max-w-7xl mx-auto px-6 text-center">
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-bold text-foreground leading-[1.05] tracking-tight">
           Des sites qui convertissent vos{' '}
