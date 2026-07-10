@@ -3,10 +3,11 @@ import { useRef } from 'react'
 import { motion, useScroll } from 'framer-motion'
 
 const TIMELINE = [
-  { num: '01', year: '2019', title: 'BTS NDRC — Négociation & Relation Client', desc: 'Premières armes en vente, prospection et relation client. Apprentissage des fondamentaux commerciaux.' },
-  { num: '02', year: '2020–2022', title: 'Digital Manager — Automobile & E-Commerce', desc: 'Animation de points de vente, campagnes Google Ads & Meta, gestion de sites e-commerce. Bachelor Marketing & Digital (BAC+3).' },
-  { num: '03', year: '2022–2023', title: 'MBA Expert Marketing Digital — BAC+5', desc: 'Stratégie digitale avancée, architecture web, automatisation marketing. Premier site publié : Vives Reports (Rome).' },
-  { num: '04', year: '2024–2025', title: 'Fondation de vivesmedia.com', desc: 'Lancement du studio freelance. Sites livrés de A à Z : Ecoserre, Paul & Louis Sport, Wood Design. Développement full-stack avec CRM, Stripe et IA.' },
+  { num: '01', year: '2019–2021', title: 'BTS NDRC — Idelca Business School', desc: 'Négociation et digitalisation de la relation client. Les fondamentaux : vente, prospection, relation client.' },
+  { num: '02', year: '2021–2022', title: 'Community Manager — Hurier Moto', desc: 'Réseaux sociaux, veille, stratégie sociale et créations graphiques pour un concessionnaire moto (Cavaillon). En parallèle : Bachelor Marketing Digital.' },
+  { num: '03', year: '2022–2023', title: 'Webmaster & Community Manager — Ducati JMS Motos', desc: 'Image de marque et contenus web (Avignon), mise en ligne des annonces, satisfaction client (GarageScore), photo & vidéo produits.' },
+  { num: '04', year: '2023–2025', title: 'CM & Webmaster — Matos Import', desc: 'Gestion du site e-commerce PrestaShop (jet-ski & nautique, Cap d\'Agde), réseaux sociaux, événements & jeux concours, supports marketing. En parallèle : MBA Expert Marketing Digital (Bac+5).' },
+  { num: '05', year: 'oct. 2025 →', title: 'Fondation de vivesmedia.com', desc: 'Studio web freelance à Avignon. Des sites sur-mesure pensés pour convertir, avec IA et automatisation : Vives Reports, Sésame Informatique, Marine Caro, Stoop, CADENCE, Yannis Amielh.' },
 ]
 
 export default function Timeline() {

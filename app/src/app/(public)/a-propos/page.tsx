@@ -1,51 +1,168 @@
 import type { Metadata } from 'next'
 import Link from 'next/link'
-import { ArrowUpRight } from 'lucide-react'
+import { ArrowUpRight, Palette, Megaphone, Search, Workflow, GraduationCap, MapPin } from 'lucide-react'
+
+function LinkedinIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} fill="currentColor" aria-hidden="true">
+      <path d="M20.45 20.45h-3.56v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.34V9h3.42v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29zM5.34 7.43a2.07 2.07 0 1 1 0-4.14 2.07 2.07 0 0 1 0 4.14zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.72v20.56C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.72V1.72C24 .77 23.2 0 22.22 0z" />
+    </svg>
+  )
+}
 import Timeline from '@/components/about/Timeline'
 
 export const metadata: Metadata = {
-  title: 'À propos — Studio web freelance Avignon',
-  description: 'vivesmedia.com, studio web freelance basé à Avignon. Expert en création de sites sur-mesure, SEO, CRM et automatisation IA. 5 ans d\'expérience, 100% full remote.',
+  title: 'À propos — Béranger Vivès · vivesmedia.com',
+  description: "Béranger Vivès, fondateur de vivesmedia.com. Marketing digital (MBA Bac+5), spécialiste SEA & Social Ads, UX/UI et automatisation IA. ~5 ans d'expérience en e-commerce, basé à Avignon, full remote.",
   alternates: { canonical: 'https://vivesmedia.com/a-propos' },
 }
 
-const PILLARS = [
-  { num: '01', title: 'Clarté', desc: 'Zéro jargon. Vous comprenez chaque décision prise pour votre projet.' },
-  { num: '02', title: 'Résultats', desc: 'Un beau site ne suffit pas. Chaque choix technique vise à convertir vos visiteurs.' },
-  { num: '03', title: 'Engagement', desc: 'Un interlocuteur unique du brief à la livraison. Jamais de sous-traitance cachée.' },
-  { num: '04', title: 'Avance', desc: 'IA, automatisation, SEO technique — toujours à la pointe pour vous garder devant.' },
+const FACTS = [
+  { k: 'MBA', v: 'Marketing digital · Bac+5' },
+  { k: '~5 ans', v: "d'expérience e-commerce" },
+  { k: '10+', v: 'projets livrés' },
+  { k: 'Avignon', v: 'full remote · France' },
+]
+
+const EXPERTISE = [
+  { icon: Palette, title: 'Sites & UX/UI', items: ['Conception UX/UI (Adobe, Figma)', 'E-commerce (PrestaShop, Shopify)', 'Sites sur-mesure (Next.js, Framer)'] },
+  { icon: Megaphone, title: 'SEA & Social Ads', items: ['Google Ads (SEA)', 'Meta / Social Ads', 'Campagnes & acquisition de leads'] },
+  { icon: Search, title: 'SEO & contenu', items: ['Audits Ahrefs & Search Console', 'SEO technique & visibilité IA', 'Réseaux sociaux, emailing (Brevo)'] },
+  { icon: Workflow, title: 'Automatisation & IA', items: ['No-code (n8n, Make)', 'CRM & workflows sur-mesure', 'Agents IA & connexion des outils'] },
+]
+
+const FORMATION = [
+  { year: '2023–2025', title: 'MBA Expert Marketing Digital', school: 'My Digital School · Bac+5' },
+  { year: '2021–2023', title: 'Bachelor Marketing Digital', school: 'My Digital School · Bac+3' },
+  { year: '2019–2021', title: 'BTS NDRC', school: 'Idelca Business School' },
+  { year: '2024', title: 'No-Code & Automatisation', school: 'n8n · Make' },
 ]
 
 export default function AProposPage() {
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
       <div className="max-w-5xl mx-auto px-6">
-        <div className="text-center mb-20">
+
+        {/* Hero */}
+        <div className="text-center mb-16">
           <div className="inline-flex items-center gap-2 border border-border rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-foreground" />
-            <span className="text-xs font-medium text-muted-foreground tracking-wide">Full remote · France</span>
+            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: '#F4521E' }} />
+            <span className="text-xs font-medium text-muted-foreground tracking-wide">Fondateur · vivesmedia.com</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-tight mb-6">
-            Je construis des sites qui <span className="italic font-normal">travaillent pour vous</span>
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            vivesmedia.com est un studio web freelance basé à Avignon. Spécialisé dans les sites sur-mesure, pensés pour convertir — pas juste pour être beaux.
+          <h1 className="text-4xl md:text-6xl font-bold text-foreground leading-[1.05] mb-4">Béranger Vivès</h1>
+          <p className="text-base md:text-lg font-medium mb-6" style={{ color: '#F4521E' }}>
+            Marketing digital · SEA &amp; Social Ads · UX/UI
           </p>
+          <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
+            Expert en marketing digital diplômé d'un <strong className="text-foreground font-semibold">MBA (Bac+5)</strong>, spécialiste
+            SEA &amp; Social Ads, avec près de 5 ans d'expérience en e-commerce. Avec vivesmedia.com, je transforme votre présence
+            web en un <strong className="text-foreground font-semibold">système de croissance autonome</strong> : des sites pensés
+            pour convertir, où l'IA et l'automatisation gèrent la logistique à votre place.
+          </p>
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
+              style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.22)' }}>
+              Lancer mon projet <ArrowUpRight className="w-4 h-4" />
+            </Link>
+            <a href="https://www.linkedin.com/in/b%C3%A9ranger-viv%C3%A8s-3397b61aa/" target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-sm font-medium px-6 py-3.5 rounded-full border border-border text-foreground hover:border-foreground transition-colors">
+              <LinkedinIcon className="w-4 h-4" /> LinkedIn
+            </a>
+          </div>
         </div>
 
-        <div className="grid md:grid-cols-4 gap-6 mb-20">
-          {PILLARS.map((p, i) => (
-            <div key={p.num} className="p-6 rounded-2xl border border-border bg-white">
-              <span className="text-xs font-mono text-muted-foreground">{p.num}</span>
-              <h3 className="text-lg font-bold text-foreground mt-3 mb-2">{p.title}</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+        {/* Facts */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-24">
+          {FACTS.map((f) => (
+            <div key={f.v} className="rounded-2xl border border-border bg-white px-5 py-6 text-center">
+              <div className="text-2xl md:text-3xl font-bold text-foreground leading-none">{f.k}</div>
+              <div className="text-xs md:text-sm text-muted-foreground mt-2 leading-snug">{f.v}</div>
             </div>
           ))}
         </div>
 
+        {/* Story */}
+        <div className="mb-24 max-w-3xl">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Le parcours</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-6">
+            Comment j'en suis <span className="font-heading italic font-normal text-foreground/50">arrivé là</span>
+          </h2>
+          <div className="space-y-4 text-muted-foreground leading-relaxed">
+            <p>
+              Je viens du <strong className="text-foreground font-medium">marketing digital e-commerce</strong>. Pendant près de cinq ans,
+              en alternance, j'ai géré des sites, des campagnes et des communautés pour des marques du sport mécanique et du nautique
+              (Hurier Moto, Ducati JMS Motos, Matos Import) : refonte UX/UI de sites PrestaShop, publicité, SEO, réseaux sociaux,
+              emailing et contenu.
+            </p>
+            <p>
+              En parallèle, j'ai poussé ma formation jusqu'au <strong className="text-foreground font-medium">MBA Expert Marketing Digital (Bac+5)</strong>,
+              puis je me suis spécialisé dans le no-code et l'IA. De cette double culture, un marketing qui convertit et une
+              exécution soignée, est né <strong className="text-foreground font-medium">vivesmedia.com</strong> : je ne livre pas
+              juste de « beaux sites », mais des systèmes où l'IA et l'automatisation travaillent pour vous, pour que vous vous
+              recentriez sur votre métier.
+            </p>
+          </div>
+        </div>
+
+        {/* Expertise */}
+        <div className="mb-24">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Compétences</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-12">
+            Ce que je <span className="font-heading italic font-normal text-foreground/50">maîtrise</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {EXPERTISE.map((e) => {
+              const Icon = e.icon
+              return (
+                <div key={e.title} className="rounded-2xl border border-border bg-white p-6 flex flex-col gap-4 hover:shadow-md transition-shadow">
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center" style={{ backgroundColor: 'rgba(244,82,30,0.08)' }}>
+                    <Icon className="w-5 h-5" style={{ color: '#F4521E' }} />
+                  </div>
+                  <h3 className="text-base font-semibold text-foreground">{e.title}</h3>
+                  <ul className="space-y-2">
+                    {e.items.map((it) => (
+                      <li key={it} className="flex items-start gap-2 text-sm text-muted-foreground leading-snug">
+                        <span className="mt-1.5 w-1 h-1 rounded-full shrink-0" style={{ backgroundColor: '#F4521E' }} />
+                        {it}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Formation */}
+        <div className="mb-24">
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Formation</p>
+          <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight mb-12">
+            Formé, diplômé, <span className="font-heading italic font-normal text-foreground/50">à jour</span>
+          </h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            {FORMATION.map((f) => (
+              <div key={f.title} className="rounded-2xl border border-border bg-white p-6 flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 bg-secondary/70">
+                  <GraduationCap className="w-5 h-5 text-foreground/70" />
+                </div>
+                <div>
+                  <div className="text-xs font-mono text-muted-foreground mb-1">{f.year}</div>
+                  <h3 className="text-base font-semibold text-foreground leading-tight">{f.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-0.5">{f.school}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Timeline (parcours chronologique) */}
         <Timeline />
 
+        {/* CTA */}
         <div className="rounded-2xl bg-foreground p-10 text-center">
+          <div className="inline-flex items-center gap-1.5 text-white/60 text-sm mb-4">
+            <MapPin className="w-4 h-4" /> Avignon · Full remote · Partout en France
+          </div>
           <h3 className="text-2xl font-bold text-white mb-3">Travaillons ensemble</h3>
           <p className="text-white/60 mb-6">Devis gratuit sous 24h, sans engagement.</p>
           <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-8 py-4 rounded-full hover:bg-white/90 transition-all">
