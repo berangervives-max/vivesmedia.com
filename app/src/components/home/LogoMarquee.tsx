@@ -8,12 +8,12 @@ const LOGOS = [
 export default function LogoMarquee() {
   const all = [...LOGOS, ...LOGOS, ...LOGOS]
   return (
-    <section className="py-14 overflow-hidden bg-white border-y border-border">
+    <section className="py-14 overflow-hidden bg-white border-y border-border/25">
       <div className="max-w-7xl mx-auto px-6 mb-8">
         <div className="flex items-center gap-4">
-          <div className="flex-1 h-px bg-border" />
+          <div className="flex-1 h-px bg-border/25" />
           <p className="text-xs text-muted-foreground text-center whitespace-nowrap uppercase tracking-wider">Des outils fiables, intégrés proprement</p>
-          <div className="flex-1 h-px bg-border" />
+          <div className="flex-1 h-px bg-border/25" />
         </div>
       </div>
       <div className="relative">
@@ -21,8 +21,8 @@ export default function LogoMarquee() {
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-white to-transparent z-10" />
         <div className="flex animate-marquee items-center">
           {all.map((logo, i) => (
-            <div key={i} className="flex-shrink-0 px-10 flex items-center justify-center h-14">
-              <img src={logo.src} alt={logo.alt} className="h-8 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity" />
+            <div key={i} className="flex-shrink-0 px-12 flex items-center justify-center h-20">
+              <img src={logo.src} alt={logo.alt} className="h-12 md:h-14 w-auto object-contain opacity-60 hover:opacity-100 transition-opacity" />
             </div>
           ))}
         </div>
