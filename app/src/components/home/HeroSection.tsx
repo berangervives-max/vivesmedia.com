@@ -12,8 +12,8 @@ export default function HeroSection() {
   return (
     <section className="relative min-h-screen flex items-center pt-32 pb-20 bg-gradient-to-b from-[#f0eeff] via-background to-background">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[500px] rounded-full bg-primary/10 blur-[140px]" />
-        <div className="absolute top-20 right-10 w-[300px] h-[300px] rounded-full bg-orange-200/30 blur-[100px]" />
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[540px] h-[380px] rounded-full bg-primary/10 blur-[80px]" />
+        <div className="absolute top-20 right-10 w-[240px] h-[240px] rounded-full bg-orange-200/30 blur-[60px]" />
       </div>
       {/* Mont Ventoux — ancrage local (Avignon), fondu SANS couture via multiply (le blanc de l'image disparaît dans le fond), adaptatif tous formats */}
       <div className="absolute inset-x-0 bottom-0 z-0 pointer-events-none overflow-hidden h-[46vh] sm:h-[52vh] lg:h-[58vh]">

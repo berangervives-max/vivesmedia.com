@@ -36,18 +36,18 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
-        {/* Google Analytics 4 — beforeInteractive : la balise est dans le HTML statique
-            (détectable par le vérificateur Google) ET chargée proprement par Next. */}
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" strategy="beforeInteractive" />
-        <Script id="ga4-init" strategy="beforeInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');`}</Script>
+        {/* Google Analytics 4 — balise présente dans le HTML statique (détectable par Google)
+            mais chargée en async : non bloquante pour le rendu et l'hydratation. */}
+        <script async src="https://www.googletagmanager.com/gtag/js?id=G-F8ZS368DW0" />
+        <script dangerouslySetInnerHTML={{ __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-F8ZS368DW0');` }} />
         {/* Ahrefs Web Analytics */}
         <script async src="https://analytics.ahrefs.com/analytics.js" data-key="9tqUA2EBj5akD55zFPOVvw" />
         <JsonLd data={SITE_SCHEMA} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground">
         {/* Brevo — tracker on-site (suivi des visiteurs/contacts) */}
-        <Script src="https://cdn.brevo.com/js/sdk-loader.js" strategy="afterInteractive" />
-        <Script id="brevo-init" strategy="afterInteractive">{`window.Brevo=window.Brevo||[];Brevo.push(["init",{client_key:"5mf34tiyc6okfn85xnsrn2ok"}]);`}</Script>
+        <Script src="https://cdn.brevo.com/js/sdk-loader.js" strategy="lazyOnload" />
+        <Script id="brevo-init" strategy="lazyOnload">{`window.Brevo=window.Brevo||[];Brevo.push(["init",{client_key:"5mf34tiyc6okfn85xnsrn2ok"}]);`}</Script>
         <PostHogProvider>
           <SmoothScroll>
             {children}
