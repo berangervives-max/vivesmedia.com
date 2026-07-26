@@ -24,6 +24,10 @@ export async function POST(req: NextRequest) {
       const service = session.metadata?.service || ''
       const montant = (session.amount_total || 0) / 100
 
+      // Idempotence : Stripe peut rejouer un événement (retries) → on n'enregistre
+      // pas deux fois la même commande (et donc pas deux factures).
+      if (await commandesService.existsBySession(session.id)) break
+
       await commandesService.create({
         client_nom: clientNom,
         client_email: clientEmail,

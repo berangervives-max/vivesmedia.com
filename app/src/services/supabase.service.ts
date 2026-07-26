@@ -145,6 +145,11 @@ export const commandesService = {
     if (error) throw error
     return data as Commande[]
   },
+  async existsBySession(sessionId: string) {
+    const sb = createServiceClient()
+    const { data } = await sb.from('commandes').select('id').eq('stripe_session_id', sessionId).limit(1).maybeSingle()
+    return !!data
+  },
   async create(payload: Omit<Commande, 'id' | 'created_at' | 'updated_at'>) {
     const sb = createServiceClient()
     const { data, error } = await sb.from('commandes').insert(payload).select().single()
