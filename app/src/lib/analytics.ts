@@ -29,4 +29,15 @@ export function track(event: FunnelEvent, props: Record<string, unknown> = {}) {
   } catch {
     /* PostHog pas encore initialisé : on ignore silencieusement */
   }
+  // Envoie aussi l'événement vers GA4 (le Consent Mode gère cookie / sans-cookie
+  // selon le choix du visiteur). Les événements de conversion (devis_submitted,
+  // checkout_completed, booking_provider_selected) sont marqués « clés » dans GA4.
+  try {
+    const w = window as unknown as { gtag?: (...args: unknown[]) => void }
+    if (typeof window !== 'undefined' && typeof w.gtag === 'function') {
+      w.gtag('event', event, props)
+    }
+  } catch {
+    /* gtag pas encore disponible : on ignore silencieusement */
+  }
 }
