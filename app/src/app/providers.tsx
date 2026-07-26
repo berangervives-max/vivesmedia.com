@@ -29,10 +29,15 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     // (heatmaps, recording, autocapture, exceptions, web-vitals) mais hors du chemin
     // critique de chargement → beaucoup plus fluide, surtout mobile. Aucune donnée perdue.
     const startPosthog = () => {
+      // RGPD : PostHog démarre en opt-out tant que l'utilisateur n'a pas accepté
+      // (la bannière ConsentBanner appelle opt_in_capturing au clic « Tout accepter »).
+      const consent = document.cookie.match(/(?:^|; )vm_consent=([^;]+)/)
+      const consentGranted = !!consent && consent[1] === 'granted'
       posthog.init('phc_umMWCaohy9wqM6jpDxHqkQqskjocSvWghxnT52c25wNJ', {
         api_host: 'https://eu.i.posthog.com',
         defaults: '2026-05-30',
         person_profiles: 'identified_only',
+        opt_out_capturing_by_default: !consentGranted,
         capture_pageview: false, // géré manuellement via PostHogPageView
         capture_pageleave: true,
         capture_exceptions: true,        // erreurs JS (message + fichier:ligne + stack)

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import Script from 'next/script'
 import { GoogleAnalytics } from '@next/third-parties/google'
+import ConsentBanner from '@/components/ConsentBanner'
 import { Inter_Tight, Instrument_Serif } from 'next/font/google'
 import './globals.css'
 import SmoothScroll from '@/components/layout/SmoothScroll'
@@ -37,6 +38,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
       <head>
+        {/* Google Consent Mode v2 (mode avancé) — DOIT s'exécuter AVANT gtag :
+            consentement par défaut « denied » tant que l'utilisateur n'a pas choisi
+            (functionality/security, nécessaires au site, restent autorisés). L'ordre
+            est impératif (doc Google). Si l'utilisateur a déjà accepté, on part en granted. */}
+        <Script id="google-consent-default" strategy="beforeInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}window.gtag=gtag;var c=document.cookie.match(/(?:^|; )vm_consent=([^;]+)/);var g=c&&c[1]==='granted';gtag('consent','default',{ad_storage:g?'granted':'denied',ad_user_data:g?'granted':'denied',ad_personalization:g?'granted':'denied',analytics_storage:g?'granted':'denied',functionality_storage:'granted',security_storage:'granted',wait_for_update:500});`}</Script>
         {/* Ahrefs Web Analytics */}
         <script async src="https://analytics.ahrefs.com/analytics.js" data-key="9tqUA2EBj5akD55zFPOVvw" />
         <JsonLd data={SITE_SCHEMA} />
@@ -53,6 +59,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* GA4 via l'intégration officielle Next.js (@next/third-parties) : charge gtag
             correctement et envoie réellement les hits (fin du blocage ORB). ID = flux vivesmedia.com. */}
         <GoogleAnalytics gaId="G-1XKRQWQVTQ" />
+        <ConsentBanner />
       </body>
     </html>
   )
