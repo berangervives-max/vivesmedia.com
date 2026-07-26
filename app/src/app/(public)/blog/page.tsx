@@ -12,7 +12,6 @@ export const metadata: Metadata = {
 const STATIC_ARTICLES = [
   { slug: 'geo-shopify-zero-clic-strategie-2026', categorie: 'Actualité IA & E-commerce', date_pub: '2026-01-25', titre: 'Survivre au Zéro-Clic : Pourquoi le GEO est votre priorité Shopify devant le SEO en 2026', extrait: 'En 2026, 58 % des recherches Google n\'aboutissent à aucun clic. Découvrez comment le GEO permet à votre boutique Shopify de devenir la source de référence citée par les IA.', image_url: 'https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=800&q=80', tags: 'GEO,Shopify 2026,IA,SEO' },
   { slug: 'automatisation-workflows-site-vitrine-2026', categorie: 'Stratégie Digitale', date_pub: '2026-01-15', titre: 'Pourquoi l\'automatisation et les workflows sont vitaux pour votre site vitrine en 2026', extrait: 'Un site vitrine sans automatisation, c\'est un vendeur qui dort. Découvrez comment les workflows intelligents transforment votre présence en ligne.', image_url: 'https://images.unsplash.com/photo-1518186285589-2f7649de83e0?w=800&q=80', tags: 'Automatisation,Site vitrine,IA' },
-  { slug: 'design-conversions-psychologie-web', categorie: 'Design & UX', date_pub: '2026-01-05', titre: 'Design & Conversions : La psychologie derrière un site qui vend', extrait: 'Pourquoi certains sites vendent et d\'autres non ? La réponse tient souvent à quelques principes psychologiques fondamentaux appliqués au design.', image_url: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?w=800&q=80', tags: 'Design,UX,Conversion' },
 ]
 
 export default async function BlogPage() {

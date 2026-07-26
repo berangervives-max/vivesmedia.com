@@ -10,7 +10,12 @@ const SAME_AS = [
   'https://www.instagram.com/vivesmedia/',
 ]
 
-const FOUNDER = { '@type': 'Person', name: 'Béranger Vives', url: SITE_URL }
+const PERSON_ID = `${SITE_URL}/#beranger`
+// Référence vers le node Person du graphe (E-E-A-T), défini une seule fois.
+const FOUNDER = { '@id': PERSON_ID }
+
+// Coordonnées d'Avignon (SEO local / pack Maps).
+const GEO = { '@type': 'GeoCoordinates', latitude: 43.9493, longitude: 4.8055 }
 
 const ADDRESS = {
   '@type': 'PostalAddress',
@@ -23,6 +28,16 @@ const ADDRESS = {
 export const SITE_SCHEMA = {
   '@context': 'https://schema.org',
   '@graph': [
+    {
+      '@type': 'Person',
+      '@id': PERSON_ID,
+      name: 'Béranger Vives',
+      url: `${SITE_URL}/a-propos`,
+      jobTitle: 'Freelance web, design & marketing',
+      worksFor: { '@id': ORG_ID },
+      knowsAbout: ['Création de sites web', 'SEO', 'Design', 'Marketing digital', 'E-commerce'],
+      sameAs: SAME_AS,
+    },
     {
       '@type': 'Organization',
       '@id': ORG_ID,
@@ -52,7 +67,15 @@ export const SITE_SCHEMA = {
       description:
         'Création de sites internet sur-mesure (vitrine, e-commerce, catalogue) pensés pour convertir. SEO inclus. Full remote depuis Avignon.',
       priceRange: '€€',
-      areaServed: { '@type': 'Country', name: 'France' },
+      geo: GEO,
+      areaServed: [
+        { '@type': 'Country', name: 'France' },
+        { '@type': 'City', name: 'Avignon' },
+        { '@type': 'City', name: 'Carpentras' },
+        { '@type': 'City', name: 'Orange' },
+        { '@type': 'City', name: 'Nîmes' },
+        { '@type': 'AdministrativeArea', name: 'Vaucluse' },
+      ],
       address: ADDRESS,
       founder: FOUNDER,
       parentOrganization: { '@id': ORG_ID },
