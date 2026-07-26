@@ -58,7 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </PostHogProvider>
         {/* GA4 via l'intégration officielle Next.js (@next/third-parties) : charge gtag
             correctement et envoie réellement les hits (fin du blocage ORB). ID = flux vivesmedia.com. */}
-        <GoogleAnalytics gaId="G-1XKRQWQVTQ" />
+        <GoogleAnalytics gaId="G-ME1W8NSM79" />
         <ConsentBanner />
       </body>
     </html>
