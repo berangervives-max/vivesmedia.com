@@ -19,6 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/mentions-legales`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/cgv`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${base}/divulgation`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${base}/politique-confidentialite`, lastModified: now, changeFrequency: 'yearly', priority: 0.3 },
   ]
 
   const cityPages: MetadataRoute.Sitemap = CITY_SLUGS.map(slug => ({

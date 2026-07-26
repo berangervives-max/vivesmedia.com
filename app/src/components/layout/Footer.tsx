@@ -100,6 +100,7 @@ export default function Footer() {
             <Link href="/mentions-legales" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Mentions légales</Link>
             <Link href="/cgv" className="text-xs text-muted-foreground hover:text-foreground transition-colors">CGV</Link>
             <Link href="/divulgation" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Divulgation d&apos;affiliation</Link>
+            <Link href="/politique-confidentialite" className="text-xs text-muted-foreground hover:text-foreground transition-colors">Confidentialité</Link>
           </div>
         </div>
       </div>

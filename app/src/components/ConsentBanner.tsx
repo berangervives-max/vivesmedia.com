@@ -86,7 +86,7 @@ export default function ConsentBanner() {
             On utilise une mesure d&apos;audience (Google Analytics, PostHog) pour améliorer le site.
             Aucun cookie de suivi n&apos;est déposé sans ton accord.{' '}
             <Link
-              href="/mentions-legales"
+              href="/politique-confidentialite"
               className="font-medium underline underline-offset-2 transition-opacity hover:opacity-80"
               style={{ color: ORANGE }}
             >
