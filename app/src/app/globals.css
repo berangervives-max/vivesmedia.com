@@ -151,3 +151,55 @@
   animation: marquee 30s linear infinite;
   width: max-content;
 }
+
+/* ============================================================
+   DA /cms — SCOPÉ à .cms-shell (n'affecte JAMAIS le site public)
+   Réutilise Inter Tight + Instrument Serif (font-heading) du repo.
+   ============================================================ */
+.cms-shell {
+  --cms-bg: #F6F4F1;          /* fond chaud off-white */
+  --cms-ink: #17130F;         /* texte principal chaud */
+  --cms-ink-2: #57514B;
+  --cms-muted: #8B837B;
+  --cms-faint: #B4ADA5;
+  --cms-card: #FFFFFF;
+  --cms-surface-2: #F1EEEA;
+  --cms-border: #EAE5DF;
+  --cms-border-2: #DED8D0;
+  --cms-brand: #F4521E;
+  --cms-brand-2: #DA430F;
+  --cms-brand-wash: #FCEFE9;
+  --cms-sidebar: #16130F;
+  --cms-ok-bg: #EAF5EE; --cms-ok-fg: #2E8B5A;
+  --cms-warn-bg: #FBF4E6; --cms-warn-fg: #A9781F;
+  --cms-danger-bg: #FCECEC; --cms-danger-fg: #C4392F;
+  --cms-info-bg: #EEF3FB; --cms-info-fg: #3A6DB0;
+  --cms-shadow: 0 1px 2px rgb(20 16 12 / 0.04), 0 14px 40px -24px rgb(20 16 12 / 0.18);
+  --cms-glow: 0 8px 22px -8px rgb(244 82 30 / 0.55);
+  color: var(--cms-ink);
+  letter-spacing: -0.011em;
+}
+.cms-accent { font-family: var(--font-heading); font-style: italic; font-weight: 400; letter-spacing: 0; }
+.cms-eyebrow { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.2em; color: var(--cms-brand); }
+.cms-card { background: var(--cms-card); border: 1px solid var(--cms-border); border-radius: 16px; box-shadow: var(--cms-shadow); }
+.cms-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+  font-weight: 600; font-size: 0.85rem; letter-spacing: -0.01em; border-radius: 999px;
+  padding: 0.6rem 1.15rem; border: 1px solid transparent; cursor: pointer;
+  transition: background 0.16s, box-shadow 0.16s, border-color 0.16s, transform 0.12s;
+  white-space: nowrap; text-decoration: none;
+}
+.cms-btn:active { transform: translateY(1px); }
+.cms-btn-primary { background: var(--cms-brand); color: #fff; box-shadow: var(--cms-glow); }
+.cms-btn-primary:hover { background: var(--cms-brand-2); }
+.cms-btn-secondary { background: var(--cms-card); color: var(--cms-ink); border-color: var(--cms-border-2); }
+.cms-btn-secondary:hover { background: var(--cms-surface-2); }
+.cms-btn-sm { padding: 0.4375rem 0.875rem; font-size: 0.78rem; }
+/* Badge de statut (piloté par data-tone) */
+.cms-badge { display: inline-flex; align-items: center; gap: 0.375rem; font-size: 0.72rem; font-weight: 600; padding: 0.25rem 0.6rem; border-radius: 999px; white-space: nowrap; }
+.cms-badge::before { content: ""; width: 6px; height: 6px; border-radius: 999px; background: currentColor; }
+.cms-badge[data-tone="ok"] { background: var(--cms-ok-bg); color: var(--cms-ok-fg); }
+.cms-badge[data-tone="warn"] { background: var(--cms-warn-bg); color: var(--cms-warn-fg); }
+.cms-badge[data-tone="danger"] { background: var(--cms-danger-bg); color: var(--cms-danger-fg); }
+.cms-badge[data-tone="info"] { background: var(--cms-info-bg); color: var(--cms-info-fg); }
+.cms-badge[data-tone="neutral"] { background: var(--cms-surface-2); color: var(--cms-muted); }
