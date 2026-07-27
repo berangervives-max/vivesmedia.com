@@ -30,7 +30,7 @@ export default async function CmsProjetsPage() {
             const client = Array.isArray(project.clients) ? project.clients[0] : project.clients
             const phase = project.current_phase as ProjectPhase
             return (
-              <a key={project.id} href={`/hub/admin/projects/${project.id}`} target="_blank" rel="noopener noreferrer"
+              <Link key={project.id} href={`/cms/projets/${project.id}`}
                 className="rounded-2xl p-5 flex items-center justify-between transition-shadow hover:shadow-md group"
                 style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', boxShadow: 'var(--cms-shadow)' }}>
                 <div className="flex items-center gap-4 min-w-0">
@@ -49,7 +49,7 @@ export default async function CmsProjetsPage() {
                   <p className="text-xs hidden sm:block" style={{ color: 'var(--cms-faint)' }}>{new Date(project.updated_at).toLocaleDateString('fr-FR')}</p>
                   <ChevronRight className="w-4 h-4" style={{ color: 'var(--cms-faint)' }} />
                 </div>
-              </a>
+              </Link>
             )
           })}
         </div>

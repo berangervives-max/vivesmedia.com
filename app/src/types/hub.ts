@@ -27,6 +27,13 @@ export const PHASE_LABELS: Record<ProjectPhase, string> = {
 
 export const PHASE_ORDER: ProjectPhase[] = ['onboarding', 'design', 'dev', 'recette', 'livraison', 'maintenance']
 
+export const TICKET_STATUS_LABELS: Record<TicketStatus, string> = {
+  open: 'Ouvert', in_progress: 'En cours', resolved: 'Résolu', closed: 'Fermé',
+}
+export const TICKET_PRIORITY_LABELS: Record<TicketPriority, string> = {
+  low: 'Faible', medium: 'Moyen', high: 'Urgent',
+}
+
 export const PHASE_DESCRIPTIONS: Record<ProjectPhase, string> = {
   onboarding: 'Nous recueillons vos informations pour démarrer',
   design: "Création des maquettes et de l'identité visuelle",
