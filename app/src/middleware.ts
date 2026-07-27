@@ -2,7 +2,6 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
 
 // ── 1) Rate-limiting léger des routes PUBLIQUES qui écrivent (anti-spam) ──
-// In-memory (par isolate Vercel) : suffisant pour une petite audience, 0 config/0 coût.
 const WINDOW_MS = 60_000
 const MAX_HITS = 12
 const hits = new Map<string, number[]>()
@@ -16,11 +15,27 @@ function isLimited(ip: string): boolean {
 }
 
 const RATE_LIMITED = ['/api/devis', '/api/rappel', '/api/newsletter', '/api/checkout', '/api/track']
-// Chemins /hub encore servis par l'ANCIEN Hub (proxifiés) : on n'y touche pas (il gère sa propre auth).
-// Débranchement terminé : plus aucun chemin /hub n'est proxifié vers l'ancien Hub.
-const HUB_PROXIED: string[] = []
-// Chemins /hub publics (pas d'auth requise).
 const HUB_PUBLIC = ['/hub/login', '/hub/auth']
+
+// Client Supabase SSR partagé (lecture des cookies de session, rafraîchissement).
+function makeSupabase(req: NextRequest) {
+  let res = NextResponse.next({ request: req })
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() { return req.cookies.getAll() },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
+          res = NextResponse.next({ request: req })
+          cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options))
+        },
+      },
+    },
+  )
+  return { supabase, getRes: () => res }
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl
@@ -35,38 +50,39 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // 2) Espace client NATIF : refresh de session Supabase + garde d'auth
+  // 2) Espace CLIENT (/hub) : refresh de session + garde d'auth
   if (pathname.startsWith('/hub')) {
-    if (HUB_PROXIED.some(p => pathname.startsWith(p))) return NextResponse.next()
-
-    let res = NextResponse.next({ request: req })
-    const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() { return req.cookies.getAll() },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value }) => req.cookies.set(name, value))
-            res = NextResponse.next({ request: req })
-            cookiesToSet.forEach(({ name, value, options }) => res.cookies.set(name, value, options))
-          },
-        },
-      },
-    )
-
+    const { supabase, getRes } = makeSupabase(req)
     let user = null
-    try { const { data } = await supabase.auth.getUser(); user = data.user } catch { /* réseau : ne pas bloquer */ }
-
+    try { user = (await supabase.auth.getUser()).data.user } catch { /* réseau : ne pas bloquer */ }
     const isPublic = HUB_PUBLIC.some(p => pathname.startsWith(p))
     const isApi = pathname.startsWith('/hub/api')
-    // Les pages protégées non connectées → login. Les API renvoient leur propre 401 (jamais de redirect HTML).
     if (!user && !isPublic && !isApi) {
-      const url = req.nextUrl.clone()
-      url.pathname = '/hub/login'
-      return NextResponse.redirect(url)
+      const url = req.nextUrl.clone(); url.pathname = '/hub/login'; return NextResponse.redirect(url)
     }
-    return res
+    return getRes()
+  }
+
+  // 3) Back-office ADMIN (/cms) : protection SERVEUR (défense en profondeur) + 2FA imposé.
+  if (pathname.startsWith('/cms')) {
+    if (pathname === '/cms/login') return NextResponse.next()
+    const { supabase, getRes } = makeSupabase(req)
+    const ADMIN = process.env.ADMIN_EMAIL || 'berangervives@gmail.com'
+    let user = null
+    let mfaSatisfied = true
+    try {
+      user = (await supabase.auth.getUser()).data.user
+      if (user) {
+        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
+        // Si un 2FA est enrôlé (nextLevel aal2) mais pas encore validé → session incomplète.
+        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') mfaSatisfied = false
+      }
+    } catch { /* réseau : ne pas verrouiller sur une erreur */ }
+
+    if (!user || user.email !== ADMIN || !mfaSatisfied) {
+      const url = req.nextUrl.clone(); url.pathname = '/cms/login'; return NextResponse.redirect(url)
+    }
+    return getRes()
   }
 
   return NextResponse.next()
@@ -75,6 +91,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/hub/:path*',
+    '/cms/:path*',
     '/api/devis/:path*',
     '/api/rappel/:path*',
     '/api/newsletter/:path*',
