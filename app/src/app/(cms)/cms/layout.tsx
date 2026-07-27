@@ -75,11 +75,16 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (pathname === '/cms/login') { setChecking(false); return }
     const sb = createClient()
-    sb.auth.getSession().then(({ data: { session } }) => {
-      // Seul l'admin accède au CMS — les clients du Hub partagent le même Supabase Auth
-      if (!session || session.user.email !== 'berangervives@gmail.com') router.replace('/cms/login')
-      else setChecking(false)
-    })
+    sb.auth.getSession()
+      .then(({ data: { session } }) => {
+        // Seul l'admin accède au CMS — les clients du Hub partagent le même Supabase Auth
+        if (!session || session.user?.email !== 'berangervives@gmail.com') router.replace('/cms/login')
+        else setChecking(false)
+      })
+      .catch(() => {
+        // Session illisible/corrompue → on ne reste JAMAIS bloqué sur l'écran de chargement.
+        router.replace('/cms/login')
+      })
   }, [router, pathname])
 
   const handleLogout = async () => {
