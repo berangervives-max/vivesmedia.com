@@ -26,9 +26,9 @@ function toSlug(s: string) {
 }
 
 const STATUS = {
-  publie: { label: 'Publié', cls: 'bg-green-100 text-green-700' },
-  programme: { label: 'Programmé', cls: 'bg-amber-100 text-amber-700' },
-  brouillon: { label: 'Brouillon', cls: 'bg-gray-100 text-gray-500' },
+  publie: { label: 'Publié', cls: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]' },
+  programme: { label: 'Programmé', cls: 'bg-[var(--cms-warn-bg)] text-[var(--cms-warn-fg)]' },
+  brouillon: { label: 'Brouillon', cls: 'bg-[var(--cms-surface-2)] text-[var(--cms-muted)]' },
 } as const
 
 // Statut réel : Programmé = date de publication dans le futur (pas encore en ligne) ;
@@ -41,7 +41,7 @@ function statusOf(a: { publie: boolean; date_pub?: string | null }): keyof typeo
 }
 
 const inputCls = "w-full px-3 py-2 rounded-lg text-sm outline-none"
-const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
+const inputStyle = { border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink)' }
 const labelCls = "text-xs font-semibold block mb-1.5 uppercase tracking-wide"
 
 export default function CmsArticlesPage() {
@@ -118,37 +118,37 @@ export default function CmsArticlesPage() {
   if (editing) return (
     <div>
       <div className="mb-6">
-        <button onClick={() => setEditing(null)} className="text-xs mb-2 flex items-center gap-1" style={{ color: '#9CA3AF' }}>← Retour aux articles</button>
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>{editing === 'new' ? 'Nouvel article' : 'Modifier l\'article'}</h1>
+        <button onClick={() => setEditing(null)} className="text-xs mb-2 flex items-center gap-1" style={{ color: 'var(--cms-muted)' }}>← Retour aux articles</button>
+        <h1 className="text-xl font-bold" style={{ color: 'var(--cms-ink)' }}>{editing === 'new' ? 'Nouvel article' : 'Modifier l\'article'}</h1>
       </div>
       <form onSubmit={save} className="space-y-4 max-w-3xl">
-        <div className="rounded-xl p-5 space-y-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl p-5 space-y-4" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Titre *</label>
+            <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Titre *</label>
             <input required value={form.titre}
               onChange={e => setForm(p => ({ ...p, titre: e.target.value, slug: toSlug(e.target.value) }))}
               className={inputCls} style={inputStyle} />
           </div>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Slug</label>
+            <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Slug</label>
             <input value={form.slug} onChange={e => setForm(p => ({ ...p, slug: e.target.value }))}
-              className={`${inputCls} font-mono`} style={{ ...inputStyle, fontSize: '12px', background: '#F9FAFB' }} />
+              className={`${inputCls} font-mono`} style={{ ...inputStyle, fontSize: '12px', background: 'var(--cms-surface-2)' }} />
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <div>
-              <label className={labelCls} style={{ color: '#6B7280' }}>Catégorie</label>
+              <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Catégorie</label>
               <input value={form.categorie} onChange={e => setForm(p => ({ ...p, categorie: e.target.value }))} className={inputCls} style={inputStyle} />
             </div>
             <div>
-              <label className={labelCls} style={{ color: '#6B7280' }}>Date de publication</label>
+              <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Date de publication</label>
               <input type="date" value={form.date_pub} onChange={e => setForm(p => ({ ...p, date_pub: e.target.value }))} className={inputCls} style={inputStyle} />
             </div>
           </div>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Image de couverture</label>
-            {form.image_url && <img src={form.image_url} alt="" className="w-full max-w-xs rounded-lg border mb-2" style={{ borderColor: '#E5E7EB' }} />}
+            <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Image de couverture</label>
+            {form.image_url && <img src={form.image_url} alt="" className="w-full max-w-xs rounded-lg border mb-2" style={{ borderColor: 'var(--cms-border-2)' }} />}
             <div className="flex items-center gap-3">
-              <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg cursor-pointer shrink-0" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              <label className="inline-flex items-center gap-2 text-sm px-3 py-2 rounded-lg cursor-pointer shrink-0" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
                 <Upload className="w-4 h-4" /> {uploading ? 'Envoi…' : 'Choisir un fichier'}
                 <input type="file" accept="image/*" className="hidden" onChange={e => onUploadImage(e.target.files?.[0])} />
               </label>
@@ -156,34 +156,34 @@ export default function CmsArticlesPage() {
             </div>
           </div>
           <div>
-            <label className={labelCls} style={{ color: '#6B7280' }}>Extrait</label>
+            <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Extrait</label>
             <textarea value={form.extrait} onChange={e => setForm(p => ({ ...p, extrait: e.target.value }))} rows={2}
               className={`${inputCls} resize-none`} style={inputStyle} />
           </div>
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className={labelCls} style={{ color: '#6B7280' }}>Contenu (HTML)</label>
-              <button type="button" onClick={() => setPreviewHtml(p => !p)} className="flex items-center gap-1 text-xs font-medium" style={{ color: '#F4521E' }}>
+              <label className={labelCls} style={{ color: 'var(--cms-ink-2)' }}>Contenu (HTML)</label>
+              <button type="button" onClick={() => setPreviewHtml(p => !p)} className="flex items-center gap-1 text-xs font-medium" style={{ color: 'var(--cms-brand)' }}>
                 <Eye className="w-3.5 h-3.5" /> {previewHtml ? 'Masquer l\'aperçu' : 'Aperçu du rendu'}
               </button>
             </div>
             <textarea value={form.contenu} onChange={e => setForm(p => ({ ...p, contenu: e.target.value }))} rows={12}
-              className={`${inputCls} font-mono resize-y`} style={{ ...inputStyle, fontSize: '12px', background: '#F9FAFB' }} />
+              className={`${inputCls} font-mono resize-y`} style={{ ...inputStyle, fontSize: '12px', background: 'var(--cms-surface-2)' }} />
             {previewHtml && (
-              <div className="mt-3 rounded-lg border p-5 prose prose-sm max-w-none" style={{ borderColor: '#E5E7EB', background: '#fff' }}
-                dangerouslySetInnerHTML={{ __html: form.contenu || '<p style="color:#9CA3AF">(contenu vide)</p>' }} />
+              <div className="mt-3 rounded-lg border p-5 prose prose-sm max-w-none" style={{ borderColor: 'var(--cms-border-2)', background: 'var(--cms-card)' }}
+                dangerouslySetInnerHTML={{ __html: form.contenu || '<p style="color:var(--cms-muted)">(contenu vide)</p>' }} />
             )}
           </div>
           <label className="flex items-center gap-3 cursor-pointer">
             <input type="checkbox" checked={form.publie} onChange={e => setForm(p => ({ ...p, publie: e.target.checked }))} className="w-4 h-4 rounded accent-orange-500" />
-            <span className="text-sm font-medium" style={{ color: '#374151' }}>Publié (visible sur le site)</span>
+            <span className="text-sm font-medium" style={{ color: 'var(--cms-ink-2)' }}>Publié (visible sur le site)</span>
           </label>
         </div>
         <div className="flex gap-3">
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
+          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50" style={{ background: 'var(--cms-brand)' }}>
             {saving ? 'Sauvegarde...' : 'Sauvegarder'}
           </button>
-          <button type="button" onClick={() => setEditing(null)} className="px-5 py-2 rounded-lg text-sm" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>
+          <button type="button" onClick={() => setEditing(null)} className="px-5 py-2 rounded-lg text-sm" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
             Annuler
           </button>
         </div>
@@ -195,26 +195,27 @@ export default function CmsArticlesPage() {
     <div>
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Articles</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>
+          <p className="cms-eyebrow">Marketing</p>
+          <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Articles</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--cms-muted)' }}>
             {articles.length} article(s) · {articles.filter(a => statusOf(a) === 'publie').length} publié(s) · {articles.filter(a => statusOf(a) === 'programme').length} programmé(s)
           </p>
         </div>
-        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#F4521E' }}>
+        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: 'var(--cms-brand)' }}>
           <Plus className="w-4 h-4" /> Nouvel article
         </button>
       </div>
 
       <Kpis items={[
-        { label: 'Publiés', value: articles.filter(a => statusOf(a) === 'publie').length, icon: BookOpen, color: '#16A34A' },
-        { label: 'Programmés', value: articles.filter(a => statusOf(a) === 'programme').length, icon: CalendarClock, color: '#D97706' },
-        { label: 'Brouillons', value: articles.filter(a => statusOf(a) === 'brouillon').length, icon: EyeOff, color: '#9CA3AF' },
-        { label: 'Clics Google', value: Object.values(stats).reduce((s, v) => s + (v.clicks || 0), 0), icon: MousePointerClick, color: '#2563EB', hint: '30 derniers jours (GSC)' },
-        { label: 'Impressions', value: Object.values(stats).reduce((s, v) => s + (v.impressions || 0), 0).toLocaleString('fr-FR'), icon: Eye, color: '#7C3AED', hint: 'vues dans la recherche' },
+        { label: 'Publiés', value: articles.filter(a => statusOf(a) === 'publie').length, icon: BookOpen, color: 'var(--cms-ok-fg)' },
+        { label: 'Programmés', value: articles.filter(a => statusOf(a) === 'programme').length, icon: CalendarClock, color: 'var(--cms-warn-fg)' },
+        { label: 'Brouillons', value: articles.filter(a => statusOf(a) === 'brouillon').length, icon: EyeOff, color: 'var(--cms-muted)' },
+        { label: 'Clics Google', value: Object.values(stats).reduce((s, v) => s + (v.clicks || 0), 0), icon: MousePointerClick, color: 'var(--cms-info-fg)', hint: '30 derniers jours (GSC)' },
+        { label: 'Impressions', value: Object.values(stats).reduce((s, v) => s + (v.impressions || 0), 0).toLocaleString('fr-FR'), icon: Eye, color: '#7C56C7', hint: 'vues dans la recherche' },
       ]} />
 
       {articles.length === 0 && (
-        <div className="rounded-xl p-12 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>
+        <div className="rounded-xl p-12 text-center text-sm" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', color: 'var(--cms-muted)' }}>
           Aucun article
         </div>
       )}
@@ -224,10 +225,10 @@ export default function CmsArticlesPage() {
           .sort((x, y) => (x.date_pub || '').localeCompare(y.date_pub || ''))
         if (!upcoming.length) return null
         return (
-          <div className="rounded-xl p-5 mb-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <div className="rounded-xl p-5 mb-5" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
             <div className="flex items-center gap-2 mb-3">
-              <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} />
-              <h2 className="text-sm font-bold" style={{ color: '#111827' }}>
+              <CalendarClock className="w-4 h-4" style={{ color: 'var(--cms-brand)' }} />
+              <h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>
                 Planning éditorial — {upcoming.length} article(s) à venir
               </h2>
             </div>
@@ -237,11 +238,11 @@ export default function CmsArticlesPage() {
                 const days = Math.max(0, Math.ceil((d.getTime() - Date.now()) / 86400000))
                 return (
                   <div key={a.id} className="flex items-center gap-3 text-sm">
-                    <span className="font-mono text-xs px-2 py-0.5 rounded shrink-0" style={{ background: '#FFF4ED', color: '#F4521E' }}>
+                    <span className="font-mono text-xs px-2 py-0.5 rounded shrink-0" style={{ background: 'var(--cms-brand-wash)', color: 'var(--cms-brand)' }}>
                       {d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' })}
                     </span>
-                    <span className="flex-1 truncate" style={{ color: '#374151' }}>{a.titre}</span>
-                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>dans {days} j</span>
+                    <span className="flex-1 truncate" style={{ color: 'var(--cms-ink-2)' }}>{a.titre}</span>
+                    <span className="text-xs shrink-0" style={{ color: 'var(--cms-muted)' }}>dans {days} j</span>
                   </div>
                 )
               })}
@@ -252,17 +253,17 @@ export default function CmsArticlesPage() {
 
       <div className="space-y-2">
         {articles.map(a => (
-          <div key={a.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <div key={a.id} className="flex items-center gap-4 p-4 rounded-xl" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
             {a.image_url ? (
               <img src={a.image_url} alt={a.titre} className="w-14 h-10 object-cover rounded-lg shrink-0" />
             ) : (
-              <div className="w-14 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#F3F4F6' }}>
-                <BookOpen className="w-4 h-4" style={{ color: '#9CA3AF' }} />
+              <div className="w-14 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'var(--cms-surface-2)' }}>
+                <BookOpen className="w-4 h-4" style={{ color: 'var(--cms-muted)' }} />
               </div>
             )}
             <div className="flex-1 min-w-0">
-              <p className="font-semibold text-sm truncate" style={{ color: '#111827' }}>{a.titre}</p>
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+              <p className="font-semibold text-sm truncate" style={{ color: 'var(--cms-ink)' }}>{a.titre}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--cms-muted)' }}>
                 {a.categorie && <span>{a.categorie} · </span>}
                 {a.date_pub}
               </p>
@@ -271,9 +272,9 @@ export default function CmsArticlesPage() {
               const s = stats[`/blog/${a.slug}`]
               if (!s || (!s.impressions && !s.clicks)) return null
               return (
-                <div className="hidden sm:flex flex-col items-end text-xs shrink-0 mr-1 leading-tight" style={{ color: '#6B7280' }} title="Search Console · 90 derniers jours">
-                  <span><strong style={{ color: '#111827' }}>{s.impressions}</strong> impr · <strong style={{ color: '#111827' }}>{s.clicks}</strong> clics</span>
-                  <span>pos. moy. <strong style={{ color: '#F4521E' }}>{s.position}</strong></span>
+                <div className="hidden sm:flex flex-col items-end text-xs shrink-0 mr-1 leading-tight" style={{ color: 'var(--cms-ink-2)' }} title="Search Console · 90 derniers jours">
+                  <span><strong style={{ color: 'var(--cms-ink)' }}>{s.impressions}</strong> impr · <strong style={{ color: 'var(--cms-ink)' }}>{s.clicks}</strong> clics</span>
+                  <span>pos. moy. <strong style={{ color: 'var(--cms-brand)' }}>{s.position}</strong></span>
                 </div>
               )
             })()}
@@ -282,30 +283,30 @@ export default function CmsArticlesPage() {
             </span>
             <div className="flex gap-1 shrink-0">
               {a.publie && (
-                <button onClick={() => requestIndex(a.slug)} disabled={indexing[a.slug] === 'busy'} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FFF4ED'; (e.currentTarget as HTMLElement).style.color = '#F4521E' }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}
+                <button onClick={() => requestIndex(a.slug)} disabled={indexing[a.slug] === 'busy'} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-brand-wash)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-brand)' }}
+                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}
                   title="Demander l'indexation (Google + Bing)">
                   {indexing[a.slug] === 'busy' ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    : indexing[a.slug] === 'ok' ? <Check className="w-3.5 h-3.5" style={{ color: '#16a34a' }} />
-                    : indexing[a.slug] === 'err' ? <X className="w-3.5 h-3.5" style={{ color: '#ef4444' }} />
+                    : indexing[a.slug] === 'ok' ? <Check className="w-3.5 h-3.5" style={{ color: 'var(--cms-ok-fg)' }} />
+                    : indexing[a.slug] === 'err' ? <X className="w-3.5 h-3.5" style={{ color: 'var(--cms-danger-fg)' }} />
                     : <Send className="w-3.5 h-3.5" />}
                 </button>
               )}
-              <button onClick={() => toggle(a)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}
+              <button onClick={() => toggle(a)} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-surface-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-ink-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}
                 title={a.publie ? 'Dépublier' : 'Publier'}>
                 {a.publie ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
               </button>
-              <button onClick={() => open(a)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+              <button onClick={() => open(a)} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-surface-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-ink-2)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}>
                 <Pencil className="w-3.5 h-3.5" />
               </button>
-              <button onClick={() => articlesService.delete(a.id).then(load)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+              <button onClick={() => articlesService.delete(a.id).then(load)} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-danger-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-danger-fg)' }}
+                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}>
                 <Trash2 className="w-3.5 h-3.5" />
               </button>
             </div>
