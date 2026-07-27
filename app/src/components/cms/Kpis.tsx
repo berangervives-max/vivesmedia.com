@@ -21,13 +21,13 @@ export default function Kpis({ items }: { items: Kpi[] }) {
         const Icon = k.icon
         const color = k.color || '#F4521E'
         return (
-          <div key={i} className="rounded-xl p-3.5" style={{ background: '#fff', border: '1px solid #EFF0F2' }}>
+          <div key={i} className="rounded-2xl p-4" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', boxShadow: 'var(--cms-shadow)' }}>
             <div className="flex items-center gap-1.5 mb-1">
               {Icon ? <Icon className="w-3.5 h-3.5" style={{ color }} /> : null}
-              <p className="text-[11px] uppercase tracking-wide font-medium" style={{ color: '#9CA3AF' }}>{k.label}</p>
+              <p className="text-[11px] uppercase tracking-wide font-semibold" style={{ color: 'var(--cms-muted)' }}>{k.label}</p>
             </div>
-            <p className="text-2xl font-bold leading-none" style={{ color: '#111827' }}>{k.value}</p>
-            {k.hint ? <p className="text-[11px] mt-1.5" style={{ color: '#9CA3AF' }}>{k.hint}</p> : null}
+            <p className="text-2xl font-bold tracking-tight leading-none" style={{ color: 'var(--cms-ink)' }}>{k.value}</p>
+            {k.hint ? <p className="text-[11px] mt-1.5" style={{ color: 'var(--cms-muted)' }}>{k.hint}</p> : null}
           </div>
         )
       })}
