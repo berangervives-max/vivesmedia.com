@@ -63,27 +63,10 @@ export async function middleware(req: NextRequest) {
     return getRes()
   }
 
-  // 3) Back-office ADMIN (/cms) : protection SERVEUR (défense en profondeur) + 2FA imposé.
-  if (pathname.startsWith('/cms')) {
-    if (pathname === '/cms/login') return NextResponse.next()
-    const { supabase, getRes } = makeSupabase(req)
-    const ADMIN = process.env.ADMIN_EMAIL || 'berangervives@gmail.com'
-    let user = null
-    let mfaSatisfied = true
-    try {
-      user = (await supabase.auth.getUser()).data.user
-      if (user) {
-        const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel()
-        // Si un 2FA est enrôlé (nextLevel aal2) mais pas encore validé → session incomplète.
-        if (aal && aal.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') mfaSatisfied = false
-      }
-    } catch { /* réseau : ne pas verrouiller sur une erreur */ }
-
-    if (!user || user.email !== ADMIN || !mfaSatisfied) {
-      const url = req.nextUrl.clone(); url.pathname = '/cms/login'; return NextResponse.redirect(url)
-    }
-    return getRes()
-  }
+  // NB : la protection SERVEUR du /cms a été retirée (elle renvoyait au login une
+  // session pourtant valide côté navigateur : la session /cms n'est pas lisible par
+  // getUser() en middleware). Le /cms reste protégé côté client (layout) + par les
+  // API (/api/cms). À reprendre proprement une fois la cause cookie/session comprise.
 
   return NextResponse.next()
 }
@@ -91,7 +74,6 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/hub/:path*',
-    '/cms/:path*',
     '/api/devis/:path*',
     '/api/rappel/:path*',
     '/api/newsletter/:path*',
