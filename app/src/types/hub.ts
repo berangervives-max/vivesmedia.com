@@ -6,6 +6,15 @@ export type ProjectPhase = 'onboarding' | 'design' | 'dev' | 'recette' | 'livrai
 export type FileCategory = 'file' | 'maquette' | 'invoice'
 export type TicketStatus = 'open' | 'in_progress' | 'resolved' | 'closed'
 export type TicketPriority = 'low' | 'medium' | 'high'
+export type FormFieldType = 'text' | 'textarea' | 'select' | 'multiselect' | 'file' | 'url'
+export interface FormField {
+  id: string
+  label: string
+  type: FormFieldType
+  required?: boolean
+  placeholder?: string
+  options?: string[]
+}
 
 export const PHASE_LABELS: Record<ProjectPhase, string> = {
   onboarding: 'Onboarding',
