@@ -3,7 +3,7 @@ import Link from 'next/link'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { PHASE_LABELS, PHASE_ORDER, phaseIndex, TICKET_STATUS_LABELS, TICKET_PRIORITY_LABELS, type ProjectPhase } from '@/types/hub'
-import { ArrowLeft, ExternalLink, Check } from 'lucide-react'
+import { ArrowLeft, Check } from 'lucide-react'
 import PhaseSelector from '@/components/admin/PhaseSelector'
 import FileUpload from '@/components/admin/FileUpload'
 import VideoManager from '@/components/admin/VideoManager'
@@ -111,9 +111,9 @@ export default async function CmsProjetDetailPage({ params }: { params: Promise<
           <div className="hub-card p-6">
             <div className="flex items-center justify-between gap-3 flex-wrap mb-4">
               <p className="text-sm font-semibold text-foreground">Formulaire d&apos;onboarding</p>
-              <a href={`/hub/admin/projects/${projectId}/form`} target="_blank" rel="noopener noreferrer" className="hub-btn hub-btn-primary hub-btn-sm">
-                <ExternalLink className="w-3.5 h-3.5" /> {form ? 'Modifier le formulaire' : 'Créer le formulaire'}
-              </a>
+              <Link href={`/cms/projets/${projectId}/form`} className="hub-btn hub-btn-primary hub-btn-sm">
+                {form ? 'Modifier le formulaire' : 'Créer le formulaire'}
+              </Link>
             </div>
             {form ? (
               <p className="text-sm font-medium text-(--sem-ok-fg) flex items-center gap-1.5">
