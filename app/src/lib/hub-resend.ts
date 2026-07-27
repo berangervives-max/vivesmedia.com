@@ -53,6 +53,14 @@ export async function sendNewFileEmail(p: { to: string; clientName: string; proj
   )
 }
 
+export async function sendInvitationEmail(p: { to: string; clientName: string; projectName: string; magicLink: string }) {
+  await send(
+    p.to,
+    `Votre espace client vivesmedia.com est prêt`,
+    `<p>Bonjour ${esc(p.clientName)},</p><p>Votre espace de suivi pour le projet <b>${esc(p.projectName)}</b> est prêt. Vous pourrez y suivre l'avancement, déposer vos documents et accéder à vos formations.</p><p><a href="${esc(p.magicLink)}">Accéder à mon espace</a></p><p>À très vite, Béranger, vivesmedia.com</p>`,
+  )
+}
+
 export async function sendReviewRequestEmail(p: { to: string; clientName: string; projectName: string; reviewUrl: string }) {
   await send(
     p.to,

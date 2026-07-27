@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import Link from 'next/link'
 import { PHASE_LABELS, type ProjectPhase } from '@/types/hub'
-import { ChevronRight } from 'lucide-react'
+import { ChevronRight, UserPlus } from 'lucide-react'
 
 // Liste des projets clients, native dans le /cms (fin du saut vers /hub/admin).
 // Le détail ouvre encore l'ancien admin (proxifié, fonctionnel) le temps de le rapatrier.
@@ -14,15 +14,18 @@ export default async function CmsProjetsPage() {
 
   return (
     <div>
-      <div className="mb-5">
-        <p className="cms-eyebrow">Suivi</p>
-        <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Projets <span className="cms-accent">clients</span></h1>
-        <p className="text-sm mt-1" style={{ color: 'var(--cms-muted)' }}>{projects?.length ?? 0} projet(s) au total</p>
+      <div className="mb-5 flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <p className="cms-eyebrow">Suivi</p>
+          <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Projets <span className="cms-accent">clients</span></h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--cms-muted)' }}>{projects?.length ?? 0} projet(s) au total</p>
+        </div>
+        <Link href="/cms/projets/nouveau" className="cms-btn cms-btn-primary"><UserPlus className="w-4 h-4" /> Inviter un client</Link>
       </div>
 
       {!projects?.length ? (
         <div className="rounded-2xl p-12 text-center text-sm" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', color: 'var(--cms-muted)' }}>
-          Aucun projet. Crée d&apos;abord un client dans <Link href="/cms/clients" className="font-semibold" style={{ color: 'var(--cms-brand)' }}>Clients</Link>.
+          Aucun projet pour l&apos;instant. <Link href="/cms/projets/nouveau" className="font-semibold" style={{ color: 'var(--cms-brand)' }}>Invite ton premier client</Link>.
         </div>
       ) : (
         <div className="grid gap-3">
