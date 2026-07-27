@@ -35,3 +35,28 @@ export async function sendAdminNewTicketAlert(p: { adminEmail: string; clientNam
     `<p><b>${esc(p.clientName)}</b> a ouvert un ticket sur <b>${esc(p.projectName)}</b>.</p><p><b>${esc(p.ticketTitle)}</b></p><p>${esc(p.ticketDescription)}</p><p>Priorité : ${esc(p.priority)}</p><p><a href="${esc(p.ticketUrl)}">Voir le projet</a></p>`,
   )
 }
+
+// ── Emails CLIENT (déclenchés par l'admin depuis /cms/projets) ──
+export async function sendPhaseChangeEmail(p: { to: string; clientName: string; projectName: string; phaseLabel: string; dashboardUrl: string; note?: string }) {
+  await send(
+    p.to,
+    `Votre projet ${p.projectName} avance : ${p.phaseLabel}`,
+    `<p>Bonjour ${esc(p.clientName)},</p><p>Votre projet <b>${esc(p.projectName)}</b> passe en phase <b>${esc(p.phaseLabel)}</b>.</p>${p.note ? `<p>${esc(p.note)}</p>` : ''}<p><a href="${esc(p.dashboardUrl)}">Voir l'avancement</a></p><p>Béranger, vivesmedia.com</p>`,
+  )
+}
+
+export async function sendNewFileEmail(p: { to: string; clientName: string; projectName: string; fileName: string; fileCategory: string; dashboardUrl: string }) {
+  await send(
+    p.to,
+    `Nouveau document sur ${p.projectName}`,
+    `<p>Bonjour ${esc(p.clientName)},</p><p>Un nouveau document (<b>${esc(p.fileName)}</b>, ${esc(p.fileCategory)}) a été déposé sur votre projet <b>${esc(p.projectName)}</b>.</p><p><a href="${esc(p.dashboardUrl)}">Le consulter</a></p><p>Béranger, vivesmedia.com</p>`,
+  )
+}
+
+export async function sendReviewRequestEmail(p: { to: string; clientName: string; projectName: string; reviewUrl: string }) {
+  await send(
+    p.to,
+    'Un petit avis sur notre collaboration ?',
+    `<p>Bonjour ${esc(p.clientName)},</p><p>J'espère que <b>${esc(p.projectName)}</b> vous donne entière satisfaction. Si vous avez 2 minutes, un avis Google m'aiderait beaucoup à développer mon activité.</p><p><a href="${esc(p.reviewUrl)}">Laisser un avis</a></p><p>Merci beaucoup, Béranger, vivesmedia.com</p>`,
+  )
+}
