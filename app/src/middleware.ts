@@ -17,7 +17,7 @@ function isLimited(ip: string): boolean {
 
 const RATE_LIMITED = ['/api/devis', '/api/rappel', '/api/newsletter', '/api/checkout', '/api/track']
 // Chemins /hub encore servis par l'ANCIEN Hub (proxifiés) : on n'y touche pas (il gère sa propre auth).
-const HUB_PROXIED = ['/hub/admin', '/hub/dashboard/formations', '/hub/api/admin', '/hub/api/client/courses']
+const HUB_PROXIED = ['/hub/admin', '/hub/api/admin']
 // Chemins /hub publics (pas d'auth requise).
 const HUB_PUBLIC = ['/hub/login', '/hub/auth']
 
