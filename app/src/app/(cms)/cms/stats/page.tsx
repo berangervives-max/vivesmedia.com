@@ -7,7 +7,7 @@ import { devisService, facturesService, commandesService, newsletterService } fr
 import { TrendingUp, Target, Mail, ExternalLink, Euro, Percent, Clock } from 'lucide-react'
 import type { Devis, Facture, Commande, Newsletter } from '@/types'
 
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 const MONTHS_FR = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Juin', 'Juil', 'Août', 'Sep', 'Oct', 'Nov', 'Déc']
 
 const EXTERNAL_TOOLS = [
@@ -20,11 +20,11 @@ const EXTERNAL_TOOLS = [
 ]
 
 const DEVIS_STATUTS: { key: Devis['statut']; label: string; color: string }[] = [
-  { key: 'nouveau', label: 'Nouveaux', color: '#F4521E' },
-  { key: 'contacte', label: 'Contactés', color: '#fb923c' },
-  { key: 'en_cours', label: 'En cours', color: '#fbbf24' },
-  { key: 'accepte', label: 'Acceptés', color: '#22c55e' },
-  { key: 'refuse', label: 'Refusés', color: '#9CA3AF' },
+  { key: 'nouveau', label: 'Nouveaux', color: 'var(--cms-brand)' },
+  { key: 'contacte', label: 'Contactés', color: 'var(--cms-warn-fg)' },
+  { key: 'en_cours', label: 'En cours', color: 'var(--cms-warn-fg)' },
+  { key: 'accepte', label: 'Acceptés', color: 'var(--cms-ok-fg)' },
+  { key: 'refuse', label: 'Refusés', color: 'var(--cms-muted)' },
 ]
 
 function monthKey(d: Date) {
@@ -123,12 +123,12 @@ export default function StatsPage() {
 
   if (loading) return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {[1, 2, 3, 4].map(i => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: '#E9ECEF' }} />)}
+      {[1, 2, 3, 4].map(i => <div key={i} className="h-28 rounded-xl animate-pulse" style={{ background: 'var(--cms-border)' }} />)}
     </div>
   )
 
   if (error) return (
-    <div className="rounded-xl p-6 text-sm" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>
+    <div className="rounded-xl p-6 text-sm" style={{ background: 'var(--cms-danger-bg)', border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' }}>
       Impossible de charger les données. Vérifiez que le script SQL <code>003_site_sur_hub_project.sql</code> a bien été exécuté dans Supabase.
     </div>
   )
@@ -138,8 +138,8 @@ export default function StatsPage() {
 
       {/* Comment lire cette page */}
       <div className="rounded-xl p-5" style={{ background: 'rgba(244,82,30,.05)', border: '1px solid rgba(244,82,30,.15)' }}>
-        <p className="text-sm leading-relaxed" style={{ color: '#374151' }}>
-          <strong style={{ color: '#111827' }}>Cette page répond à 4 questions :</strong>{' '}
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--cms-ink-2)' }}>
+          <strong style={{ color: 'var(--cms-ink)' }}>Cette page répond à 4 questions :</strong>{' '}
           combien je gagne ? · est-ce que les demandes rentrent ? · est-ce que je transforme les demandes en clients ? · est-ce que mon audience grandit ?
           Tout vient de tes vraies données (formulaires du site, factures, Stripe) — rien d'estimé.
         </p>
@@ -148,33 +148,33 @@ export default function StatsPage() {
       {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {KPIS.map(k => (
-          <div key={k.label} className="rounded-xl p-5 flex flex-col" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <div key={k.label} className="rounded-xl p-5 flex flex-col" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
             <div className="flex items-center gap-2.5 mb-3">
               <div className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(244,82,30,.1)', color: ORANGE }}>
                 <k.icon className="w-4 h-4" />
               </div>
-              <p className="text-xs font-semibold" style={{ color: '#6B7280' }}>{k.label}</p>
+              <p className="text-xs font-semibold" style={{ color: 'var(--cms-ink-2)' }}>{k.label}</p>
             </div>
-            <p className="text-3xl font-bold" style={{ color: '#111827' }}>{k.value}</p>
-            <p className="text-[11px] mt-2 leading-relaxed pt-2 flex-1" style={{ color: '#9CA3AF', borderTop: '1px solid #F1F3F5' }}>{k.explication}</p>
+            <p className="text-3xl font-bold" style={{ color: 'var(--cms-ink)' }}>{k.value}</p>
+            <p className="text-[11px] mt-2 leading-relaxed pt-2 flex-1" style={{ color: 'var(--cms-muted)', borderTop: '1px solid var(--cms-surface-2)' }}>{k.explication}</p>
           </div>
         ))}
       </div>
 
       {/* CA par mois */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="flex items-center gap-2 mb-1">
           <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Chiffre d'affaires encaissé par mois</h2>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Chiffre d'affaires encaissé par mois</h2>
         </div>
-        <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Factures payées + commandes Stripe, 12 derniers mois</p>
+        <p className="text-xs mb-5" style={{ color: 'var(--cms-muted)' }}>Factures payées + commandes Stripe, 12 derniers mois</p>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={caParMois}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F3F5" vertical={false} />
-              <XAxis dataKey="mois" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}€`} />
-              <Tooltip formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} €`, 'CA']} contentStyle={{ borderRadius: 10, border: '1px solid #E9ECEF', fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--cms-surface-2)" vertical={false} />
+              <XAxis dataKey="mois" tick={{ fontSize: 11, fill: 'var(--cms-muted)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'var(--cms-muted)' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}€`} />
+              <Tooltip formatter={(v) => [`${Number(v ?? 0).toLocaleString('fr-FR')} €`, 'CA']} contentStyle={{ borderRadius: 10, border: '1px solid var(--cms-border)', fontSize: 12 }} />
               <Bar dataKey="ca" fill={ORANGE} radius={[6, 6, 0, 0]} maxBarSize={36} />
             </BarChart>
           </ResponsiveContainer>
@@ -184,19 +184,19 @@ export default function StatsPage() {
       <div className="grid lg:grid-cols-2 gap-6">
 
         {/* Pipeline devis */}
-        <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Target className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Pipeline commercial</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Pipeline commercial</h2>
           </div>
-          <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Tous les devis par statut</p>
+          <p className="text-xs mb-5" style={{ color: 'var(--cms-muted)' }}>Tous les devis par statut</p>
           <div className="space-y-3">
             {pipeline.map(s => {
               const max = Math.max(...pipeline.map(p => p.count), 1)
               return (
                 <div key={s.key} className="flex items-center gap-3">
-                  <span className="text-xs w-20 shrink-0" style={{ color: '#6B7280' }}>{s.label}</span>
-                  <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#F8F9FA' }}>
+                  <span className="text-xs w-20 shrink-0" style={{ color: 'var(--cms-ink-2)' }}>{s.label}</span>
+                  <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: 'var(--cms-surface-2)' }}>
                     <div className="h-full rounded-lg transition-all duration-700 flex items-center px-2"
                       style={{ width: `${Math.max((s.count / max) * 100, s.count > 0 ? 12 : 0)}%`, background: s.color }}>
                       {s.count > 0 && <span className="text-xs font-bold text-white">{s.count}</span>}
@@ -207,29 +207,29 @@ export default function StatsPage() {
             })}
           </div>
           {tauxConversion !== null && (
-            <p className="text-xs mt-5 pt-4" style={{ color: '#6B7280', borderTop: '1px solid #F1F3F5' }}>
-              Taux de conversion (acceptés / traités) : <strong style={{ color: '#111827' }}>{tauxConversion}%</strong>
+            <p className="text-xs mt-5 pt-4" style={{ color: 'var(--cms-ink-2)', borderTop: '1px solid var(--cms-surface-2)' }}>
+              Taux de conversion (acceptés / traités) : <strong style={{ color: 'var(--cms-ink)' }}>{tauxConversion}%</strong>
             </p>
           )}
         </div>
 
         {/* Demandes par service */}
-        <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Clock className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Services les plus demandés</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Services les plus demandés</h2>
           </div>
-          <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Répartition des demandes de devis</p>
+          <p className="text-xs mb-5" style={{ color: 'var(--cms-muted)' }}>Répartition des demandes de devis</p>
           {parService.length === 0 ? (
-            <p className="text-sm" style={{ color: '#9CA3AF' }}>Aucune demande pour le moment.</p>
+            <p className="text-sm" style={{ color: 'var(--cms-muted)' }}>Aucune demande pour le moment.</p>
           ) : (
             <div className="space-y-3">
               {parService.map(([service, count]) => {
                 const max = parService[0][1]
                 return (
                   <div key={service} className="flex items-center gap-3">
-                    <span className="text-xs w-32 shrink-0 truncate" style={{ color: '#6B7280' }}>{service}</span>
-                    <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: '#F8F9FA' }}>
+                    <span className="text-xs w-32 shrink-0 truncate" style={{ color: 'var(--cms-ink-2)' }}>{service}</span>
+                    <div className="flex-1 h-7 rounded-lg overflow-hidden" style={{ background: 'var(--cms-surface-2)' }}>
                       <div className="h-full rounded-lg flex items-center px-2 transition-all duration-700"
                         style={{ width: `${Math.max((count / max) * 100, 12)}%`, background: ORANGE }}>
                         <span className="text-xs font-bold text-white">{count}</span>
@@ -244,19 +244,19 @@ export default function StatsPage() {
       </div>
 
       {/* Croissance newsletter */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="flex items-center gap-2 mb-1">
           <Mail className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Croissance newsletter</h2>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Croissance newsletter</h2>
         </div>
-        <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Abonnés cumulés, 12 derniers mois</p>
+        <p className="text-xs mb-5" style={{ color: 'var(--cms-muted)' }}>Abonnés cumulés, 12 derniers mois</p>
         <div className="h-48">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart data={newsGrowth}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F3F5" vertical={false} />
-              <XAxis dataKey="mois" tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: '#9CA3AF' }} axisLine={false} tickLine={false} allowDecimals={false} />
-              <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid #E9ECEF', fontSize: 12 }} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--cms-surface-2)" vertical={false} />
+              <XAxis dataKey="mois" tick={{ fontSize: 11, fill: 'var(--cms-muted)' }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: 'var(--cms-muted)' }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <Tooltip contentStyle={{ borderRadius: 10, border: '1px solid var(--cms-border)', fontSize: 12 }} />
               <Line type="monotone" dataKey="abonnés" stroke={ORANGE} strokeWidth={2.5} dot={false} />
             </LineChart>
           </ResponsiveContainer>
@@ -264,19 +264,19 @@ export default function StatsPage() {
       </div>
 
       {/* Outils externes */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-        <h2 className="font-bold text-sm mb-1" style={{ color: '#111827' }}>Outils connectés</h2>
-        <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Accès direct aux dashboards externes</p>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
+        <h2 className="font-bold text-sm mb-1" style={{ color: 'var(--cms-ink)' }}>Outils connectés</h2>
+        <p className="text-xs mb-5" style={{ color: 'var(--cms-muted)' }}>Accès direct aux dashboards externes</p>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {EXTERNAL_TOOLS.map(t => (
             <a key={t.label} href={t.href} target="_blank" rel="noopener noreferrer"
               className="group flex items-start justify-between gap-2 p-4 rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-sm"
-              style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
+              style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-surface-2)' }}>
               <div>
-                <p className="text-sm font-semibold" style={{ color: '#111827' }}>{t.label}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{t.desc}</p>
+                <p className="text-sm font-semibold" style={{ color: 'var(--cms-ink)' }}>{t.label}</p>
+                <p className="text-xs mt-0.5" style={{ color: 'var(--cms-muted)' }}>{t.desc}</p>
               </div>
-              <ExternalLink className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors" style={{ color: '#D1D5DB' }} />
+              <ExternalLink className="w-3.5 h-3.5 shrink-0 mt-0.5 transition-colors" style={{ color: 'var(--cms-faint)' }} />
             </a>
           ))}
         </div>

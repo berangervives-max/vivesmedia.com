@@ -8,7 +8,7 @@ import {
   ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid, BarChart, Bar, Cell,
 } from 'recharts'
 
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 
 type GscRow = { keys: string[]; clicks: number; impressions: number; ctr: number; position: number }
 type Day = { date: string; [k: string]: number | string }
@@ -27,7 +27,7 @@ function Funnel({ title, steps }: { title: string; steps: FunnelStep[] }) {
   const max = Math.max(1, steps[0]?.count ?? 0)
   return (
     <div>
-      <p className="text-xs font-semibold mb-3" style={{ color: '#475569' }}>{title}</p>
+      <p className="text-xs font-semibold mb-3" style={{ color: 'var(--cms-ink-2)' }}>{title}</p>
       <div className="space-y-2.5">
         {steps.map((s, i) => {
           const prev = i > 0 ? steps[i - 1].count : s.count
@@ -36,14 +36,14 @@ function Funnel({ title, steps }: { title: string; steps: FunnelStep[] }) {
           return (
             <div key={s.key + i}>
               <div className="flex items-center justify-between text-xs mb-1">
-                <span style={{ color: '#334155' }}>{s.label}</span>
-                <span className="font-semibold" style={{ color: '#0F172A' }}>
+                <span style={{ color: 'var(--cms-ink-2)' }}>{s.label}</span>
+                <span className="font-semibold" style={{ color: 'var(--cms-ink)' }}>
                   {s.count}
-                  {i > 0 && <span className="ml-2 font-normal" style={{ color: dropPct > 60 ? '#DC2626' : '#94A3B8' }}>−{dropPct}%</span>}
+                  {i > 0 && <span className="ml-2 font-normal" style={{ color: dropPct > 60 ? 'var(--cms-danger-fg)' : 'var(--cms-faint)' }}>−{dropPct}%</span>}
                 </span>
               </div>
-              <div className="h-2 rounded-full" style={{ background: '#F1F5F9' }}>
-                <div className="h-2 rounded-full" style={{ width: `${widthPct}%`, background: '#F4521E' }} />
+              <div className="h-2 rounded-full" style={{ background: 'var(--cms-surface-3)' }}>
+                <div className="h-2 rounded-full" style={{ width: `${widthPct}%`, background: 'var(--cms-brand)' }} />
               </div>
             </div>
           )
@@ -54,17 +54,17 @@ function Funnel({ title, steps }: { title: string; steps: FunnelStep[] }) {
 }
 
 function RankList({ items, empty }: { items: { label: string; count: number }[]; empty?: string }) {
-  if (!items.length) return <p className="text-xs" style={{ color: '#94A3B8' }}>{empty || 'Pas encore de données'}</p>
+  if (!items.length) return <p className="text-xs" style={{ color: 'var(--cms-faint)' }}>{empty || 'Pas encore de données'}</p>
   const max = items[0]?.count || 1
   return (
     <ul className="space-y-2">
       {items.map((it, i) => (
         <li key={i}>
           <div className="flex items-center justify-between text-xs mb-1">
-            <span className="truncate" style={{ color: '#334155' }}>{it.label}</span>
-            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: '#0F172A' }}>{it.count}</span>
+            <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{it.label}</span>
+            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: 'var(--cms-ink)' }}>{it.count}</span>
           </div>
-          <div className="h-1.5 rounded-full" style={{ background: '#F1F5F9' }}><div className="h-1.5 rounded-full" style={{ width: `${(it.count / max) * 100}%`, background: i === 0 ? '#F4521E' : '#FBC4AC' }} /></div>
+          <div className="h-1.5 rounded-full" style={{ background: 'var(--cms-surface-3)' }}><div className="h-1.5 rounded-full" style={{ width: `${(it.count / max) * 100}%`, background: i === 0 ? 'var(--cms-brand)' : 'var(--cms-brand-wash)' }} /></div>
         </li>
       ))}
     </ul>
@@ -72,34 +72,34 @@ function RankList({ items, empty }: { items: { label: string; count: number }[];
 }
 
 function Card({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-  return <div className={`rounded-2xl p-5 ${className}`} style={{ background: '#fff', border: '1px solid #ECEEF1' }}>{children}</div>
+  return <div className={`rounded-2xl p-5 ${className}`} style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border-2)' }}>{children}</div>
 }
 
 function Kpi({ icon: Icon, label, value, sub, accent }: { icon: typeof Eye; label: string; value: string; sub?: React.ReactNode; accent?: boolean }) {
   return (
     <Card>
       <div className="flex items-center gap-2 mb-3">
-        <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: accent ? '#FEEFE9' : '#F4F5F7' }}>
-          <Icon className="w-4 h-4" style={{ color: accent ? ORANGE : '#6B7280' }} />
+        <span className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: accent ? 'var(--cms-brand-wash)' : 'var(--cms-surface-2)' }}>
+          <Icon className="w-4 h-4" style={{ color: accent ? ORANGE : 'var(--cms-ink-2)' }} />
         </span>
-        <p className="text-xs font-medium" style={{ color: '#6B7280' }}>{label}</p>
+        <p className="text-xs font-medium" style={{ color: 'var(--cms-ink-2)' }}>{label}</p>
       </div>
-      <p className="text-3xl font-bold tracking-tight" style={{ color: '#0F172A' }}>{value}</p>
+      <p className="text-3xl font-bold tracking-tight" style={{ color: 'var(--cms-ink)' }}>{value}</p>
       {sub && <div className="mt-1 text-xs">{sub}</div>}
     </Card>
   )
 }
 
 const SEV = {
-  opportunity: { bg: '#FEF6F2', bd: '#FAD9CB', fg: ORANGE, icon: Lightbulb, label: 'Opportunité' },
-  warning: { bg: '#FFFBEB', bd: '#FDE68A', fg: '#B45309', icon: AlertTriangle, label: 'À surveiller' },
-  good: { bg: '#F0FDF4', bd: '#BBF7D0', fg: '#16A34A', icon: CheckCircle2, label: 'Point fort' },
+  opportunity: { bg: 'var(--cms-brand-wash)', bd: 'var(--cms-brand-wash)', fg: ORANGE, icon: Lightbulb, label: 'Opportunité' },
+  warning: { bg: 'var(--cms-warn-bg)', bd: 'var(--cms-warn-bg)', fg: 'var(--cms-warn-fg)', icon: AlertTriangle, label: 'À surveiller' },
+  good: { bg: 'var(--cms-ok-bg)', bd: 'var(--cms-ok-bg)', fg: 'var(--cms-ok-fg)', icon: CheckCircle2, label: 'Point fort' },
 }
 
 function ChartTooltip({ active, payload, label }: { active?: boolean; payload?: { name: string; value: number; color: string }[]; label?: string }) {
   if (!active || !payload?.length) return null
   return (
-    <div className="rounded-lg px-3 py-2 text-xs shadow-lg" style={{ background: '#0F172A', color: '#fff' }}>
+    <div className="rounded-lg px-3 py-2 text-xs shadow-lg" style={{ background: 'var(--cms-ink)', color: 'var(--cms-card)' }}>
       <p className="font-semibold mb-1">{label}</p>
       {payload.map((p, i) => <p key={i} style={{ color: p.color }}>{p.name} : <span className="font-bold">{p.value}</span></p>)}
     </div>
@@ -120,8 +120,8 @@ export default function TraficPage() {
   }
   useEffect(load, [])
 
-  if (loading && !data) return <div className="flex items-center gap-2 text-sm" style={{ color: '#6B7280' }}><RefreshCw className="w-4 h-4 animate-spin" /> Chargement des données…</div>
-  if (error) return <div className="rounded-xl p-5 text-sm" style={{ background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>{error}</div>
+  if (loading && !data) return <div className="flex items-center gap-2 text-sm" style={{ color: 'var(--cms-ink-2)' }}><RefreshCw className="w-4 h-4 animate-spin" /> Chargement des données…</div>
+  if (error) return <div className="rounded-xl p-5 text-sm" style={{ background: 'var(--cms-danger-bg)', border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' }}>{error}</div>
   if (!data) return null
 
   const { ga4, gsc, posthog, insights, funnel } = data
@@ -133,17 +133,18 @@ export default function TraficPage() {
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#0F172A' }}>Analytics</h1>
-          <p className="text-xs mt-0.5" style={{ color: '#94A3B8' }}>GA4 · Search Console · PostHog — données en direct</p>
+          <p className="cms-eyebrow">Mesure</p>
+          <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Analytics</h1>
+          <p className="text-xs mt-0.5" style={{ color: 'var(--cms-faint)' }}>GA4 · Search Console · PostHog — données en direct</p>
         </div>
         <div className="flex items-center gap-3">
           {ga4.available && (
-            <span className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg" style={{ background: '#FEEFE9', color: ORANGE }}>
+            <span className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg" style={{ background: 'var(--cms-brand-wash)', color: ORANGE }}>
               <span className="relative flex h-2 w-2"><span className="animate-ping absolute h-2 w-2 rounded-full opacity-75" style={{ background: ORANGE }} /><span className="rounded-full h-2 w-2" style={{ background: ORANGE }} /></span>
               {ga4.realtimeUsers} en direct
             </span>
           )}
-          <button onClick={load} className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+          <button onClick={load} className="flex items-center gap-2 text-xs font-semibold px-3 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
             <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin' : ''}`} /> Actualiser
           </button>
         </div>
@@ -154,14 +155,14 @@ export default function TraficPage() {
         <Card>
           <div className="flex items-center gap-2 mb-4">
             <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>Tunnel de conversion</h2>
-            <span className="text-xs" style={{ color: '#94A3B8' }}>· {funnel.periodDays} derniers jours</span>
+            <h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Tunnel de conversion</h2>
+            <span className="text-xs" style={{ color: 'var(--cms-faint)' }}>· {funnel.periodDays} derniers jours</span>
           </div>
           <div className="grid md:grid-cols-2 gap-8">
             <Funnel title="Voie devis (conseil)" steps={funnel.conseil} />
             <Funnel title="Voie achat en ligne" steps={funnel.achat} />
           </div>
-          <p className="text-[11px] mt-4" style={{ color: '#94A3B8' }}>
+          <p className="text-[11px] mt-4" style={{ color: 'var(--cms-faint)' }}>
             Le % indique la perte à chaque étape. Une grosse chute = l'étape à corriger en priorité.
           </p>
         </Card>
@@ -170,19 +171,19 @@ export default function TraficPage() {
       {/* KPIs */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <Kpi icon={Globe} label="Sessions (30j)" value={String(ga4.last30.sessions)} accent
-          sub={<span className="inline-flex items-center gap-1 font-semibold" style={{ color: trendUp ? '#16A34A' : '#DC2626' }}>{trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{ga4.trendSessionsPct > 0 ? '+' : ''}{ga4.trendSessionsPct}% vs 7j préc.</span>} />
-        <Kpi icon={Eye} label="Visiteurs (30j)" value={String(ga4.last30.activeUsers)} sub={<span style={{ color: '#94A3B8' }}>{ga4.last30.pageViews} pages vues</span>} />
-        <Kpi icon={MousePointerClick} label="Clics SEO (28j)" value={String(gsc.totals.clicks)} sub={<span style={{ color: '#94A3B8' }}>{gsc.totals.impressions} impressions</span>} />
-        <Kpi icon={Search} label="Position Google moy." value={gsc.totals.position ? gsc.totals.position.toFixed(1) : '—'} sub={<span style={{ color: '#94A3B8' }}>CTR {pct(gsc.totals.ctr)}</span>} />
+          sub={<span className="inline-flex items-center gap-1 font-semibold" style={{ color: trendUp ? 'var(--cms-ok-fg)' : 'var(--cms-danger-fg)' }}>{trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}{ga4.trendSessionsPct > 0 ? '+' : ''}{ga4.trendSessionsPct}% vs 7j préc.</span>} />
+        <Kpi icon={Eye} label="Visiteurs (30j)" value={String(ga4.last30.activeUsers)} sub={<span style={{ color: 'var(--cms-faint)' }}>{ga4.last30.pageViews} pages vues</span>} />
+        <Kpi icon={MousePointerClick} label="Clics SEO (28j)" value={String(gsc.totals.clicks)} sub={<span style={{ color: 'var(--cms-faint)' }}>{gsc.totals.impressions} impressions</span>} />
+        <Kpi icon={Search} label="Position Google moy." value={gsc.totals.position ? gsc.totals.position.toFixed(1) : '—'} sub={<span style={{ color: 'var(--cms-faint)' }}>CTR {pct(gsc.totals.ctr)}</span>} />
       </div>
 
       {/* Courbe trafic GA4 */}
       <Card>
         <div className="flex items-center justify-between mb-4">
-          <p className="text-sm font-bold" style={{ color: '#0F172A' }}>Trafic — 30 derniers jours</p>
-          <div className="flex items-center gap-4 text-xs" style={{ color: '#64748B' }}>
+          <p className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Trafic — 30 derniers jours</p>
+          <div className="flex items-center gap-4 text-xs" style={{ color: 'var(--cms-muted)' }}>
             <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: ORANGE }} /> Sessions</span>
-            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: '#94A3B8' }} /> Visiteurs</span>
+            <span className="flex items-center gap-1.5"><span className="w-2.5 h-2.5 rounded-full" style={{ background: 'var(--cms-faint)' }} /> Visiteurs</span>
           </div>
         </div>
         {ga4.available && ga4.series.length > 0 ? (
@@ -191,15 +192,15 @@ export default function TraficPage() {
               <defs>
                 <linearGradient id="gSes" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={ORANGE} stopOpacity={0.25} /><stop offset="100%" stopColor={ORANGE} stopOpacity={0} /></linearGradient>
               </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-              <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} interval={4} tickLine={false} axisLine={false} />
-              <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} width={32} />
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--cms-surface-3)" vertical={false} />
+              <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--cms-faint)' }} interval={4} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fontSize: 10, fill: 'var(--cms-faint)' }} tickLine={false} axisLine={false} width={32} />
               <Tooltip content={<ChartTooltip />} />
-              <Area type="monotone" dataKey="visiteurs" stroke="#CBD5E1" strokeWidth={1.5} fill="none" name="Visiteurs" />
+              <Area type="monotone" dataKey="visiteurs" stroke="var(--cms-faint)" strokeWidth={1.5} fill="none" name="Visiteurs" />
               <Area type="monotone" dataKey="sessions" stroke={ORANGE} strokeWidth={2.5} fill="url(#gSes)" name="Sessions" />
             </AreaChart>
           </ResponsiveContainer>
-        ) : <p className="text-xs py-12 text-center" style={{ color: '#94A3B8' }}>{ga4.reason === 'data-api-disabled' ? 'Active la Google Analytics Data API pour voir la courbe.' : 'Pas encore de données.'}</p>}
+        ) : <p className="text-xs py-12 text-center" style={{ color: 'var(--cms-faint)' }}>{ga4.reason === 'data-api-disabled' ? 'Active la Google Analytics Data API pour voir la courbe.' : 'Pas encore de données.'}</p>}
       </Card>
 
       {/* Axes d'amélioration */}
@@ -207,8 +208,8 @@ export default function TraficPage() {
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Lightbulb className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>Axes d&apos;amélioration</h2>
-            <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#F1F5F9', color: '#64748B' }}>généré depuis tes données</span>
+            <h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Axes d&apos;amélioration</h2>
+            <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--cms-surface-3)', color: 'var(--cms-muted)' }}>généré depuis tes données</span>
           </div>
           <div className="grid md:grid-cols-2 gap-3">
             {insights.map((ins, i) => {
@@ -218,8 +219,8 @@ export default function TraficPage() {
                   <div className="flex items-start gap-3">
                     <Icon className="w-4 h-4 mt-0.5 shrink-0" style={{ color: s.fg }} />
                     <div>
-                      <p className="text-sm font-semibold" style={{ color: '#0F172A' }}>{ins.title}</p>
-                      <p className="text-xs mt-1" style={{ color: '#475569' }}>{ins.detail}</p>
+                      <p className="text-sm font-semibold" style={{ color: 'var(--cms-ink)' }}>{ins.title}</p>
+                      <p className="text-xs mt-1" style={{ color: 'var(--cms-ink-2)' }}>{ins.detail}</p>
                       <p className="text-xs mt-2 flex items-start gap-1 font-medium" style={{ color: s.fg }}><ArrowUpRight className="w-3 h-3 mt-0.5 shrink-0" />{ins.action}</p>
                     </div>
                   </div>
@@ -233,63 +234,63 @@ export default function TraficPage() {
       {/* Sources + SEO courbe */}
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
-          <p className="text-sm font-bold mb-4" style={{ color: '#0F172A' }}>Sources de trafic (30j)</p>
+          <p className="text-sm font-bold mb-4" style={{ color: 'var(--cms-ink)' }}>Sources de trafic (30j)</p>
           {ga4.topSources.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={ga4.topSources} layout="vertical" margin={{ left: 20, right: 16 }}>
                 <XAxis type="number" hide />
-                <YAxis type="category" dataKey="source" tick={{ fontSize: 11, fill: '#475569' }} width={110} tickLine={false} axisLine={false} />
-                <Tooltip content={<ChartTooltip />} cursor={{ fill: '#F8FAFC' }} />
+                <YAxis type="category" dataKey="source" tick={{ fontSize: 11, fill: 'var(--cms-ink-2)' }} width={110} tickLine={false} axisLine={false} />
+                <Tooltip content={<ChartTooltip />} cursor={{ fill: 'var(--cms-surface-2)' }} />
                 <Bar dataKey="sessions" name="Sessions" radius={[0, 6, 6, 0]} barSize={18}>
-                  {ga4.topSources.map((_, i) => <Cell key={i} fill={i === 0 ? ORANGE : '#FBC4AC'} />)}
+                  {ga4.topSources.map((_, i) => <Cell key={i} fill={i === 0 ? ORANGE : 'var(--cms-brand-wash)'} />)}
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
-          ) : <p className="text-xs py-10 text-center" style={{ color: '#94A3B8' }}>Pas encore de données</p>}
+          ) : <p className="text-xs py-10 text-center" style={{ color: 'var(--cms-faint)' }}>Pas encore de données</p>}
         </Card>
 
         <Card>
-          <p className="text-sm font-bold mb-4" style={{ color: '#0F172A' }}>SEO — clics & impressions (28j)</p>
+          <p className="text-sm font-bold mb-4" style={{ color: 'var(--cms-ink)' }}>SEO — clics & impressions (28j)</p>
           {gsc.series.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
               <AreaChart data={gsc.series} margin={{ left: -20, right: 8, top: 4 }}>
-                <defs><linearGradient id="gImp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#3B82F6" stopOpacity={0.15} /><stop offset="100%" stopColor="#3B82F6" stopOpacity={0} /></linearGradient></defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                <XAxis dataKey="date" tick={{ fontSize: 10, fill: '#94A3B8' }} interval={4} tickLine={false} axisLine={false} />
-                <YAxis tick={{ fontSize: 10, fill: '#94A3B8' }} tickLine={false} axisLine={false} width={32} />
+                <defs><linearGradient id="gImp" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="var(--cms-info-fg)" stopOpacity={0.15} /><stop offset="100%" stopColor="var(--cms-info-fg)" stopOpacity={0} /></linearGradient></defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--cms-surface-3)" vertical={false} />
+                <XAxis dataKey="date" tick={{ fontSize: 10, fill: 'var(--cms-faint)' }} interval={4} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 10, fill: 'var(--cms-faint)' }} tickLine={false} axisLine={false} width={32} />
                 <Tooltip content={<ChartTooltip />} />
-                <Area type="monotone" dataKey="impressions" stroke="#3B82F6" strokeWidth={1.5} fill="url(#gImp)" name="Impressions" />
+                <Area type="monotone" dataKey="impressions" stroke="var(--cms-info-fg)" strokeWidth={1.5} fill="url(#gImp)" name="Impressions" />
                 <Area type="monotone" dataKey="clics" stroke={ORANGE} strokeWidth={2.5} fill="none" name="Clics" />
               </AreaChart>
             </ResponsiveContainer>
-          ) : <p className="text-xs py-10 text-center" style={{ color: '#94A3B8' }}>Pas encore de données SEO</p>}
+          ) : <p className="text-xs py-10 text-center" style={{ color: 'var(--cms-faint)' }}>Pas encore de données SEO</p>}
         </Card>
       </div>
 
       {/* Top requêtes + top pages */}
       <div className="grid lg:grid-cols-2 gap-4">
         <Card>
-          <p className="text-sm font-bold mb-3" style={{ color: '#0F172A' }}>Top requêtes Google</p>
+          <p className="text-sm font-bold mb-3" style={{ color: 'var(--cms-ink)' }}>Top requêtes Google</p>
           <ul className="space-y-2.5">
             {gsc.topQueries.slice(0, 7).map((q, i) => (
               <li key={i} className="flex items-center justify-between text-sm gap-3">
-                <span className="truncate" style={{ color: '#334155' }}>{q.keys[0]}</span>
-                <span className="shrink-0 text-xs tabular-nums" style={{ color: '#94A3B8' }}>{q.clicks} clics · pos {q.position.toFixed(0)}</span>
+                <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{q.keys[0]}</span>
+                <span className="shrink-0 text-xs tabular-nums" style={{ color: 'var(--cms-faint)' }}>{q.clicks} clics · pos {q.position.toFixed(0)}</span>
               </li>
             ))}
-            {gsc.topQueries.length === 0 && <li className="text-xs" style={{ color: '#94A3B8' }}>Pas encore de données</li>}
+            {gsc.topQueries.length === 0 && <li className="text-xs" style={{ color: 'var(--cms-faint)' }}>Pas encore de données</li>}
           </ul>
         </Card>
         <Card>
-          <p className="text-sm font-bold mb-3" style={{ color: '#0F172A' }}>Pages les plus vues (30j)</p>
+          <p className="text-sm font-bold mb-3" style={{ color: 'var(--cms-ink)' }}>Pages les plus vues (30j)</p>
           <ul className="space-y-2.5">
             {ga4.topPages.slice(0, 7).map((p, i) => (
               <li key={i} className="flex items-center justify-between text-sm gap-3">
-                <span className="truncate" style={{ color: '#334155' }}>{p.path}</span>
-                <span className="shrink-0 text-xs tabular-nums font-semibold" style={{ color: '#0F172A' }}>{p.views}</span>
+                <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{p.path}</span>
+                <span className="shrink-0 text-xs tabular-nums font-semibold" style={{ color: 'var(--cms-ink)' }}>{p.views}</span>
               </li>
             ))}
-            {ga4.topPages.length === 0 && <li className="text-xs" style={{ color: '#94A3B8' }}>Pas encore de données</li>}
+            {ga4.topPages.length === 0 && <li className="text-xs" style={{ color: 'var(--cms-faint)' }}>Pas encore de données</li>}
           </ul>
         </Card>
       </div>
@@ -299,8 +300,8 @@ export default function TraficPage() {
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <MousePointer2 className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="text-sm font-bold" style={{ color: '#0F172A' }}>Comportement & UX <span className="font-normal" style={{ color: '#94A3B8' }}>· PostHog</span></h2>
-            {posthog.available && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: '#F0FDF4', color: '#16A34A' }}>connecté</span>}
+            <h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Comportement & UX <span className="font-normal" style={{ color: 'var(--cms-faint)' }}>· PostHog</span></h2>
+            {posthog.available && <span className="text-[10px] px-2 py-0.5 rounded-full" style={{ background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' }}>connecté</span>}
           </div>
         </div>
 
@@ -308,33 +309,33 @@ export default function TraficPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <Kpi icon={Clock} label="Durée moy. session" value={`${Math.floor(posthog.avgSessionSec / 60)}m ${posthog.avgSessionSec % 60}s`} accent />
-              <Kpi icon={TrendingDown} label="Taux de rebond" value={`${posthog.bounceRate} %`} sub={<span style={{ color: '#94A3B8' }}>sessions 1 page</span>} />
-              <Kpi icon={Flame} label="Rage clicks (30j)" value={String(posthog.rageClicks)} sub={<span style={{ color: '#94A3B8' }}>clics de frustration</span>} />
-              <Kpi icon={MousePointerClick} label="Dead clicks" value={String(posthog.deadClicks)} sub={<span style={{ color: '#94A3B8' }}>clics sans effet</span>} />
+              <Kpi icon={TrendingDown} label="Taux de rebond" value={`${posthog.bounceRate} %`} sub={<span style={{ color: 'var(--cms-faint)' }}>sessions 1 page</span>} />
+              <Kpi icon={Flame} label="Rage clicks (30j)" value={String(posthog.rageClicks)} sub={<span style={{ color: 'var(--cms-faint)' }}>clics de frustration</span>} />
+              <Kpi icon={MousePointerClick} label="Dead clicks" value={String(posthog.deadClicks)} sub={<span style={{ color: 'var(--cms-faint)' }}>clics sans effet</span>} />
             </div>
 
             {/* Accès heatmaps & enregistrements (visuels → PostHog) */}
             <div className="grid sm:grid-cols-2 gap-4">
-              <a href="https://eu.posthog.com/project/192676/heatmaps" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: '#0F172A' }}>
+              <a href="https://eu.posthog.com/project/192676/heatmaps" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: 'var(--cms-ink)' }}>
                 <div>
                   <p className="text-sm font-bold text-white flex items-center gap-2"><Flame className="w-4 h-4" style={{ color: ORANGE }} /> Heatmaps</p>
-                  <p className="text-xs mt-1" style={{ color: '#94A3B8' }}>Où les visiteurs cliquent & scrollent, page par page</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--cms-faint)' }}>Où les visiteurs cliquent & scrollent, page par page</p>
                 </div>
                 <ExternalLink className="w-4 h-4 text-white/60" />
               </a>
-              <a href="https://eu.posthog.com/project/192676/replay" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: posthog.recordingsCount > 0 ? '#0F172A' : '#FFFBEB', border: posthog.recordingsCount > 0 ? 'none' : '1px solid #FDE68A' }}>
+              <a href="https://eu.posthog.com/project/192676/replay" target="_blank" rel="noopener noreferrer" className="rounded-2xl p-5 flex items-center justify-between transition-colors hover:opacity-90" style={{ background: posthog.recordingsCount > 0 ? 'var(--cms-ink)' : 'var(--cms-warn-bg)', border: posthog.recordingsCount > 0 ? 'none' : '1px solid var(--cms-warn-bg)' }}>
                 <div>
-                  <p className="text-sm font-bold flex items-center gap-2" style={{ color: posthog.recordingsCount > 0 ? '#fff' : '#B45309' }}><PlayCircle className="w-4 h-4" style={{ color: ORANGE }} /> Enregistrements de session</p>
-                  <p className="text-xs mt-1" style={{ color: posthog.recordingsCount > 0 ? '#94A3B8' : '#B45309' }}>{posthog.recordingsCount > 0 ? 'Regarde la navigation réelle des visiteurs' : 'Activé ✓ — les premières sessions apparaîtront ici'}</p>
+                  <p className="text-sm font-bold flex items-center gap-2" style={{ color: posthog.recordingsCount > 0 ? 'var(--cms-card)' : 'var(--cms-warn-fg)' }}><PlayCircle className="w-4 h-4" style={{ color: ORANGE }} /> Enregistrements de session</p>
+                  <p className="text-xs mt-1" style={{ color: posthog.recordingsCount > 0 ? 'var(--cms-faint)' : 'var(--cms-warn-fg)' }}>{posthog.recordingsCount > 0 ? 'Regarde la navigation réelle des visiteurs' : 'Activé ✓ — les premières sessions apparaîtront ici'}</p>
                 </div>
-                <ExternalLink className="w-4 h-4" style={{ color: posthog.recordingsCount > 0 ? 'rgba(255,255,255,.6)' : '#B45309' }} />
+                <ExternalLink className="w-4 h-4" style={{ color: posthog.recordingsCount > 0 ? 'rgba(255,255,255,.6)' : 'var(--cms-warn-fg)' }} />
               </a>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-4">
               <Card className="lg:col-span-2">
-                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Ce sur quoi les visiteurs cliquent</p>
-                <p className="text-[11px] mb-4" style={{ color: '#94A3B8' }}>Site public (hors back-office) · 30 jours</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--cms-ink)' }}>Ce sur quoi les visiteurs cliquent</p>
+                <p className="text-[11px] mb-4" style={{ color: 'var(--cms-faint)' }}>Site public (hors back-office) · 30 jours</p>
                 {posthog.topClicks.length > 0 ? (
                   <ul className="space-y-2.5">
                     {posthog.topClicks.map((c, i) => {
@@ -342,34 +343,34 @@ export default function TraficPage() {
                       return (
                         <li key={i}>
                           <div className="flex items-center justify-between text-xs mb-1">
-                            <span className="truncate" style={{ color: '#334155' }}>{c.label}</span>
-                            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: '#0F172A' }}>{c.count}</span>
+                            <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{c.label}</span>
+                            <span className="tabular-nums font-semibold shrink-0 ml-2" style={{ color: 'var(--cms-ink)' }}>{c.count}</span>
                           </div>
-                          <div className="h-1.5 rounded-full" style={{ background: '#F1F5F9' }}><div className="h-1.5 rounded-full" style={{ width: `${(c.count / max) * 100}%`, background: i === 0 ? ORANGE : '#FBC4AC' }} /></div>
+                          <div className="h-1.5 rounded-full" style={{ background: 'var(--cms-surface-3)' }}><div className="h-1.5 rounded-full" style={{ width: `${(c.count / max) * 100}%`, background: i === 0 ? ORANGE : 'var(--cms-brand-wash)' }} /></div>
                         </li>
                       )
                     })}
                   </ul>
-                ) : <p className="text-xs py-8 text-center" style={{ color: '#94A3B8' }}>Encore peu de clics publics — ça se remplit avec les visiteurs.</p>}
+                ) : <p className="text-xs py-8 text-center" style={{ color: 'var(--cms-faint)' }}>Encore peu de clics publics — ça se remplit avec les visiteurs.</p>}
               </Card>
 
               <Card>
-                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Points de friction</p>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Pages où les visiteurs cliquent frénétiquement (élément qui paraît cliquable mais ne l'est pas, ou temps d'attente) — à corriger en priorité. Hors back-office.</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--cms-ink)' }}>Points de friction</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>Pages où les visiteurs cliquent frénétiquement (élément qui paraît cliquable mais ne l'est pas, ou temps d'attente) — à corriger en priorité. Hors back-office.</p>
                 {posthog.frictionPages.length > 0 ? (
                   <ul className="space-y-2.5">
                     {posthog.frictionPages.map((f, i) => (
                       <li key={i} className="flex items-center justify-between text-sm gap-2">
-                        <span className="truncate flex items-center gap-1.5" style={{ color: '#334155' }}><Flame className="w-3 h-3 shrink-0" style={{ color: '#EF4444' }} />{f.path}</span>
-                        <span className="shrink-0 text-xs font-semibold" style={{ color: '#EF4444' }}>{f.rage} rage</span>
+                        <span className="truncate flex items-center gap-1.5" style={{ color: 'var(--cms-ink-2)' }}><Flame className="w-3 h-3 shrink-0" style={{ color: 'var(--cms-danger-fg)' }} />{f.path}</span>
+                        <span className="shrink-0 text-xs font-semibold" style={{ color: 'var(--cms-danger-fg)' }}>{f.rage} rage</span>
                       </li>
                     ))}
                   </ul>
-                ) : <p className="text-xs" style={{ color: '#16A34A' }}>Aucune friction détectée 👌</p>}
+                ) : <p className="text-xs" style={{ color: 'var(--cms-ok-fg)' }}>Aucune friction détectée 👌</p>}
                 {posthog.devices.length > 0 && (
-                  <div className="mt-4 pt-4 flex gap-5" style={{ borderTop: '1px solid #F1F5F9' }}>
+                  <div className="mt-4 pt-4 flex gap-5" style={{ borderTop: '1px solid var(--cms-surface-3)' }}>
                     {posthog.devices.map((d, i) => (
-                      <div key={i}><p className="text-lg font-bold" style={{ color: '#0F172A' }}>{d.sessions}</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>{d.device}</p></div>
+                      <div key={i}><p className="text-lg font-bold" style={{ color: 'var(--cms-ink)' }}>{d.sessions}</p><p className="text-[11px]" style={{ color: 'var(--cms-faint)' }}>{d.device}</p></div>
                     ))}
                   </div>
                 )}
@@ -380,44 +381,44 @@ export default function TraficPage() {
             <div className="grid lg:grid-cols-2 gap-4 mt-4">
               <Card>
                 <div className="flex items-center gap-2 mb-1">
-                  <AlertTriangle className="w-4 h-4" style={{ color: '#EF4444' }} />
-                  <p className="text-sm font-bold" style={{ color: '#0F172A' }}>Erreurs JS (bugs)</p>
+                  <AlertTriangle className="w-4 h-4" style={{ color: 'var(--cms-danger-fg)' }} />
+                  <p className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Erreurs JS (bugs)</p>
                 </div>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Exceptions JavaScript captées sur le site public : message + page. Ouvre PostHog → Error tracking pour la stack (fichier:ligne).</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>Exceptions JavaScript captées sur le site public : message + page. Ouvre PostHog → Error tracking pour la stack (fichier:ligne).</p>
                 {posthog.errors.length > 0 ? (
                   <ul className="space-y-2">
                     {posthog.errors.map((e, i) => (
                       <li key={i} className="text-xs">
                         <div className="flex items-start justify-between gap-2">
-                          <span className="font-mono break-all" style={{ color: '#B91C1C' }}>{e.type ? `${e.type}: ` : ''}{e.message}</span>
-                          <span className="shrink-0 font-semibold" style={{ color: '#0F172A' }}>{e.count}×</span>
+                          <span className="font-mono break-all" style={{ color: 'var(--cms-danger-fg)' }}>{e.type ? `${e.type}: ` : ''}{e.message}</span>
+                          <span className="shrink-0 font-semibold" style={{ color: 'var(--cms-ink)' }}>{e.count}×</span>
                         </div>
-                        <span style={{ color: '#94A3B8' }}>{e.page}</span>
+                        <span style={{ color: 'var(--cms-faint)' }}>{e.page}</span>
                       </li>
                     ))}
                   </ul>
-                ) : <p className="text-xs" style={{ color: '#16A34A' }}>Aucune erreur JS détectée 👌 — capture activée, les futurs bugs s'afficheront ici avec leur emplacement.</p>}
+                ) : <p className="text-xs" style={{ color: 'var(--cms-ok-fg)' }}>Aucune erreur JS détectée 👌 — capture activée, les futurs bugs s'afficheront ici avec leur emplacement.</p>}
               </Card>
 
               <Card>
                 <div className="flex items-center gap-2 mb-1">
                   <TrendingUp className="w-4 h-4" style={{ color: ORANGE }} />
-                  <p className="text-sm font-bold" style={{ color: '#0F172A' }}>Performance perçue (Web Vitals)</p>
+                  <p className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Performance perçue (Web Vitals)</p>
                 </div>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>p75 réel visiteurs · LCP &lt; 2,5 s · INP &lt; 200 ms · CLS &lt; 0,1 = bon</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>p75 réel visiteurs · LCP &lt; 2,5 s · INP &lt; 200 ms · CLS &lt; 0,1 = bon</p>
                 <div className="flex gap-6 mb-3">
-                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.lcp > 2500 ? '#EF4444' : '#16A34A' }}>{(posthog.vitals.lcp / 1000).toFixed(1)}s</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>LCP</p></div>
-                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.inp > 200 ? '#EF4444' : '#16A34A' }}>{posthog.vitals.inp}ms</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>INP</p></div>
-                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.cls > 0.1 ? '#EF4444' : '#16A34A' }}>{posthog.vitals.cls}</p><p className="text-[11px]" style={{ color: '#94A3B8' }}>CLS</p></div>
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.lcp > 2500 ? 'var(--cms-danger-fg)' : 'var(--cms-ok-fg)' }}>{(posthog.vitals.lcp / 1000).toFixed(1)}s</p><p className="text-[11px]" style={{ color: 'var(--cms-faint)' }}>LCP</p></div>
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.inp > 200 ? 'var(--cms-danger-fg)' : 'var(--cms-ok-fg)' }}>{posthog.vitals.inp}ms</p><p className="text-[11px]" style={{ color: 'var(--cms-faint)' }}>INP</p></div>
+                  <div><p className="text-lg font-bold" style={{ color: posthog.vitals.cls > 0.1 ? 'var(--cms-danger-fg)' : 'var(--cms-ok-fg)' }}>{posthog.vitals.cls}</p><p className="text-[11px]" style={{ color: 'var(--cms-faint)' }}>CLS</p></div>
                 </div>
                 {posthog.vitals.slowest.length > 0 && (
-                  <div className="pt-3" style={{ borderTop: '1px solid #F1F5F9' }}>
-                    <p className="text-[11px] mb-2" style={{ color: '#94A3B8' }}>Pages les plus lentes (LCP) — à optimiser en priorité :</p>
+                  <div className="pt-3" style={{ borderTop: '1px solid var(--cms-surface-3)' }}>
+                    <p className="text-[11px] mb-2" style={{ color: 'var(--cms-faint)' }}>Pages les plus lentes (LCP) — à optimiser en priorité :</p>
                     <ul className="space-y-1.5">
                       {posthog.vitals.slowest.map((p, i) => (
                         <li key={i} className="flex items-center justify-between text-xs gap-2">
-                          <span className="truncate" style={{ color: '#334155' }}>{p.path}</span>
-                          <span className="shrink-0 font-semibold tabular-nums" style={{ color: p.lcp > 2500 ? '#EF4444' : '#0F172A' }}>{(p.lcp / 1000).toFixed(1)}s</span>
+                          <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{p.path}</span>
+                          <span className="shrink-0 font-semibold tabular-nums" style={{ color: p.lcp > 2500 ? 'var(--cms-danger-fg)' : 'var(--cms-ink)' }}>{(p.lcp / 1000).toFixed(1)}s</span>
                         </li>
                       ))}
                     </ul>
@@ -429,26 +430,26 @@ export default function TraficPage() {
             {/* Parcours & sources — analyse du trafic */}
             <div className="grid lg:grid-cols-3 gap-4 mt-4">
               <Card>
-                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Pages d'entrée</p>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Où les visiteurs arrivent (30j) — tes portes d'entrée</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--cms-ink)' }}>Pages d'entrée</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>Où les visiteurs arrivent (30j) — tes portes d'entrée</p>
                 <RankList items={posthog.entryPages.map(p => ({ label: p.path, count: p.count }))} empty="Pas encore de visites" />
               </Card>
               <Card>
-                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Pages de sortie</p>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>Où ils quittent le site — à renforcer en priorité</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--cms-ink)' }}>Pages de sortie</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>Où ils quittent le site — à renforcer en priorité</p>
                 <RankList items={posthog.exitPages.map(p => ({ label: p.path, count: p.count }))} empty="Pas encore de données" />
               </Card>
               <Card>
-                <p className="text-sm font-bold mb-1" style={{ color: '#0F172A' }}>Sources de trafic</p>
-                <p className="text-[11px] mb-3" style={{ color: '#94A3B8' }}>D'où vient le trafic (30j)</p>
+                <p className="text-sm font-bold mb-1" style={{ color: 'var(--cms-ink)' }}>Sources de trafic</p>
+                <p className="text-[11px] mb-3" style={{ color: 'var(--cms-faint)' }}>D'où vient le trafic (30j)</p>
                 <RankList items={posthog.channels.map(c => ({ label: c.channel, count: c.count }))} empty="Pas encore de données" />
               </Card>
             </div>
           </div>
-        ) : <Card><p className="text-xs" style={{ color: '#94A3B8' }}>PostHog non connecté</p></Card>}
+        ) : <Card><p className="text-xs" style={{ color: 'var(--cms-faint)' }}>PostHog non connecté</p></Card>}
       </div>
 
-      <p className="text-[10px]" style={{ color: '#CBD5E1' }}>Mis à jour le {new Date(data.generatedAt).toLocaleString('fr-FR')}</p>
+      <p className="text-[10px]" style={{ color: 'var(--cms-faint)' }}>Mis à jour le {new Date(data.generatedAt).toLocaleString('fr-FR')}</p>
     </div>
   )
 }

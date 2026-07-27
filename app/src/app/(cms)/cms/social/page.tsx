@@ -45,10 +45,10 @@ const FORMATS: Record<SocialPlateforme, { v: SocialFormat; label: string }[]> = 
   ],
 }
 const STATUTS: { v: SocialStatut; label: string; cls: string; dot: string }[] = [
-  { v: 'idee', label: 'Idée', cls: 'bg-gray-100 text-gray-600', dot: '#9CA3AF' },
-  { v: 'a_valider', label: 'À valider', cls: 'bg-amber-100 text-amber-700', dot: '#D97706' },
-  { v: 'planifie', label: 'Planifié', cls: 'bg-blue-100 text-blue-700', dot: '#2563EB' },
-  { v: 'publie', label: 'Publié', cls: 'bg-green-100 text-green-700', dot: '#16A34A' },
+  { v: 'idee', label: 'Idée', cls: 'bg-gray-100 text-gray-600', dot: 'var(--cms-muted)' },
+  { v: 'a_valider', label: 'À valider', cls: 'bg-amber-100 text-amber-700', dot: 'var(--cms-warn-fg)' },
+  { v: 'planifie', label: 'Planifié', cls: 'bg-blue-100 text-blue-700', dot: 'var(--cms-info-fg)' },
+  { v: 'publie', label: 'Publié', cls: 'bg-green-100 text-green-700', dot: 'var(--cms-ok-fg)' },
 ]
 const statutMeta = (s: SocialStatut) => STATUTS.find(x => x.v === s) || STATUTS[0]
 
@@ -64,9 +64,9 @@ const TIPS: Record<SocialFormat, string> = {
 }
 
 const inputCls = 'w-full px-3 py-2 rounded-lg text-sm outline-none'
-const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
+const inputStyle = { border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink)' }
 const labelCls = 'text-xs font-semibold block mb-1.5 uppercase tracking-wide'
-const labelStyle = { color: '#6B7280' }
+const labelStyle = { color: 'var(--cms-ink-2)' }
 
 export default function CmsSocialPage() {
   const [posts, setPosts] = useState<SocialPost[]>([])
@@ -150,10 +150,10 @@ export default function CmsSocialPage() {
   const ig = posts.filter(p => p.plateforme === 'instagram').length
 
   if (err === 'table_absente') return (
-    <div className="rounded-xl p-8 max-w-2xl" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-      <h1 className="text-lg font-bold mb-2" style={{ color: '#92400E' }}>Onglet Réseaux sociaux — 1 étape à faire</h1>
-      <p className="text-sm mb-3" style={{ color: '#92400E' }}>La table <code>social_posts</code> n&apos;existe pas encore. Ouvre <b>Supabase → SQL Editor</b>, colle le contenu du fichier <code>supabase/social_posts.sql</code> du projet, clique <b>Run</b>, puis recharge cette page.</p>
-      <p className="text-xs" style={{ color: '#B45309' }}>C&apos;est la seule étape manuelle (création de la table). Ensuite tout fonctionne.</p>
+    <div className="rounded-xl p-8 max-w-2xl" style={{ background: 'var(--cms-warn-bg)', border: '1px solid var(--cms-warn-bg)' }}>
+      <h1 className="text-lg font-bold mb-2" style={{ color: 'var(--cms-warn-fg)' }}>Onglet Réseaux sociaux — 1 étape à faire</h1>
+      <p className="text-sm mb-3" style={{ color: 'var(--cms-warn-fg)' }}>La table <code>social_posts</code> n&apos;existe pas encore. Ouvre <b>Supabase → SQL Editor</b>, colle le contenu du fichier <code>supabase/social_posts.sql</code> du projet, clique <b>Run</b>, puis recharge cette page.</p>
+      <p className="text-xs" style={{ color: 'var(--cms-warn-fg)' }}>C&apos;est la seule étape manuelle (création de la table). Ensuite tout fonctionne.</p>
     </div>
   )
 
@@ -161,10 +161,11 @@ export default function CmsSocialPage() {
     <form onSubmit={save} className="max-w-3xl">
       {lightbox}
       <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>{editing === 'new' ? 'Nouveau post' : 'Modifier le post'}</h1>
-        <button type="button" onClick={() => setEditing(null)} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }}><X className="w-4 h-4" /></button>
+        <p className="cms-eyebrow">Réseaux</p>
+        <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>{editing === 'new' ? 'Nouveau post' : 'Modifier le post'}</h1>
+        <button type="button" onClick={() => setEditing(null)} className="p-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)' }}><X className="w-4 h-4" /></button>
       </div>
-      <div className="space-y-4 rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="space-y-4 rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className={labelCls} style={labelStyle}>Plateforme</label>
@@ -179,7 +180,7 @@ export default function CmsSocialPage() {
             </select>
           </div>
         </div>
-        <p className="text-xs rounded-lg p-2.5" style={{ background: '#F0F9FF', color: '#0369A1' }}>💡 {TIPS[form.format]}</p>
+        <p className="text-xs rounded-lg p-2.5" style={{ background: 'var(--cms-info-bg)', color: 'var(--cms-info-fg)' }}>💡 {TIPS[form.format]}</p>
         <div>
           <label className={labelCls} style={labelStyle}>Titre interne (repère)</label>
           <input value={form.titre} onChange={e => setForm(p => ({ ...p, titre: e.target.value }))} className={inputCls} style={inputStyle} placeholder="Ex : Carrousel « 5 erreurs sur votre site »" />
@@ -190,7 +191,7 @@ export default function CmsSocialPage() {
             <VoiceInput onResult={t => setForm(p => ({ ...p, legende: t }))} label="Dicter la légende" />
           </div>
           <textarea value={form.legende} onChange={e => setForm(p => ({ ...p, legende: e.target.value }))} rows={6} className={inputCls} style={inputStyle} placeholder="Accroche en 1re ligne… puis valeur… puis une question." />
-          <p className="text-[11px] mt-1" style={{ color: '#9CA3AF' }}>{form.legende.length} caractères {form.plateforme === 'linkedin' ? '(LinkedIn : viser 800-1200)' : ''}</p>
+          <p className="text-[11px] mt-1" style={{ color: 'var(--cms-muted)' }}>{form.legende.length} caractères {form.plateforme === 'linkedin' ? '(LinkedIn : viser 800-1200)' : ''}</p>
         </div>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -205,7 +206,7 @@ export default function CmsSocialPage() {
         <div>
           <label className={labelCls} style={labelStyle}>Visuel (URL image/vidéo)</label>
           <input value={form.visuel_url} onChange={e => setForm(p => ({ ...p, visuel_url: e.target.value }))} className={inputCls} style={inputStyle} placeholder="Colle l'URL du visuel généré (vérifié par visual-qc)" />
-          <p className="text-[11px] mt-1" style={{ color: '#0369A1' }}>📐 Format recommandé : <b>{FORMAT_DIMS[form.format]}</b></p>
+          <p className="text-[11px] mt-1" style={{ color: 'var(--cms-info-fg)' }}>📐 Format recommandé : <b>{FORMAT_DIMS[form.format]}</b></p>
           {form.visuel_url ? (
             <button type="button" onClick={() => openZoom(form)} className="block mt-2 group relative">
               <img src={form.visuel_url} alt="" className="rounded-lg max-h-56 object-cover" />
@@ -216,12 +217,12 @@ export default function CmsSocialPage() {
         {(form.format === 'carrousel' || form.format === 'post') && (
           <div>
             <label className={labelCls} style={labelStyle}>Slides supplémentaires (carrousel) — {form.visuels.length}</label>
-            <p className="text-[11px] mb-2" style={{ color: '#9CA3AF' }}>Le visuel ci-dessus = slide 1 (couverture). Ajoute ici les slides 2, 3, 4… Le carrousel complet s&apos;ouvre en grand avec ← / →.</p>
+            <p className="text-[11px] mb-2" style={{ color: 'var(--cms-muted)' }}>Le visuel ci-dessus = slide 1 (couverture). Ajoute ici les slides 2, 3, 4… Le carrousel complet s&apos;ouvre en grand avec ← / →.</p>
             <div className="flex flex-wrap gap-2 mb-2">
               {form.visuels.map((u, i) => (
                 <div key={i} className="relative">
-                  <button type="button" onClick={() => openZoom(form)}><img src={u} alt="" className="w-20 h-24 object-cover rounded-md" style={{ border: '1px solid #E5E7EB' }} /></button>
-                  <button type="button" onClick={() => setForm(p => ({ ...p, visuels: p.visuels.filter((_, j) => j !== i) }))} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ background: '#DC2626' }}>✕</button>
+                  <button type="button" onClick={() => openZoom(form)}><img src={u} alt="" className="w-20 h-24 object-cover rounded-md" style={{ border: '1px solid var(--cms-border-2)' }} /></button>
+                  <button type="button" onClick={() => setForm(p => ({ ...p, visuels: p.visuels.filter((_, j) => j !== i) }))} className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full text-white text-xs flex items-center justify-center" style={{ background: 'var(--cms-danger-fg)' }}>✕</button>
                   <span className="absolute bottom-0.5 left-0.5 text-[9px] text-white px-1 rounded" style={{ background: 'rgba(0,0,0,.55)' }}>{i + 2}</span>
                 </div>
               ))}
@@ -248,10 +249,10 @@ export default function CmsSocialPage() {
         </div>
       </div>
       <div className="flex gap-3 mt-5">
-        <button type="submit" disabled={saving} className="px-5 py-2.5 rounded-lg text-white text-sm font-semibold disabled:opacity-50" style={{ background: '#F4521E' }}>{saving ? 'Enregistrement…' : 'Enregistrer'}</button>
-        <button type="button" onClick={() => setEditing(null)} className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>Annuler</button>
+        <button type="submit" disabled={saving} className="px-5 py-2.5 rounded-lg text-white text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--cms-brand)' }}>{saving ? 'Enregistrement…' : 'Enregistrer'}</button>
+        <button type="button" onClick={() => setEditing(null)} className="px-5 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>Annuler</button>
         {editing && editing !== 'new' && (
-          <button type="button" onClick={() => { del(editing); setEditing(null) }} className="ml-auto flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid #FECACA', color: '#DC2626' }}>
+          <button type="button" onClick={() => { del(editing); setEditing(null) }} className="ml-auto flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-medium" style={{ border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' }}>
             <Trash2 className="w-4 h-4" /> Supprimer
           </button>
         )}
@@ -264,27 +265,27 @@ export default function CmsSocialPage() {
       {lightbox}
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Réseaux sociaux</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>Calendrier éditorial LinkedIn + Instagram — visuels, légendes, liens, hashtags.</p>
+          <h1 className="text-xl font-bold" style={{ color: 'var(--cms-ink)' }}>Réseaux sociaux</h1>
+          <p className="text-sm mt-0.5" style={{ color: 'var(--cms-muted)' }}>Calendrier éditorial LinkedIn + Instagram — visuels, légendes, liens, hashtags.</p>
         </div>
-        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: '#F4521E' }}>
+        <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: 'var(--cms-brand)' }}>
           <Plus className="w-4 h-4" /> Nouveau post
         </button>
       </div>
 
       <Kpis items={[
-        { label: 'À valider', value: aValider, icon: Clock, color: '#D97706' },
-        { label: 'Planifiés cette semaine', value: planifSemaine, icon: CalendarClock, color: '#2563EB' },
+        { label: 'À valider', value: aValider, icon: Clock, color: 'var(--cms-warn-fg)' },
+        { label: 'Planifiés cette semaine', value: planifSemaine, icon: CalendarClock, color: 'var(--cms-info-fg)' },
         { label: 'LinkedIn', value: li, icon: LinkedinIcon, color: '#0A66C2' },
         { label: 'Instagram', value: ig, icon: InstagramIcon, color: '#C13584' },
-        { label: 'Publiés', value: posts.filter(p => p.statut === 'publie').length, icon: CheckCircle2, color: '#16A34A' },
+        { label: 'Publiés', value: posts.filter(p => p.statut === 'publie').length, icon: CheckCircle2, color: 'var(--cms-ok-fg)' },
       ]} />
 
       {/* Sélecteur de vue */}
-      <div className="inline-flex rounded-lg p-0.5 mb-4" style={{ background: '#F1F3F5' }}>
+      <div className="inline-flex rounded-lg p-0.5 mb-4" style={{ background: 'var(--cms-surface-2)' }}>
         {([['calendrier', '📅 Calendrier'], ['feed', '🟣 Feed Instagram']] as const).map(([v, label]) => (
           <button key={v} onClick={() => setView(v)} className="text-xs font-semibold px-3 py-1.5 rounded-md transition"
-            style={view === v ? { background: '#fff', color: '#111827', boxShadow: '0 1px 2px rgba(0,0,0,.06)' } : { color: '#6B7280' }}>
+            style={view === v ? { background: 'var(--cms-card)', color: 'var(--cms-ink)', boxShadow: '0 1px 2px rgba(0,0,0,.06)' } : { color: 'var(--cms-ink-2)' }}>
             {label}
           </button>
         ))}
@@ -293,49 +294,49 @@ export default function CmsSocialPage() {
       {view === 'calendrier' && (<>
       {/* Navigation de semaine */}
       <div className="flex items-center justify-between mb-3">
-        <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }} title="Semaine précédente"><ChevronLeft className="w-4 h-4" style={{ color: '#6B7280' }} /></button>
-        <p className="text-sm font-semibold" style={{ color: '#111827' }}>
+        <button onClick={() => setWeekStart(addDays(weekStart, -7))} className="p-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)' }} title="Semaine précédente"><ChevronLeft className="w-4 h-4" style={{ color: 'var(--cms-ink-2)' }} /></button>
+        <p className="text-sm font-semibold" style={{ color: 'var(--cms-ink)' }}>
           Semaine du {weekStart.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })} au {addDays(weekStart, 6).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
         </p>
         <div className="flex gap-2">
-          <button onClick={() => setWeekStart(mondayOf(new Date()))} className="text-xs px-3 py-1.5 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#6B7280' }}>Aujourd&apos;hui</button>
-          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-2 rounded-lg" style={{ border: '1px solid #E5E7EB' }} title="Semaine suivante"><ChevronRight className="w-4 h-4" style={{ color: '#6B7280' }} /></button>
+          <button onClick={() => setWeekStart(mondayOf(new Date()))} className="text-xs px-3 py-1.5 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>Aujourd&apos;hui</button>
+          <button onClick={() => setWeekStart(addDays(weekStart, 7))} className="p-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)' }} title="Semaine suivante"><ChevronRight className="w-4 h-4" style={{ color: 'var(--cms-ink-2)' }} /></button>
         </div>
       </div>
 
       {/* Calendrier : jours en lignes, plateformes en colonnes */}
-      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #E9ECEF' }}>
-        <div className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', background: '#F8F9FA', borderBottom: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--cms-border)' }}>
+        <div className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', background: 'var(--cms-surface-2)', borderBottom: '1px solid var(--cms-border)' }}>
           <div className="p-2.5" />
-          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#0A66C2', borderLeft: '1px solid #E9ECEF' }}><LinkedinIcon className="w-3.5 h-3.5" /> LinkedIn</div>
-          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#C13584', borderLeft: '1px solid #E9ECEF' }}><InstagramIcon className="w-3.5 h-3.5" /> Instagram</div>
+          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#0A66C2', borderLeft: '1px solid var(--cms-border)' }}><LinkedinIcon className="w-3.5 h-3.5" /> LinkedIn</div>
+          <div className="p-2.5 flex items-center gap-1.5 text-xs font-bold" style={{ color: '#C13584', borderLeft: '1px solid var(--cms-border)' }}><InstagramIcon className="w-3.5 h-3.5" /> Instagram</div>
         </div>
         {DAYS.map((dlabel, i) => {
           const day = addDays(weekStart, i)
           const ds = ymd(day)
           const isToday = ds === ymd(new Date())
           const cell = (plat: SocialPlateforme) => (
-            <div className="p-2 space-y-1 group" style={{ borderLeft: '1px solid #E9ECEF', minHeight: 60 }}>
+            <div className="p-2 space-y-1 group" style={{ borderLeft: '1px solid var(--cms-border)', minHeight: 60 }}>
               {posts.filter(p => p.date_prevue === ds && p.plateforme === plat).sort((a, b) => (a.heure || '').localeCompare(b.heure || '')).map(p => {
                 const sm = statutMeta(p.statut)
                 return (
-                  <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+                  <button key={p.id} onClick={() => open(p)} className="w-full text-left flex items-center gap-1.5 px-1.5 py-1 rounded-md hover:shadow-sm transition" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
                     {p.visuel_url
                       ? <img src={p.visuel_url} alt="" className="w-6 h-6 rounded object-cover shrink-0" />
                       : <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: sm.dot }} />}
-                    {p.heure ? <span className="text-[10px] font-semibold shrink-0" style={{ color: '#9CA3AF' }}>{p.heure}</span> : null}
-                    <span className="text-[11px] truncate" style={{ color: '#374151' }}>{p.titre || p.format}</span>
+                    {p.heure ? <span className="text-[10px] font-semibold shrink-0" style={{ color: 'var(--cms-muted)' }}>{p.heure}</span> : null}
+                    <span className="text-[11px] truncate" style={{ color: 'var(--cms-ink-2)' }}>{p.titre || p.format}</span>
                   </button>
                 )
               })}
-              <button onClick={() => openAt(ds, plat)} className="w-full text-[11px] py-1 rounded-md opacity-0 group-hover:opacity-100 transition" style={{ color: '#9CA3AF', border: '1px dashed #E5E7EB' }}>+ ajouter</button>
+              <button onClick={() => openAt(ds, plat)} className="w-full text-[11px] py-1 rounded-md opacity-0 group-hover:opacity-100 transition" style={{ color: 'var(--cms-muted)', border: '1px dashed var(--cms-border-2)' }}>+ ajouter</button>
             </div>
           )
           return (
-            <div key={dlabel} className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', borderBottom: i < 6 ? '1px solid #F1F3F5' : 'none', background: isToday ? '#FFF7F4' : '#fff' }}>
+            <div key={dlabel} className="grid" style={{ gridTemplateColumns: '64px 1fr 1fr', borderBottom: i < 6 ? '1px solid var(--cms-surface-2)' : 'none', background: isToday ? 'var(--cms-brand-wash)' : 'var(--cms-card)' }}>
               <div className="p-2.5 flex flex-col justify-center">
-                <span className="text-xs font-bold" style={{ color: isToday ? '#F4521E' : '#111827' }}>{dlabel}</span>
-                <span className="text-[10px]" style={{ color: '#9CA3AF' }}>{day.getDate()}</span>
+                <span className="text-xs font-bold" style={{ color: isToday ? 'var(--cms-brand)' : 'var(--cms-ink)' }}>{dlabel}</span>
+                <span className="text-[10px]" style={{ color: 'var(--cms-muted)' }}>{day.getDate()}</span>
               </div>
               {cell('linkedin')}
               {cell('instagram')}
@@ -351,15 +352,15 @@ export default function CmsSocialPage() {
         if (!others.length) return null
         return (
           <div className="mt-5">
-            <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>À planifier (sans date ou hors semaine) — {others.length}</p>
+            <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: 'var(--cms-muted)' }}>À planifier (sans date ou hors semaine) — {others.length}</p>
             <div className="flex flex-wrap gap-2">
               {others.map(p => {
                 const sm = statutMeta(p.statut)
                 const Plat = p.plateforme === 'linkedin' ? LinkedinIcon : InstagramIcon
                 return (
-                  <button key={p.id} onClick={() => open(p)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs hover:shadow-sm transition" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+                  <button key={p.id} onClick={() => open(p)} className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs hover:shadow-sm transition" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
                     <Plat className="w-3 h-3" style={{ color: p.plateforme === 'linkedin' ? '#0A66C2' : '#C13584' }} />
-                    <span className="truncate max-w-[160px]" style={{ color: '#374151' }}>{p.titre || p.format}</span>
+                    <span className="truncate max-w-[160px]" style={{ color: 'var(--cms-ink-2)' }}>{p.titre || p.format}</span>
                     <span className="w-1.5 h-1.5 rounded-full" style={{ background: sm.dot }} />
                   </button>
                 )
@@ -376,26 +377,26 @@ export default function CmsSocialPage() {
           .sort((a, b) => (b.date_prevue || '').localeCompare(a.date_prevue || '') || (b.heure || '').localeCompare(a.heure || ''))
         return (
           <div>
-            <p className="text-xs mb-3" style={{ color: '#9CA3AF' }}>Aperçu de ta grille Instagram (posts, carrousels et reels affichés sur la grille). Les stories et reels masqués n&apos;y figurent pas. Du plus récent au plus ancien.</p>
+            <p className="text-xs mb-3" style={{ color: 'var(--cms-muted)' }}>Aperçu de ta grille Instagram (posts, carrousels et reels affichés sur la grille). Les stories et reels masqués n&apos;y figurent pas. Du plus récent au plus ancien.</p>
             <div className="max-w-md mx-auto">
               <div className="grid grid-cols-3 gap-1">
-                {grid.length === 0 && <div className="col-span-3 text-center text-sm py-12 rounded-lg" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun post de grille pour l&apos;instant.</div>}
+                {grid.length === 0 && <div className="col-span-3 text-center text-sm py-12 rounded-lg" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', color: 'var(--cms-muted)' }}>Aucun post de grille pour l&apos;instant.</div>}
                 {grid.map(p => (
-                  <button key={p.id} onClick={() => p.visuel_url ? openZoom(p) : open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: '#F1F3F5' }}>
+                  <button key={p.id} onClick={() => p.visuel_url ? openZoom(p) : open(p)} className="relative aspect-square overflow-hidden hover:opacity-90 transition" style={{ background: 'var(--cms-surface-2)' }}>
                     {p.visuel_url
                       ? <img src={p.visuel_url} alt="" className="w-full h-full object-cover" />
-                      : <span className="absolute inset-0 flex items-center justify-center text-[10px] px-1.5 text-center leading-tight" style={{ color: '#9CA3AF' }}>{p.titre || p.format}</span>}
+                      : <span className="absolute inset-0 flex items-center justify-center text-[10px] px-1.5 text-center leading-tight" style={{ color: 'var(--cms-muted)' }}>{p.titre || p.format}</span>}
                     {(p.visuels?.length ?? 0) > 0 && <span className="absolute top-1 right-1 text-[10px] text-white px-1.5 py-0.5 rounded" style={{ background: 'rgba(0,0,0,.6)' }}>▦ {(p.visuels?.length ?? 0) + 1}</span>}
                   </button>
                 ))}
               </div>
             </div>
-            <p className="text-[11px] mt-3 max-w-md mx-auto text-center" style={{ color: '#9CA3AF' }}>💡 Cherche la cohérence : alterne les types (citation / réalisation / conseil), garde la même palette et la même lumière (voir DA Station). Une grille harmonieuse = un profil qui inspire confiance.</p>
+            <p className="text-[11px] mt-3 max-w-md mx-auto text-center" style={{ color: 'var(--cms-muted)' }}>💡 Cherche la cohérence : alterne les types (citation / réalisation / conseil), garde la même palette et la même lumière (voir DA Station). Une grille harmonieuse = un profil qui inspire confiance.</p>
           </div>
         )
       })()}
 
-      <p className="text-xs mt-5 flex items-center gap-1.5" style={{ color: '#9CA3AF' }}>
+      <p className="text-xs mt-5 flex items-center gap-1.5" style={{ color: 'var(--cms-muted)' }}>
         <Send className="w-3 h-3" /> Astuce : sur Instagram, seule la <b>story</b> permet un lien cliquable — planifie 1 story/semaine vers une page de conversion.
       </p>
     </div>
