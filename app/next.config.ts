@@ -56,23 +56,11 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    // FUSION DU HUB — BASCULE 1 : l'espace client (login, auth, dashboard, projet,
-    // onboarding, support) est désormais NATIF dans cette appli. Seuls restent servis
-    // par l'ancien Hub externe (à rapatrier ensuite, P2/P3) : l'admin et les formations
-    // client + leurs API. Ces routes proxifiées partagent la MÊME session (même domaine).
-    // BASCULE 3 : les Projets clients (vues + API phase/files/videos/review/form) sont
-    // NATIFS. Restent proxifiés vers l'ancien Hub : les PAGES /hub/admin (dashboard,
-    // clients, services, blog, settings — doublons du /cms) et les API admin ai/courses/clients.
-    const HUB = "https://vivesmedia-hub.vercel.app";
-    return {
-      beforeFiles: [
-        { source: "/hub/admin", destination: `${HUB}/hub/admin` },
-        { source: "/hub/admin/:path*", destination: `${HUB}/hub/admin/:path*` },
-        { source: "/hub/api/admin/ai/:path*", destination: `${HUB}/hub/api/admin/ai/:path*` },
-        { source: "/hub/api/admin/courses/:path*", destination: `${HUB}/hub/api/admin/courses/:path*` },
-        { source: "/hub/api/admin/clients/:path*", destination: `${HUB}/hub/api/admin/clients/:path*` },
-      ],
-    };
+    // DÉBRANCHEMENT : la fusion est terminée. Tout /hub (espace client) ET toute
+    // l'administration (Projets, invitation, inscription cours, génération IA) sont
+    // désormais NATIFS dans cette appli. Plus aucun proxy vers vivesmedia-hub.
+    // L'ancien back-office externe /hub/admin (doublon du /cms) n'est plus servi.
+    return [];
   },
 };
 

@@ -17,7 +17,8 @@ function isLimited(ip: string): boolean {
 
 const RATE_LIMITED = ['/api/devis', '/api/rappel', '/api/newsletter', '/api/checkout', '/api/track']
 // Chemins /hub encore servis par l'ANCIEN Hub (proxifiés) : on n'y touche pas (il gère sa propre auth).
-const HUB_PROXIED = ['/hub/admin', '/hub/api/admin/ai', '/hub/api/admin/courses', '/hub/api/admin/clients']
+// Débranchement terminé : plus aucun chemin /hub n'est proxifié vers l'ancien Hub.
+const HUB_PROXIED: string[] = []
 // Chemins /hub publics (pas d'auth requise).
 const HUB_PUBLIC = ['/hub/login', '/hub/auth']
 
