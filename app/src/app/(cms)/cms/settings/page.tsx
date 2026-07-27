@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react'
 import { Building2, Receipt, Link2, Save, Check } from 'lucide-react'
 
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 const STORAGE_KEY = 'vivesmedia-cms-settings'
 
 type Settings = {
@@ -42,15 +42,15 @@ function Field({ label, value, onChange, placeholder, textarea }: {
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: '#9CA3AF' }}>{label}</label>
+      <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--cms-muted)' }}>{label}</label>
       {textarea ? (
         <textarea value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder} rows={3}
           className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none leading-relaxed"
-          style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+          style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-border)', color: 'var(--cms-ink)' }} />
       ) : (
         <input value={value} onChange={e => onChange(e.target.value)} placeholder={placeholder}
           className="w-full px-3 py-2.5 rounded-lg text-sm outline-none"
-          style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+          style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-border)', color: 'var(--cms-ink)' }} />
       )}
     </div>
   )
@@ -79,10 +79,10 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-3xl">
 
       {/* Entreprise */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="flex items-center gap-2 mb-5">
           <Building2 className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Entreprise</h2>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Entreprise</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-4">
           <Field label="Raison sociale" value={s.entreprise} onChange={set('entreprise')} />
@@ -95,10 +95,10 @@ export default function SettingsPage() {
       </div>
 
       {/* Facturation */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="flex items-center gap-2 mb-5">
           <Receipt className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Facturation</h2>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Facturation</h2>
         </div>
         <div className="grid sm:grid-cols-2 gap-4 mb-4">
           <Field label="Préfixe numéro de facture" value={s.prefixeFacture} onChange={set('prefixeFacture')} placeholder="VM-2026-" />
@@ -108,10 +108,10 @@ export default function SettingsPage() {
       </div>
 
       {/* Liens */}
-      <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="flex items-center gap-2 mb-5">
           <Link2 className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Liens connectés</h2>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Liens connectés</h2>
         </div>
         <div className="space-y-4">
           <Field label="Lien avis Google" value={s.googleReviewUrl} onChange={set('googleReviewUrl')} placeholder="https://g.page/r/XXXX/review" />
@@ -125,10 +125,10 @@ export default function SettingsPage() {
       <div className="flex items-center gap-4">
         <button onClick={handleSave}
           className="flex items-center gap-2 text-sm font-semibold px-6 py-3 rounded-lg text-white transition-opacity hover:opacity-90"
-          style={{ background: saved ? '#16A34A' : ORANGE }}>
+          style={{ background: saved ? 'var(--cms-ok-fg)' : ORANGE }}>
           {saved ? <><Check className="w-4 h-4" /> Enregistré</> : <><Save className="w-4 h-4" /> Enregistrer</>}
         </button>
-        <p className="text-xs" style={{ color: '#9CA3AF' }}>
+        <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>
           Utilisé pour tes <strong>factures</strong> (préfixe de numéro, coordonnées, mentions, régime TVA) et tes <strong>liens</strong> (Calendly, avis Google). Stocké sur ce navigateur.
         </p>
       </div>

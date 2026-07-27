@@ -7,7 +7,7 @@ import Kpis from '@/components/cms/Kpis'
 
 type CampLog = { id: string; subject: string; sent: number; at: string; opens: number }
 
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 
 const TEMPLATES = [
   { id: 'nouveaute', label: 'Annonce nouveauté', subject: 'Nouveau chez vivesmedia.com : {{titre}}', body: 'Bonjour,\n\nJ\'ai le plaisir de vous annoncer...\n\n— Béranger Vives · vivesmedia.com' },
@@ -74,7 +74,7 @@ export default function CampagnesPage() {
     setTesting(true); setResult(null)
     try {
       await post(true)
-      setResult({ ok: true, msg: 'Email test envoyé sur ta boîte ✓ — vérifie le rendu avant l\'envoi réel.' })
+      setResult({ ok: true, msg: 'Email test envoyé sur ta boîte, vérifie le rendu avant l\'envoi réel.' })
     } catch (err) {
       setResult({ ok: false, msg: err instanceof Error ? err.message : 'Erreur envoi' })
     } finally { setTesting(false) }
@@ -86,7 +86,7 @@ export default function CampagnesPage() {
     setSending(true); setResult(null)
     try {
       const data = await post(false)
-      setResult({ ok: true, msg: `Campagne envoyée à ${data.sent} abonné(s) ✓` })
+      setResult({ ok: true, msg: `Campagne envoyée à ${data.sent} abonné(s).` })
       setSubject(''); setBody(''); setVars({})
       setTimeout(loadHistory, 800)
     } catch (err) {
@@ -100,16 +100,16 @@ export default function CampagnesPage() {
     <div className="space-y-6">
 
       <Kpis items={[
-        { label: 'Destinataires actifs', value: abonnes ?? '—', icon: Users, color: '#F4521E' },
-        { label: 'Campagnes envoyées', value: history.length, icon: Send, color: '#2563EB' },
-        { label: 'Emails envoyés', value: history.reduce((s, c) => s + (c.sent || 0), 0), icon: MailOpen, color: '#7C3AED' },
-        { label: "Taux d'ouverture", value: (() => { const sent = history.reduce((s, c) => s + (c.sent || 0), 0); const op = history.reduce((s, c) => s + (c.opens || 0), 0); return sent ? `${Math.round(op / sent * 100)} %` : '—' })(), icon: Eye, color: '#16A34A', hint: 'moyenne historique' },
+        { label: 'Destinataires actifs', value: abonnes ?? '—', icon: Users, color: 'var(--cms-brand)' },
+        { label: 'Campagnes envoyées', value: history.length, icon: Send, color: 'var(--cms-info-fg)' },
+        { label: 'Emails envoyés', value: history.reduce((s, c) => s + (c.sent || 0), 0), icon: MailOpen, color: '#7C56C7' },
+        { label: "Taux d'ouverture", value: (() => { const sent = history.reduce((s, c) => s + (c.sent || 0), 0); const op = history.reduce((s, c) => s + (c.opens || 0), 0); return sent ? `${Math.round(op / sent * 100)} %` : '—' })(), icon: Eye, color: 'var(--cms-ok-fg)', hint: 'moyenne historique' },
       ]} />
 
       {/* Bandeau info */}
-      <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: '#F0FDF4', border: '1px solid #BBF7D0' }}>
-          <Info className="w-4 h-4 shrink-0" style={{ color: '#16A34A' }} />
-          <p className="text-xs leading-relaxed" style={{ color: '#166534' }}>
+      <div className="rounded-xl p-5 flex items-center gap-3" style={{ background: 'var(--cms-ok-bg)', border: '1px solid var(--cms-ok-bg)' }}>
+          <Info className="w-4 h-4 shrink-0" style={{ color: 'var(--cms-ok-fg)' }} />
+          <p className="text-xs leading-relaxed" style={{ color: 'var(--cms-ok-fg)' }}>
             <strong>Envoi Resend connecté.</strong> La campagne part depuis contact@vivesmedia.com avec le template aux couleurs vivesmedia. Confirmation demandée avant chaque envoi — rien ne part par accident.
           </p>
       </div>
@@ -117,32 +117,32 @@ export default function CampagnesPage() {
       <div className="grid lg:grid-cols-3 gap-6">
 
         {/* Éditeur */}
-        <div className="lg:col-span-2 rounded-xl p-6 space-y-5" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-          <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Composer une campagne</h2>
+        <div className="lg:col-span-2 rounded-xl p-6 space-y-5" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
+          <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Composer une campagne</h2>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: '#9CA3AF' }}>Objet</label>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--cms-muted)' }}>Objet</label>
             <input value={subject} onChange={e => setSubject(e.target.value)} placeholder="Objet de l'email…"
               className="w-full px-3 py-2.5 rounded-lg text-sm outline-none transition-colors focus:border-orange-300"
-              style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+              style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-border)', color: 'var(--cms-ink)' }} />
           </div>
 
           <div>
-            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: '#9CA3AF' }}>Message</label>
+            <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--cms-muted)' }}>Message</label>
             <textarea value={body} onChange={e => setBody(e.target.value)} rows={12} placeholder="Rédige ton message… (les variables {{titre}}, {{lien}}, {{date}} seront remplacées)"
               className="w-full px-3 py-2.5 rounded-lg text-sm outline-none resize-none leading-relaxed transition-colors focus:border-orange-300"
-              style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+              style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-border)', color: 'var(--cms-ink)' }} />
           </div>
 
           {varNames.length > 0 && (
             <div>
-              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: '#9CA3AF' }}>Variables à remplir</label>
+              <label className="text-xs font-semibold uppercase tracking-wider block mb-1.5" style={{ color: 'var(--cms-muted)' }}>Variables à remplir</label>
               <div className="grid sm:grid-cols-2 gap-2">
                 {varNames.map(name => (
                   <div key={name} className="flex items-center gap-2">
                     <span className="text-xs font-mono shrink-0" style={{ color: ORANGE }}>{`{{${name}}}`}</span>
                     <input value={vars[name] || ''} onChange={e => setVars(p => ({ ...p, [name]: e.target.value }))} placeholder={`valeur de ${name}`}
-                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: '#F8F9FA', border: '1px solid #E9ECEF', color: '#111827' }} />
+                      className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-border)', color: 'var(--cms-ink)' }} />
                   </div>
                 ))}
               </div>
@@ -152,12 +152,12 @@ export default function CampagnesPage() {
           <div className="flex flex-wrap items-center gap-3 pt-1">
             <button onClick={() => setPreview(p => !p)}
               className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors"
-              style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
               <Eye className="w-4 h-4" /> {preview ? 'Masquer' : 'Prévisualiser'}
             </button>
             <button onClick={handleTest} disabled={testing || !subject || !body}
               className="flex items-center gap-2 text-sm font-medium px-4 py-2.5 rounded-lg transition-colors disabled:opacity-40"
-              style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+              style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
               <Eye className="w-4 h-4" /> {testing ? 'Envoi…' : 'Envoi test (à moi)'}
             </button>
             <button onClick={handleSend} disabled={sending || !subject || !body || !abonnes}
@@ -170,48 +170,48 @@ export default function CampagnesPage() {
           {result && (
             <div className="rounded-lg px-4 py-3 text-sm"
               style={result.ok
-                ? { background: '#F0FDF4', border: '1px solid #BBF7D0', color: '#166534' }
-                : { background: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>
+                ? { background: 'var(--cms-ok-bg)', border: '1px solid var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' }
+                : { background: 'var(--cms-danger-bg)', border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' }}>
               {result.msg}
             </div>
           )}
 
           {/* Préview */}
           {preview && (
-            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid #E9ECEF' }}>
-              <div className="px-4 py-3" style={{ background: '#F8F9FA', borderBottom: '1px solid #E9ECEF' }}>
-                <p className="text-xs" style={{ color: '#9CA3AF' }}>De : vivesmedia.com &lt;contact@vivesmedia.com&gt;</p>
-                <p className="text-sm font-bold mt-1" style={{ color: '#111827' }}>{applyVars(subject) || '(sans objet)'}</p>
+            <div className="rounded-xl overflow-hidden" style={{ border: '1px solid var(--cms-border)' }}>
+              <div className="px-4 py-3" style={{ background: 'var(--cms-surface-2)', borderBottom: '1px solid var(--cms-border)' }}>
+                <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>De : vivesmedia.com &lt;contact@vivesmedia.com&gt;</p>
+                <p className="text-sm font-bold mt-1" style={{ color: 'var(--cms-ink)' }}>{applyVars(subject) || '(sans objet)'}</p>
               </div>
               <div className="p-5">
                 <div className="h-1 w-12 rounded-full mb-4" style={{ background: ORANGE }} />
-                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: '#374151' }}>{applyVars(body) || '(message vide)'}</p>
+                <p className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: 'var(--cms-ink-2)' }}>{applyVars(body) || '(message vide)'}</p>
               </div>
             </div>
           )}
         </div>
 
         {/* Modèles */}
-        <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <Sparkles className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Modèles rapides</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Modèles rapides</h2>
           </div>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Clique pour pré-remplir</p>
+          <p className="text-xs mb-4" style={{ color: 'var(--cms-muted)' }}>Clique pour pré-remplir</p>
           <div className="space-y-2">
             {TEMPLATES.map(t => (
               <button key={t.id} onClick={() => applyTemplate(t)}
                 className="w-full text-left p-3.5 rounded-lg transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
-                <p className="text-sm font-semibold" style={{ color: '#111827' }}>{t.label}</p>
-                <p className="text-xs mt-0.5 truncate" style={{ color: '#9CA3AF' }}>{t.subject}</p>
+                style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-surface-2)' }}>
+                <p className="text-sm font-semibold" style={{ color: 'var(--cms-ink)' }}>{t.label}</p>
+                <p className="text-xs mt-0.5 truncate" style={{ color: 'var(--cms-muted)' }}>{t.subject}</p>
               </button>
             ))}
           </div>
 
-          <div className="mt-6 pt-5" style={{ borderTop: '1px solid #F1F3F5' }}>
-            <p className="text-xs leading-relaxed" style={{ color: '#9CA3AF' }}>
-              💡 Conseil : une campagne par mois maximum. Du concret (nouveauté, article utile, offre) — jamais de remplissage.
+          <div className="mt-6 pt-5" style={{ borderTop: '1px solid var(--cms-surface-2)' }}>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--cms-muted)' }}>
+              Conseil : une campagne par mois maximum. Du concret (nouveauté, article utile, offre) — jamais de remplissage.
             </p>
           </div>
         </div>
@@ -219,24 +219,24 @@ export default function CampagnesPage() {
 
       {/* Historique des campagnes */}
       {history.length > 0 && (
-        <div className="rounded-xl p-6" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl p-6" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <div className="flex items-center gap-2 mb-1">
             <MailOpen className="w-4 h-4" style={{ color: ORANGE }} />
-            <h2 className="font-bold text-sm" style={{ color: '#111827' }}>Historique des campagnes</h2>
+            <h2 className="font-bold text-sm" style={{ color: 'var(--cms-ink)' }}>Historique des campagnes</h2>
           </div>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Envois passés et taux d&apos;ouverture (si le webhook Resend est activé)</p>
-          <div className="divide-y" style={{ borderColor: '#F1F3F5' }}>
+          <p className="text-xs mb-4" style={{ color: 'var(--cms-muted)' }}>Envois passés et taux d&apos;ouverture (si le webhook Resend est activé)</p>
+          <div className="divide-y" style={{ borderColor: 'var(--cms-surface-2)' }}>
             {history.map(c => {
               const taux = c.sent > 0 ? Math.round((c.opens / c.sent) * 100) : 0
               return (
                 <div key={c.id} className="flex items-center gap-4 py-3">
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate" style={{ color: '#111827' }}>{c.subject}</p>
-                    <p className="text-xs" style={{ color: '#9CA3AF' }}>{new Date(c.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} · {c.sent} destinataire{c.sent > 1 ? 's' : ''}</p>
+                    <p className="text-sm font-medium truncate" style={{ color: 'var(--cms-ink)' }}>{c.subject}</p>
+                    <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>{new Date(c.at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })} · {c.sent} destinataire{c.sent > 1 ? 's' : ''}</p>
                   </div>
                   <div className="text-right shrink-0">
-                    <p className="text-sm font-bold" style={{ color: c.opens > 0 ? ORANGE : '#9CA3AF' }}>{c.opens} ouverture{c.opens > 1 ? 's' : ''}</p>
-                    {c.opens > 0 && <p className="text-[11px]" style={{ color: '#9CA3AF' }}>{taux}%</p>}
+                    <p className="text-sm font-bold" style={{ color: c.opens > 0 ? ORANGE : 'var(--cms-muted)' }}>{c.opens} ouverture{c.opens > 1 ? 's' : ''}</p>
+                    {c.opens > 0 && <p className="text-[11px]" style={{ color: 'var(--cms-muted)' }}>{taux}%</p>}
                   </div>
                 </div>
               )

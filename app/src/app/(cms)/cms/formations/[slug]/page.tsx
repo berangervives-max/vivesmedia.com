@@ -19,11 +19,11 @@ export default function EditCoursePage() {
       .catch(() => setState('notfound'))
   }, [slug])
 
-  if (state === 'loading') return <p className="p-8 text-sm" style={{ color: '#94A3B8' }}>Chargement…</p>
+  if (state === 'loading') return <p className="p-8 text-sm" style={{ color: 'var(--cms-faint)' }}>Chargement…</p>
   if (state === 'notfound' || !course) return (
     <div className="p-8 max-w-md">
-      <p className="font-semibold mb-2" style={{ color: '#0F172A' }}>Cours introuvable</p>
-      <Link href="/cms/formations" className="text-sm font-semibold" style={{ color: '#F4521E' }}>← Retour aux formations</Link>
+      <p className="font-semibold mb-2" style={{ color: 'var(--cms-ink)' }}>Cours introuvable</p>
+      <Link href="/cms/formations" className="text-sm font-semibold" style={{ color: 'var(--cms-brand)' }}>← Retour aux formations</Link>
     </div>
   )
   return <CourseEditor initial={course} isNew={false} />

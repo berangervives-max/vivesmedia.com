@@ -6,15 +6,15 @@ type Item = { prospectId: string; nom?: string; entreprise?: string; id: string;
 
 // statut réel Resend → libellé + couleurs
 const STATUT: Record<string, { label: string; color: string; bg: string }> = {
-  scheduled: { label: 'Programmé', color: '#92400E', bg: '#FEF3C7' },
-  sent: { label: 'Envoyé', color: '#1E40AF', bg: '#DBEAFE' },
-  delivered: { label: 'Livré ✓', color: '#065F46', bg: '#D1FAE5' },
-  delivery_delayed: { label: 'Envoi différé', color: '#92400E', bg: '#FEF3C7' },
-  opened: { label: 'Ouvert 👀', color: '#065F46', bg: '#D1FAE5' },
-  clicked: { label: 'Cliqué 🔗', color: '#065F46', bg: '#D1FAE5' },
-  bounced: { label: 'Rejeté (adresse invalide)', color: '#991B1B', bg: '#FEE2E2' },
-  complained: { label: 'Marqué spam', color: '#991B1B', bg: '#FEE2E2' },
-  canceled: { label: 'Annulé', color: '#6B7280', bg: '#F3F4F6' },
+  scheduled: { label: 'Programmé', color: 'var(--cms-warn-fg)', bg: 'var(--cms-warn-bg)' },
+  sent: { label: 'Envoyé', color: 'var(--cms-info-fg)', bg: 'var(--cms-info-bg)' },
+  delivered: { label: 'Livré', color: 'var(--cms-ok-fg)', bg: 'var(--cms-ok-bg)' },
+  delivery_delayed: { label: 'Envoi différé', color: 'var(--cms-warn-fg)', bg: 'var(--cms-warn-bg)' },
+  opened: { label: 'Ouvert', color: 'var(--cms-ok-fg)', bg: 'var(--cms-ok-bg)' },
+  clicked: { label: 'Cliqué', color: 'var(--cms-ok-fg)', bg: 'var(--cms-ok-bg)' },
+  bounced: { label: 'Rejeté (adresse invalide)', color: 'var(--cms-danger-fg)', bg: 'var(--cms-danger-bg)' },
+  complained: { label: 'Marqué spam', color: 'var(--cms-danger-fg)', bg: 'var(--cms-danger-bg)' },
+  canceled: { label: 'Annulé', color: 'var(--cms-ink-2)', bg: 'var(--cms-surface-2)' },
 }
 const statutOf = (it: Item) => STATUT[it.statutReel || ''] || STATUT[it.statut === 'annulé' ? 'canceled' : it.statut === 'envoyé' ? 'sent' : 'scheduled']
 
@@ -50,48 +50,49 @@ export default function ProgrammesPage() {
   return (
     <div className="max-w-4xl">
       <div className="flex items-center gap-3 mb-1">
-        <Clock className="w-5 h-5" style={{ color: '#F4521E' }} />
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Envois programmés</h1>
+        <Clock className="w-5 h-5" style={{ color: 'var(--cms-brand)' }} />
+        <p className="cms-eyebrow">Marketing</p>
+        <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Envois programmés</h1>
       </div>
-      <p className="text-sm mb-6" style={{ color: '#6B7280' }}>Emails de prospection planifiés (via Resend). Vous pouvez les annuler ou changer la date/heure jusqu'à l'envoi.</p>
+      <p className="text-sm mb-6" style={{ color: 'var(--cms-ink-2)' }}>Emails de prospection planifiés (via Resend). Vous pouvez les annuler ou changer la date/heure jusqu'à l'envoi.</p>
 
-      {loading ? <p className="text-sm" style={{ color: '#9CA3AF' }}>Chargement…</p> : (
+      {loading ? <p className="text-sm" style={{ color: 'var(--cms-muted)' }}>Chargement…</p> : (
         <>
-          {active.length === 0 && <div className="rounded-xl p-8 text-center text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun envoi programmé pour le moment.</div>}
+          {active.length === 0 && <div className="rounded-xl p-8 text-center text-sm" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', color: 'var(--cms-muted)' }}>Aucun envoi programmé pour le moment.</div>}
 
           <div className="space-y-3">
             {active.map(it => (
-              <div key={it.id} className="rounded-xl p-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+              <div key={it.id} className="rounded-xl p-4" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
                 <div className="flex items-start gap-4">
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(244,82,30,.1)' }}>
-                    <CalendarClock className="w-5 h-5" style={{ color: '#F4521E' }} />
+                    <CalendarClock className="w-5 h-5" style={{ color: 'var(--cms-brand)' }} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-sm" style={{ color: '#111827' }}>{it.entreprise || it.nom}</span>
+                      <span className="font-semibold text-sm" style={{ color: 'var(--cms-ink)' }}>{it.entreprise || it.nom}</span>
                       <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: statutOf(it).bg, color: statutOf(it).color }}>{statutOf(it).label}</span>
                     </div>
-                    <p className="text-xs mt-1" style={{ color: '#6B7280' }}>→ {it.to}</p>
-                    <p className="text-sm mt-1 font-medium" style={{ color: '#F4521E' }}>{fmt(it.when)}</p>
+                    <p className="text-xs mt-1" style={{ color: 'var(--cms-ink-2)' }}>→ {it.to}</p>
+                    <p className="text-sm mt-1 font-medium" style={{ color: 'var(--cms-brand)' }}>{fmt(it.when)}</p>
 
                     {editing === it.id && (
                       <div className="flex items-center gap-2 mt-3 flex-wrap">
                         <input type="datetime-local" value={when} onChange={e => setWhen(e.target.value)}
-                          className="text-sm px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid #E5E7EB' }} />
+                          className="text-sm px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid var(--cms-border-2)' }} />
                         <button disabled={busy || !when} onClick={() => reschedule(it)}
-                          className="text-xs font-medium px-3 py-1.5 rounded-lg text-white disabled:opacity-40" style={{ background: '#F4521E' }}>Confirmer</button>
-                        <button onClick={() => setEditing(null)} className="text-xs px-2 py-1.5" style={{ color: '#9CA3AF' }}>Annuler</button>
+                          className="text-xs font-medium px-3 py-1.5 rounded-lg text-white disabled:opacity-40" style={{ background: 'var(--cms-brand)' }}>Confirmer</button>
+                        <button onClick={() => setEditing(null)} className="text-xs px-2 py-1.5" style={{ color: 'var(--cms-muted)' }}>Annuler</button>
                       </div>
                     )}
                   </div>
                   {editing !== it.id && (
                     <div className="flex items-center gap-2 shrink-0">
                       <button onClick={() => { setEditing(it.id); setWhen(toLocalInput(it.when)) }} disabled={busy}
-                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
                         <RefreshCw className="w-3.5 h-3.5" /> Reprogrammer
                       </button>
                       <button onClick={() => cancel(it)} disabled={busy}
-                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg" style={{ border: '1px solid #FEE2E2', color: '#DC2626', background: '#FEF2F2' }}>
+                        className="flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg" style={{ border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)', background: 'var(--cms-danger-bg)' }}>
                         <X className="w-3.5 h-3.5" /> Annuler
                       </button>
                     </div>
@@ -103,12 +104,12 @@ export default function ProgrammesPage() {
 
           {past.length > 0 && (
             <div className="mt-8">
-              <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: '#9CA3AF' }}>Historique</p>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-2" style={{ color: 'var(--cms-muted)' }}>Historique</p>
               <div className="space-y-2">
                 {past.map(it => (
-                  <div key={it.id} className="rounded-lg p-3 flex items-center gap-3 text-sm" style={{ background: '#fff', border: '1px solid #F1F3F5', color: '#9CA3AF' }}>
+                  <div key={it.id} className="rounded-lg p-3 flex items-center gap-3 text-sm" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-surface-2)', color: 'var(--cms-muted)' }}>
                     {(it.statutReel === 'bounced' || it.statutReel === 'complained' || it.statut === 'annulé') ? <Ban className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
-                    <span className="font-medium" style={{ color: '#6B7280' }}>{it.entreprise || it.nom}</span>
+                    <span className="font-medium" style={{ color: 'var(--cms-ink-2)' }}>{it.entreprise || it.nom}</span>
                     <span>→ {it.to}</span>
                     <span className="text-[11px] px-2 py-0.5 rounded-full font-medium" style={{ background: statutOf(it).bg, color: statutOf(it).color }}>{statutOf(it).label}</span>
                     <span className="ml-auto">{fmt(it.when)}</span>
