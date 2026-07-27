@@ -47,7 +47,7 @@ const NAV_SECTIONS = [
   {
     label: 'Hub Clients',
     items: [
-      { href: '/hub/admin', label: 'Projets clients', icon: Users },
+      { href: '/cms/projets', label: 'Projets clients', icon: Users },
       { href: '/cms/formations', label: 'Formations', icon: GraduationCap },
     ],
   },
