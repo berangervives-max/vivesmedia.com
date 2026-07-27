@@ -41,7 +41,7 @@ export default function HubLoginPage() {
     setLoading(true)
     const { error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) toast.error('Email ou mot de passe incorrect.')
-    else window.location.href = '/hub/dashboard'
+    else window.location.href = '/hub/admin'
     setLoading(false)
   }
 

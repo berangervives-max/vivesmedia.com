@@ -56,20 +56,19 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    // MIGRATION EN COURS : fusion du Hub Client (vivesmedia-hub) dans cette appli.
-    // Le rewrite est en `beforeFiles` → l'ancien Hub externe garde TOUJOURS la main
-    // sur /hub/* pendant qu'on construit les routes natives dormantes à côté.
-    // Bascule finale : retirer ces deux entrées → le natif prend le relais (zéro downtime).
+    // FUSION DU HUB — BASCULE 1 : l'espace client (login, auth, dashboard, projet,
+    // onboarding, support) est désormais NATIF dans cette appli. Seuls restent servis
+    // par l'ancien Hub externe (à rapatrier ensuite, P2/P3) : l'admin et les formations
+    // client + leurs API. Ces routes proxifiées partagent la MÊME session (même domaine).
+    const HUB = "https://vivesmedia-hub.vercel.app";
     return {
       beforeFiles: [
-        {
-          source: "/hub",
-          destination: "https://vivesmedia-hub.vercel.app/hub",
-        },
-        {
-          source: "/hub/:path*",
-          destination: "https://vivesmedia-hub.vercel.app/hub/:path*",
-        },
+        { source: "/hub/admin", destination: `${HUB}/hub/admin` },
+        { source: "/hub/admin/:path*", destination: `${HUB}/hub/admin/:path*` },
+        { source: "/hub/dashboard/formations", destination: `${HUB}/hub/dashboard/formations` },
+        { source: "/hub/dashboard/formations/:path*", destination: `${HUB}/hub/dashboard/formations/:path*` },
+        { source: "/hub/api/admin/:path*", destination: `${HUB}/hub/api/admin/:path*` },
+        { source: "/hub/api/client/courses/:path*", destination: `${HUB}/hub/api/client/courses/:path*` },
       ],
     };
   },
