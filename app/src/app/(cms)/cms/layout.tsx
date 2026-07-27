@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase'
 import {
   LayoutDashboard, Users, FileText, Receipt, ShoppingBag,
   BookOpen, Star, Mail, BarChart3, Globe, CalendarDays, Send,
-  Zap, Settings, LogOut, Menu, X, ExternalLink, Briefcase,
+  Zap, Settings, LogOut, Menu, X, ExternalLink, Briefcase, ShieldCheck,
   Package, GraduationCap, Activity, Share2, CheckCircle2, Clock, Radar
 } from 'lucide-react'
 
@@ -57,6 +57,7 @@ const NAV_SECTIONS = [
       { href: '/cms/agenda', label: 'Agenda & RDV', icon: CalendarDays },
       { href: '/cms/automations', label: 'Automatisations', icon: Zap },
       { href: '/cms/settings', label: 'Paramètres', icon: Settings },
+      { href: '/cms/securite', label: 'Sécurité (2FA)', icon: ShieldCheck },
     ],
   },
 ]

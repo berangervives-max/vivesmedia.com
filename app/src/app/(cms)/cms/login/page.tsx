@@ -4,13 +4,16 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase'
 import { Mail, Lock, ArrowRight, ShieldCheck, KeyRound } from 'lucide-react'
 
-type Mode = 'login' | 'forgot' | 'sent' | 'recovery'
+type Mode = 'login' | 'forgot' | 'sent' | 'recovery' | 'mfa'
 
 export default function CmsLoginPage() {
   const [mode, setMode] = useState<Mode>('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [password2, setPassword2] = useState('')
+  const [mfaCode, setMfaCode] = useState('')
+  const [factorId, setFactorId] = useState('')
+  const [challengeId, setChallengeId] = useState('')
   const [error, setError] = useState('')
   const [ok, setOk] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,6 +33,27 @@ export default function CmsLoginPage() {
     setLoading(true); setError('')
     const { error } = await sb.auth.signInWithPassword({ email, password })
     if (error) { setError('Email ou mot de passe incorrect.'); setLoading(false); return }
+    // 2FA : si un facteur TOTP est requis, demander le code à 6 chiffres.
+    try {
+      const { data: aal } = await sb.auth.mfa.getAuthenticatorAssuranceLevel()
+      if (aal?.nextLevel === 'aal2' && aal.currentLevel !== 'aal2') {
+        const { data: factors } = await sb.auth.mfa.listFactors()
+        const totp = factors?.totp?.[0]
+        if (totp) {
+          const { data: ch, error: chErr } = await sb.auth.mfa.challenge({ factorId: totp.id })
+          if (!chErr && ch) { setFactorId(totp.id); setChallengeId(ch.id); setMode('mfa'); setLoading(false); return }
+        }
+      }
+    } catch { /* pas de 2FA configurée → connexion normale */ }
+    router.replace('/cms/dashboard')
+  }
+
+  const handleMfa = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setError(''); setLoading(true)
+    const { error } = await sb.auth.mfa.verify({ factorId, challengeId, code: mfaCode.trim() })
+    setLoading(false)
+    if (error) { setError('Code incorrect. Réessaie.'); return }
     router.replace('/cms/dashboard')
   }
 
@@ -99,6 +123,24 @@ export default function CmsLoginPage() {
               {error && <p className="text-sm px-3 py-2.5 rounded-lg" style={{ background: 'rgba(196,57,47,.14)', color: '#F2B8B2' }}>{error}</p>}
               <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 transition-opacity hover:opacity-90 mt-1" style={{ background: 'var(--cms-brand)', boxShadow: 'var(--cms-glow)' }}>
                 {loading ? 'Connexion…' : <>Se connecter <ArrowRight className="w-4 h-4" /></>}
+              </button>
+            </form>
+          )}
+
+          {mode === 'mfa' && (
+            <form onSubmit={handleMfa} className="space-y-4">
+              <div className="flex items-center gap-2 mb-1">
+                <ShieldCheck className="w-4 h-4" style={{ color: 'var(--cms-brand)' }} />
+                <p className="text-sm font-semibold text-white">Vérification en deux étapes</p>
+              </div>
+              <p className="text-xs" style={{ color: 'rgba(255,255,255,.45)' }}>Entre le code à 6 chiffres de ton application d&apos;authentification.</p>
+              <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} value={mfaCode}
+                onChange={e => setMfaCode(e.target.value.replace(/\D/g, ''))} required autoFocus
+                className="w-full text-center text-2xl font-bold tracking-[0.5em] py-3 rounded-xl outline-none text-white"
+                style={{ background: 'rgba(255,255,255,.06)', border: '1px solid rgba(255,255,255,.1)' }} placeholder="000000" />
+              {error && <p className="text-sm px-3 py-2.5 rounded-lg" style={{ background: 'rgba(196,57,47,.14)', color: '#F2B8B2' }}>{error}</p>}
+              <button type="submit" disabled={loading || mfaCode.length < 6} className="w-full py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90" style={{ background: 'var(--cms-brand)' }}>
+                {loading ? 'Vérification…' : 'Valider'}
               </button>
             </form>
           )}
