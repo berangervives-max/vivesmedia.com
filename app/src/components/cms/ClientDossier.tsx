@@ -4,28 +4,28 @@ import { crmService, clientsService, type ClientDossier as Dossier } from '@/ser
 import type { Client } from '@/types'
 import { FileText, Receipt, ShoppingBag, Euro, Mail, Phone, Building2, ArrowLeft, Globe, Send, Copy, Check, UserCheck, MapPin, MessageSquare, MessageCircle, Eye, MousePointerClick, Activity, Gauge, PhoneCall, Trash2, Clock, type LucideIcon } from 'lucide-react'
 
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 // Métadonnées d'affichage de la timeline de suivi
 const ACT_META: Record<string, { label: string; icon: LucideIcon; bg: string; fg: string }> = {
-  prospect_email: { label: 'Email envoyé', icon: Send, bg: '#FFF1EC', fg: '#F4521E' },
-  email_open: { label: 'Email ouvert', icon: Eye, bg: '#ECFDF5', fg: '#16A34A' },
-  email_click: { label: 'Lien cliqué', icon: MousePointerClick, bg: '#EFF6FF', fg: '#2563EB' },
-  email_bounce: { label: 'Email rejeté', icon: Mail, bg: '#FEE2E2', fg: '#DC2626' },
-  prospect_call: { label: 'Appel passé', icon: PhoneCall, bg: '#F1F5F9', fg: '#475569' },
-  prospect_sms: { label: 'SMS envoyé', icon: MessageSquare, bg: '#F1F5F9', fg: '#475569' },
-  prospect_whatsapp: { label: 'WhatsApp', icon: MessageCircle, bg: '#DCFCE7', fg: '#16A34A' },
-  default: { label: 'Action', icon: Activity, bg: '#F3F4F6', fg: '#6B7280' },
+  prospect_email: { label: 'Email envoyé', icon: Send, bg: 'var(--cms-brand-wash)', fg: 'var(--cms-brand)' },
+  email_open: { label: 'Email ouvert', icon: Eye, bg: 'var(--cms-ok-bg)', fg: 'var(--cms-ok-fg)' },
+  email_click: { label: 'Lien cliqué', icon: MousePointerClick, bg: 'var(--cms-info-bg)', fg: 'var(--cms-info-fg)' },
+  email_bounce: { label: 'Email rejeté', icon: Mail, bg: 'var(--cms-danger-bg)', fg: 'var(--cms-danger-fg)' },
+  prospect_call: { label: 'Appel passé', icon: PhoneCall, bg: 'var(--cms-surface-3)', fg: 'var(--cms-ink-2)' },
+  prospect_sms: { label: 'SMS envoyé', icon: MessageSquare, bg: 'var(--cms-surface-3)', fg: 'var(--cms-ink-2)' },
+  prospect_whatsapp: { label: 'WhatsApp', icon: MessageCircle, bg: 'var(--cms-ok-bg)', fg: 'var(--cms-ok-fg)' },
+  default: { label: 'Action', icon: Activity, bg: 'var(--cms-surface-2)', fg: 'var(--cms-ink-2)' },
 }
 const euro = (n: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n || 0)
 
-const DEVIS_COLORS: Record<string, string> = { nouveau: 'bg-orange-100 text-orange-700', contacte: 'bg-blue-100 text-blue-700', en_cours: 'bg-violet-100 text-violet-700', accepte: 'bg-green-100 text-green-700', refuse: 'bg-gray-100 text-gray-500' }
-const FACT_COLORS: Record<string, string> = { brouillon: 'bg-gray-100 text-gray-500', envoyee: 'bg-blue-100 text-blue-700', payee: 'bg-green-100 text-green-700', en_retard: 'bg-red-100 text-red-600', annulee: 'bg-gray-100 text-gray-400' }
-const CMD_COLORS: Record<string, string> = { en_attente: 'bg-orange-100 text-orange-700', paye: 'bg-green-100 text-green-700', rembourse: 'bg-blue-100 text-blue-700', annule: 'bg-gray-100 text-gray-500' }
-const STATUT_COLORS: Record<string, string> = { prospect: 'bg-blue-100 text-blue-700', actif: 'bg-green-100 text-green-700', pause: 'bg-orange-100 text-orange-700', termine: 'bg-gray-100 text-gray-500' }
+const DEVIS_COLORS: Record<string, string> = { nouveau: 'bg-[var(--cms-warn-bg)] text-[var(--cms-warn-fg)]', contacte: 'bg-[var(--cms-info-bg)] text-[var(--cms-info-fg)]', en_cours: 'bg-[#F1ECF9] text-[#7C56C7]', accepte: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]', refuse: 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]' }
+const FACT_COLORS: Record<string, string> = { brouillon: 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]', envoyee: 'bg-[var(--cms-info-bg)] text-[var(--cms-info-fg)]', payee: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]', en_retard: 'bg-[var(--cms-danger-bg)] text-[var(--cms-danger-fg)]', annulee: 'bg-[var(--cms-surface-3)] text-[var(--cms-faint)]' }
+const CMD_COLORS: Record<string, string> = { en_attente: 'bg-[var(--cms-warn-bg)] text-[var(--cms-warn-fg)]', paye: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]', rembourse: 'bg-[var(--cms-info-bg)] text-[var(--cms-info-fg)]', annule: 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]' }
+const STATUT_COLORS: Record<string, string> = { prospect: 'bg-[var(--cms-info-bg)] text-[var(--cms-info-fg)]', actif: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]', pause: 'bg-[var(--cms-warn-bg)] text-[var(--cms-warn-fg)]', termine: 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]' }
 const STATUTS: Client['statut'][] = ['prospect', 'actif', 'pause', 'termine']
 
 function Badge({ value, map }: { value: string; map: Record<string, string> }) {
-  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[value] || 'bg-gray-100 text-gray-500'}`}>{value}</span>
+  return <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${map[value] || 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]'}`}>{value}</span>
 }
 
 /** Extrait commune + site web depuis les notes (issues du sourcing / enrichissement). */
@@ -198,7 +198,7 @@ const RECO: Record<string, { services: string[]; angle: string }> = {
   autre: { services: ['Site vitrine', 'SEO local', 'Google Business + avis'], angle: 'Une présence en ligne professionnelle qui ramène des clients.' },
 }
 const Field = ({ label, value }: { label: string; value: string }) => (
-  <div><p className="text-[10px] uppercase tracking-wide" style={{ color: '#9CA3AF' }}>{label}</p><p className="text-sm font-medium" style={{ color: '#111827' }}>{value || '—'}</p></div>
+  <div><p className="text-[10px] uppercase tracking-wide" style={{ color: 'var(--cms-muted)' }}>{label}</p><p className="text-sm font-medium" style={{ color: 'var(--cms-ink)' }}>{value || '—'}</p></div>
 )
 
 /** Dossier client 360° + poste de prospection (actions depuis la fiche). */
@@ -370,17 +370,17 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
   const caCommandes = (d?.commandes ?? []).filter(c => c.statut === 'paye').reduce((s, c) => s + Number(c.montant || 0), 0)
   const caTotal = caFactures + caCommandes
   const enAttente = (d?.factures ?? []).filter(f => f.statut === 'envoyee' || f.statut === 'en_retard').reduce((s, f) => s + Number(f.montant_ttc || 0), 0)
-  const card = { background: '#fff', border: '1px solid #E9ECEF' }
+  const card = { background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }
   const isProspect = statut === 'prospect' || statut === 'pause'
 
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <button onClick={onBack} className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}>
+        <button onClick={onBack} className="text-xs flex items-center gap-1" style={{ color: 'var(--cms-muted)' }}>
           <ArrowLeft className="w-3.5 h-3.5" /> Retour aux clients
         </button>
         <button onClick={async () => { if (!confirm(`Supprimer définitivement la fiche « ${client.nom} » ? Action irréversible.`)) return; try { await clientsService.delete(client.id); onBack() } catch (e) { alert(e instanceof Error ? e.message : 'Erreur') } }}
-          className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ border: '1px solid #FECACA', color: '#DC2626' }}>
+          className="text-xs flex items-center gap-1.5 px-3 py-1.5 rounded-lg" style={{ border: '1px solid var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' }}>
           <Trash2 className="w-3.5 h-3.5" /> Supprimer la fiche
         </button>
       </div>
@@ -393,28 +393,28 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
               {client.nom.charAt(0).toUpperCase()}
             </div>
             <div>
-              <h1 className="text-xl font-bold" style={{ color: '#111827' }}>{client.nom}</h1>
-              <p className="text-sm" style={{ color: '#9CA3AF' }}>{client.entreprise || '—'}</p>
+              <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--cms-ink)' }}>{client.nom}</h1>
+              <p className="text-sm" style={{ color: 'var(--cms-muted)' }}>{client.entreprise || '—'}</p>
             </div>
             <span className="ml-2"><Badge value={statut} map={STATUT_COLORS} /></span>
           </div>
-          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-sm" style={{ color: '#6B7280' }}>
+          <div className="flex flex-wrap gap-x-3 gap-y-1.5 text-sm" style={{ color: 'var(--cms-ink-2)' }}>
             {client.email && (
               <a href={`mailto:${client.email}`} className="flex items-center gap-1.5 hover:underline">
                 <Mail className="w-3.5 h-3.5" /> {client.email}
-                <span className="text-[10px] px-1.5 rounded-full font-medium" style={emTag === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{emTag}</span>
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={emTag === 'pro' ? { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' } : { background: 'var(--cms-warn-bg)', color: 'var(--cms-warn-fg)' }}>{emTag}</span>
               </a>
             )}
             {mobileNum && (
               <a href={`tel:${normPhone(mobileNum)}`} className="flex items-center gap-1.5 hover:underline">
                 <Phone className="w-3.5 h-3.5" /> {mobileNum}
-                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: '#EFF6FF', color: '#2563EB' }}>mobile</span>
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: 'var(--cms-info-bg)', color: 'var(--cms-info-fg)' }}>mobile</span>
               </a>
             )}
             {fixeNum && (
               <a href={`tel:${normPhone(fixeNum)}`} className="flex items-center gap-1.5 hover:underline">
                 <Phone className="w-3.5 h-3.5" /> {fixeNum}
-                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: '#F1F5F9', color: '#64748B' }}>fixe</span>
+                <span className="text-[10px] px-1.5 rounded-full font-medium" style={{ background: 'var(--cms-surface-3)', color: 'var(--cms-muted)' }}>fixe</span>
               </a>
             )}
             {commune && <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" /> {commune}</span>}
@@ -423,12 +423,12 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
           </div>
         </div>
         {/* Changement de statut rapide */}
-        <div className="flex flex-wrap items-center gap-2 mt-4 pt-4" style={{ borderTop: '1px solid #F3F4F6' }}>
-          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: '#9CA3AF' }}>Statut :</span>
+        <div className="flex flex-wrap items-center gap-2 mt-4 pt-4" style={{ borderTop: '1px solid var(--cms-surface-2)' }}>
+          <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--cms-muted)' }}>Statut :</span>
           {STATUTS.map(s => (
             <button key={s} onClick={() => markStatut(s)} disabled={savingStatut}
               className="text-xs px-3 py-1 rounded-lg font-medium transition-colors disabled:opacity-50"
-              style={{ background: statut === s ? '#0F172A' : '#fff', color: statut === s ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+              style={{ background: statut === s ? 'var(--cms-ink)' : 'var(--cms-card)', color: statut === s ? 'var(--cms-card)' : 'var(--cms-ink-2)', border: '1px solid var(--cms-border-2)' }}>
               {s}
             </button>
           ))}
@@ -438,7 +438,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       {/* ── INFORMATIONS ENTREPRISE (open data) ── */}
       <div className="rounded-xl p-6 mb-4" style={card}>
         <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2"><Building2 className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Informations entreprise</h2></div>
+          <div className="flex items-center gap-2"><Building2 className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Informations entreprise</h2></div>
           {sirenUrl && <a href={sirenUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold" style={{ color: ORANGE }}>Fiche officielle INSEE →</a>}
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -455,8 +455,8 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
 
       {/* ── ANALYSE & RECOMMANDATIONS ── */}
       <div className="rounded-xl p-6 mb-4" style={{ ...card, borderColor: 'rgba(244,82,30,.25)' }}>
-        <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Analyse & recommandations</h2></div>
-        <p className="text-sm leading-relaxed mb-4" style={{ color: '#374151' }}>
+        <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Analyse & recommandations</h2></div>
+        <p className="text-sm leading-relaxed mb-4" style={{ color: 'var(--cms-ink-2)' }}>
           <strong>{client.entreprise || client.nom}</strong> — {client.secteur || 'professionnel'}{info.commune ? ` à ${info.commune}` : ''}
           {anciennete !== null && (anciennete <= 2 ? ', structure récente (souvent sans site → besoin d\'une première vitrine).' : `, établie depuis ${anciennete} ans (site potentiellement à moderniser).`)}
           {!site && ' Aucun site web détecté pour l\'instant — angle de vente direct.'}
@@ -464,14 +464,14 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
         </p>
         <div className="grid sm:grid-cols-2 gap-4">
           <div>
-            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>Services à proposer</p>
+            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: 'var(--cms-muted)' }}>Services à proposer</p>
             <div className="flex flex-wrap gap-1.5">
-              {reco.services.map(s => <span key={s} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(244,82,30,.08)', color: '#F4521E' }}>{s}</span>)}
+              {reco.services.map(s => <span key={s} className="text-xs px-2.5 py-1 rounded-full" style={{ background: 'rgba(244,82,30,.08)', color: 'var(--cms-brand)' }}>{s}</span>)}
             </div>
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: '#9CA3AF' }}>Angle de vente</p>
-            <p className="text-sm" style={{ color: '#374151' }}>{recoAngle}</p>
+            <p className="text-[10px] uppercase tracking-wide mb-2" style={{ color: 'var(--cms-muted)' }}>Angle de vente</p>
+            <p className="text-sm" style={{ color: 'var(--cms-ink-2)' }}>{recoAngle}</p>
           </div>
         </div>
       </div>
@@ -480,28 +480,28 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       <div className="rounded-xl p-6 mb-4" style={card}>
         <div className="flex items-center gap-2 mb-4">
           <Send className="w-4 h-4" style={{ color: ORANGE }} />
-          <h2 className="text-sm font-bold" style={{ color: '#111827' }}>Contacter ce prospect</h2>
+          <h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Contacter ce prospect</h2>
         </div>
 
         {/* Actions rapides */}
         <div className="flex flex-wrap gap-2 mb-4">
           {(mobileNum || fixeNum) && (
             <a href={`tel:${normPhone(mobileNum || fixeNum)}`} onClick={() => logAction('call')} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white" style={{ background: ORANGE }}>
-              <Phone className="w-4 h-4" /> Appeler{loggedAct === 'call' ? ' ✓' : ''}
+              <Phone className="w-4 h-4" /> Appeler{loggedAct === 'call' && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
             </a>
           )}
           {smsHref && (
-            <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
-              <MessageSquare className="w-4 h-4" /> SMS{loggedAct === 'sms' ? ' ✓' : ''}
+            <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
+              <MessageSquare className="w-4 h-4" /> SMS{loggedAct === 'sms' && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
             </a>
           )}
           {waHref && (
             <a href={waHref} target="_blank" rel="noopener noreferrer" onClick={() => logAction('whatsapp')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg text-white" style={{ background: '#25D366' }}>
-              <MessageCircle className="w-4 h-4" /> WhatsApp{loggedAct === 'whatsapp' ? ' ✓' : ''}
+              <MessageCircle className="w-4 h-4" /> WhatsApp{loggedAct === 'whatsapp' && <Check className="w-3.5 h-3.5" strokeWidth={3} />}
             </a>
           )}
           {site && (
-            <a href={site} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+            <a href={site} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
               <Globe className="w-4 h-4" /> Voir leur site
             </a>
           )}
@@ -511,7 +511,7 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
             </button>
           )}
           {isProspect && (
-            <button onClick={() => markStatut('actif')} disabled={savingStatut} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50" style={{ border: '1px solid #E5E7EB', color: '#16A34A' }}>
+            <button onClick={() => markStatut('actif')} disabled={savingStatut} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg disabled:opacity-50" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ok-fg)' }}>
               <UserCheck className="w-4 h-4" /> Convertir en client
             </button>
           )}
@@ -519,18 +519,18 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
 
         {/* Résultat de l'analyse du site → personnalisation de l'email */}
         {audit && (
-          <div className="rounded-lg p-4 mb-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+          <div className="rounded-lg p-4 mb-4" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
             {audit.error || audit.unreachable ? (
-              <p className="text-sm" style={{ color: '#B91C1C' }}>{audit.error || 'Site injoignable (ne répond pas ou trop lent).'}</p>
+              <p className="text-sm" style={{ color: 'var(--cms-danger-fg)' }}>{audit.error || 'Site injoignable (ne répond pas ou trop lent).'}</p>
             ) : (
               <>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-2"><Gauge className="w-4 h-4" style={{ color: ORANGE }} /><h3 className="text-sm font-bold" style={{ color: '#111827' }}>Analyse du site</h3></div>
-                  <span className="text-sm font-bold px-2.5 py-1 rounded-lg" style={{ background: (audit.audit?.score ?? 0) >= 70 ? '#DCFCE7' : (audit.audit?.score ?? 0) >= 45 ? '#FEF3C7' : '#FEE2E2', color: (audit.audit?.score ?? 0) >= 70 ? '#16A34A' : (audit.audit?.score ?? 0) >= 45 ? '#D97706' : '#DC2626' }}>{audit.audit?.score}/100</span>
+                  <div className="flex items-center gap-2"><Gauge className="w-4 h-4" style={{ color: ORANGE }} /><h3 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Analyse du site</h3></div>
+                  <span className="text-sm font-bold px-2.5 py-1 rounded-lg" style={{ background: (audit.audit?.score ?? 0) >= 70 ? 'var(--cms-ok-bg)' : (audit.audit?.score ?? 0) >= 45 ? 'var(--cms-warn-bg)' : 'var(--cms-danger-bg)', color: (audit.audit?.score ?? 0) >= 70 ? 'var(--cms-ok-fg)' : (audit.audit?.score ?? 0) >= 45 ? 'var(--cms-warn-fg)' : 'var(--cms-danger-fg)' }}>{audit.audit?.score}/100</span>
                 </div>
                 <div className="flex flex-wrap gap-1.5 mb-3">
                   {(audit.findings || []).map((fd, i) => (
-                    <span key={i} className="text-[11px] px-2 py-1 rounded-md" style={fd.level === 'bad' ? { background: '#FEE2E2', color: '#B91C1C' } : fd.level === 'warn' ? { background: '#FEF3C7', color: '#92400E' } : { background: '#ECFDF5', color: '#047857' }}>{fd.label}</span>
+                    <span key={i} className="text-[11px] px-2 py-1 rounded-md" style={fd.level === 'bad' ? { background: 'var(--cms-danger-bg)', color: 'var(--cms-danger-fg)' } : fd.level === 'warn' ? { background: 'var(--cms-warn-bg)', color: 'var(--cms-warn-fg)' } : { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' }}>{fd.label}</span>
                   ))}
                 </div>
                 {(audit.emailLines?.length ?? 0) > 0 && (
@@ -545,123 +545,123 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
 
         {/* Composeur SMS — envoi pro via Brevo + option gratuite via le tél */}
         {(mobileNum || fixeNum) && (
-          <div className="rounded-lg p-4 mb-4" style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
+          <div className="rounded-lg p-4 mb-4" style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-surface-2)' }}>
             <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: '#111827' }}><MessageSquare className="w-4 h-4" style={{ color: ORANGE }} /> SMS</h3>
-              <span className="text-[11px]" style={{ color: smsText.length > 160 ? '#DC2626' : '#9CA3AF' }}>{smsText.length}/160</span>
+              <h3 className="text-sm font-bold flex items-center gap-1.5" style={{ color: 'var(--cms-ink)' }}><MessageSquare className="w-4 h-4" style={{ color: ORANGE }} /> SMS</h3>
+              <span className="text-[11px]" style={{ color: smsText.length > 160 ? 'var(--cms-danger-fg)' : 'var(--cms-muted)' }}>{smsText.length}/160</span>
             </div>
             <textarea value={smsText} onChange={e => { setSmsText(e.target.value); setSmsSent(false) }} rows={3}
-              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-y" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }} />
+              className="w-full px-3 py-2 rounded-lg text-sm outline-none resize-y" style={{ border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink-2)' }} />
             <div className="flex flex-wrap items-center gap-2 mt-2">
               <button onClick={sendSmsBrevo} disabled={smsSending || smsSent || !smsText.trim()}
-                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: smsSent ? '#16A34A' : ORANGE }}>
-                {smsSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {smsSent ? 'Envoyé ✓' : smsSending ? 'Envoi…' : 'Envoyer (vivesmedia)'}
+                className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: smsSent ? 'var(--cms-ok-fg)' : ORANGE }}>
+                {smsSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {smsSent ? 'Envoyé' : smsSending ? 'Envoi…' : 'Envoyer (vivesmedia)'}
               </button>
               {smsHref && (
-                <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: '#374151' }}>
+                <a href={smsHref} onClick={() => logAction('sms')} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>
                   <Phone className="w-4 h-4" /> Depuis mon tél (gratuit)
                 </a>
               )}
             </div>
-            <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer (vivesmedia) » = SMS pro via Brevo (~0,05 €, expéditeur « vivesmedia », créneau légal 8h-20h hors dimanche). « Depuis mon tél » = gratuit via ton forfait (ton numéro visible).</p>
+            <p className="text-[11px] mt-2" style={{ color: 'var(--cms-muted)' }}>« Envoyer (vivesmedia) » = SMS pro via Brevo (~0,05 €, expéditeur « vivesmedia », créneau légal 8h-20h hors dimanche). « Depuis mon tél » = gratuit via ton forfait (ton numéro visible).</p>
           </div>
         )}
 
         {/* Trouver les coordonnées manquantes (1 clic) */}
         {(!client.email || (!mobileNum && !fixeNum)) && (
-          <div className="flex flex-wrap items-center gap-2 mb-4 text-xs p-3 rounded-lg" style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}>
-            <span style={{ color: '#92400E' }}>Coordonnées manquantes — trouve-les :</span>
-            <a href={`https://www.google.com/search?q=${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>Google</a>
-            <a href={`https://www.google.com/maps/search/${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>Maps</a>
-            <a href={`https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui=${encodeURIComponent(client.nom)}&ou=${encodeURIComponent(commune || 'Vaucluse')}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: '#fff', border: '1px solid #E5E7EB', color: '#374151' }}>PagesJaunes</a>
-            <span style={{ color: '#92400E' }}>→ puis « Modifier » la fiche pour les enregistrer.</span>
+          <div className="flex flex-wrap items-center gap-2 mb-4 text-xs p-3 rounded-lg" style={{ background: 'var(--cms-warn-bg)', border: '1px solid var(--cms-warn-bg)' }}>
+            <span style={{ color: 'var(--cms-warn-fg)' }}>Coordonnées manquantes — trouve-les :</span>
+            <a href={`https://www.google.com/search?q=${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>Google</a>
+            <a href={`https://www.google.com/maps/search/${encodeURIComponent(client.nom + ' ' + commune)}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>Maps</a>
+            <a href={`https://www.pagesjaunes.fr/annuaire/chercherlespros?quoiqui=${encodeURIComponent(client.nom)}&ou=${encodeURIComponent(commune || 'Vaucluse')}`} target="_blank" rel="noopener noreferrer" className="font-semibold px-2 py-1 rounded-md" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}>PagesJaunes</a>
+            <span style={{ color: 'var(--cms-warn-fg)' }}>→ puis « Modifier » la fiche pour les enregistrer.</span>
           </div>
         )}
 
         {/* Composeur d'email personnalisé */}
-        <div className="rounded-lg p-4" style={{ background: '#F8F9FA', border: '1px solid #F1F3F5' }}>
+        <div className="rounded-lg p-4" style={{ background: 'var(--cms-surface-2)', border: '1px solid var(--cms-surface-2)' }}>
           <div className="flex flex-wrap gap-1.5 mb-3">
             {(Object.keys(tpl) as (keyof typeof tpl)[]).map(k => (
               <button key={k} onClick={() => pickTpl(k)}
                 className="text-xs font-semibold px-3 py-1.5 rounded-lg transition-colors"
-                style={{ background: active === k ? ORANGE : '#fff', color: active === k ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
+                style={{ background: active === k ? ORANGE : 'var(--cms-card)', color: active === k ? 'var(--cms-card)' : 'var(--cms-ink-2)', border: '1px solid var(--cms-border-2)' }}>
                 {tpl[k].label}
               </button>
             ))}
           </div>
-          <p className="text-[11px] leading-relaxed mb-2" style={{ color: '#9CA3AF' }}>💡 {COLD_TIPS}</p>
+          <p className="text-[11px] leading-relaxed mb-2" style={{ color: 'var(--cms-muted)' }}>{COLD_TIPS}</p>
           <input value={subject} onChange={e => setSubject(e.target.value)}
-            className="w-full px-3 py-2 rounded-lg text-sm font-medium mb-2 outline-none" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }} />
+            className="w-full px-3 py-2 rounded-lg text-sm font-medium mb-2 outline-none" style={{ border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink)' }} />
           <textarea value={body} onChange={e => setBody(e.target.value)} rows={9}
-            className="w-full px-3 py-2 rounded-lg text-sm leading-relaxed outline-none resize-y" style={{ border: '1px solid #E5E7EB', background: '#fff', color: '#374151' }} />
+            className="w-full px-3 py-2 rounded-lg text-sm leading-relaxed outline-none resize-y" style={{ border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink-2)' }} />
           {/* Destinataire modifiable : si la fiche n'a pas d'email, colle celui que tu trouves */}
           <div className="mt-3">
-            <label className="text-[10px] uppercase tracking-wide block mb-1" style={{ color: '#9CA3AF' }}>Destinataire</label>
+            <label className="text-[10px] uppercase tracking-wide block mb-1" style={{ color: 'var(--cms-muted)' }}>Destinataire</label>
             <div className="flex items-center gap-2">
               <input type="email" value={to} onChange={e => { setTo(e.target.value); setMailSent(false) }} placeholder="email@duprospect.fr"
-                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ border: `1px solid ${to && !validTo ? '#FCA5A5' : '#E5E7EB'}`, background: '#fff', color: '#111827' }} />
+                className="flex-1 px-3 py-2 rounded-lg text-sm outline-none" style={{ border: `1px solid ${to && !validTo ? 'var(--cms-danger-fg)' : 'var(--cms-border-2)'}`, background: 'var(--cms-card)', color: 'var(--cms-ink)' }} />
               {client.email && to.trim() === client.email && (
-                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={emTag === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{emTag}</span>
+                <span className="text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0" style={emTag === 'pro' ? { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' } : { background: 'var(--cms-warn-bg)', color: 'var(--cms-warn-fg)' }}>{emTag}</span>
               )}
             </div>
-            {!client.email && <p className="text-[11px] mt-1" style={{ color: '#92400E' }}>Pas d'email sur la fiche — colle celui que tu trouves (boutons « Trouver les coordonnées » ci-dessus). Il sera enregistré à l'envoi.</p>}
+            {!client.email && <p className="text-[11px] mt-1" style={{ color: 'var(--cms-warn-fg)' }}>Pas d'email sur la fiche — colle celui que tu trouves (boutons « Trouver les coordonnées » ci-dessus). Il sera enregistré à l'envoi.</p>}
           </div>
           <div className="flex flex-wrap items-center gap-2 mt-3">
             <button onClick={sendViaApp} disabled={sendingMail || mailSent || !validTo} title={!validTo ? 'Renseigne un email destinataire' : ''}
-              className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: mailSent ? '#16A34A' : ORANGE }}>
-              {mailSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mailSent ? 'Envoyé ✓' : sendingMail ? 'Envoi…' : 'Envoyer (vivesmedia.com)'}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: mailSent ? 'var(--cms-ok-fg)' : ORANGE }}>
+              {mailSent ? <Check className="w-4 h-4" /> : <Send className="w-4 h-4" />} {mailSent ? 'Envoyé' : sendingMail ? 'Envoi…' : 'Envoyer (vivesmedia.com)'}
             </button>
             <a href={validTo ? mailto : undefined} onClick={e => { if (!validTo) e.preventDefault() }}
-              className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: validTo ? '#374151' : '#C4C4C4' }}>
+              className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: validTo ? 'var(--cms-ink-2)' : 'var(--cms-faint)' }}>
               <Mail className="w-4 h-4" /> Ouvrir dans ma messagerie
             </a>
-            <button onClick={copy} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: copied ? '#16A34A' : '#374151' }}>
+            <button onClick={copy} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: copied ? 'var(--cms-ok-fg)' : 'var(--cms-ink-2)' }}>
               {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />} {copied ? 'Copié' : 'Copier'}
             </button>
             {isProspect && (
-              <button onClick={() => markStatut('actif')} disabled={savingStatut} className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>
+              <button onClick={() => markStatut('actif')} disabled={savingStatut} className="text-xs ml-auto" style={{ color: 'var(--cms-muted)' }}>
                 marquer comme client →
               </button>
             )}
           </div>
-          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px dashed #E5E7EB' }}>
-            <span className="text-xs font-medium" style={{ color: '#6B7280' }}>⏰ Ou programmer&nbsp;:</span>
+          <div className="flex flex-wrap items-center gap-2 mt-3 pt-3" style={{ borderTop: '1px dashed var(--cms-border-2)' }}>
+            <span className="text-xs font-medium" style={{ color: 'var(--cms-ink-2)' }}>⏰ Ou programmer&nbsp;:</span>
             <input type="datetime-local" value={schedAt} onChange={e => setSchedAt(e.target.value)}
-              className="text-sm px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid #E5E7EB', color: '#111827' }} />
+              className="text-sm px-3 py-1.5 rounded-lg outline-none" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink)' }} />
             <button onClick={scheduleViaApp} disabled={scheduling || scheduled || !validTo || !schedAt}
-              className="flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: scheduled ? '#16A34A' : '#0F172A' }}>
-              {scheduled ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />} {scheduled ? 'Programmé ✓' : scheduling ? 'Programmation…' : 'Programmer l\'envoi'}
+              className="flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-lg text-white disabled:opacity-50" style={{ background: scheduled ? 'var(--cms-ok-fg)' : 'var(--cms-ink)' }}>
+              {scheduled ? <Check className="w-4 h-4" /> : <Clock className="w-4 h-4" />} {scheduled ? 'Programmé' : scheduling ? 'Programmation…' : 'Programmer l\'envoi'}
             </button>
-            <a href="/cms/programmes" className="text-[11px]" style={{ color: '#9CA3AF' }}>voir les envois programmés →</a>
+            <a href="/cms/programmes" className="text-[11px]" style={{ color: 'var(--cms-muted)' }}>voir les envois programmés →</a>
           </div>
-          <p className="text-[11px] mt-2" style={{ color: '#9CA3AF' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Programmer » planifie l'envoi (visible dans Envois programmés + Suivi prospection). « Ouvrir dans ma messagerie » part de ta boîte perso. Sans email, utilise l'appel / le SMS.</p>
+          <p className="text-[11px] mt-2" style={{ color: 'var(--cms-muted)' }}>« Envoyer » part de contact@vivesmedia.com (trace conservée). « Programmer » planifie l'envoi (visible dans Envois programmés + Suivi prospection). « Ouvrir dans ma messagerie » part de ta boîte perso. Sans email, utilise l'appel / le SMS.</p>
         </div>
       </div>
 
       {/* ── SUIVI & HISTORIQUE (tracking live) ── */}
       <div className="rounded-xl p-6 mb-4" style={card}>
         <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <div className="flex items-center gap-2"><Activity className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Suivi & historique</h2></div>
-          <div className="flex items-center gap-3 text-xs" style={{ color: '#6B7280' }}>
+          <div className="flex items-center gap-2"><Activity className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Suivi & historique</h2></div>
+          <div className="flex items-center gap-3 text-xs" style={{ color: 'var(--cms-ink-2)' }}>
             <span className="flex items-center gap-1"><Send className="w-3.5 h-3.5" style={{ color: ORANGE }} /> {sentN} envoyé{sentN > 1 ? 's' : ''}</span>
-            <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" style={{ color: '#16A34A' }} /> {openN} ouvert{openN > 1 ? 's' : ''}</span>
-            <span className="flex items-center gap-1"><MousePointerClick className="w-3.5 h-3.5" style={{ color: '#2563EB' }} /> {clickN} clic{clickN > 1 ? 's' : ''}</span>
+            <span className="flex items-center gap-1"><Eye className="w-3.5 h-3.5" style={{ color: 'var(--cms-ok-fg)' }} /> {openN} ouvert{openN > 1 ? 's' : ''}</span>
+            <span className="flex items-center gap-1"><MousePointerClick className="w-3.5 h-3.5" style={{ color: 'var(--cms-info-fg)' }} /> {clickN} clic{clickN > 1 ? 's' : ''}</span>
           </div>
         </div>
         {acts.length === 0 ? (
-          <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune action pour l'instant. Les emails envoyés, leurs <strong>ouvertures</strong> et <strong>clics</strong> (suivis en direct), ainsi que les appels et SMS, apparaîtront ici.</p>
+          <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>Aucune action pour l'instant. Les emails envoyés, leurs <strong>ouvertures</strong> et <strong>clics</strong> (suivis en direct), ainsi que les appels et SMS, apparaîtront ici.</p>
         ) : (
           <div className="space-y-2">
             {acts.map(a => { const m = ACT_META[a.type] || ACT_META.default; return (
               <div key={a.id} className="flex items-center gap-3 text-sm">
                 <span className="w-7 h-7 rounded-full flex items-center justify-center shrink-0" style={{ background: m.bg }}><m.icon className="w-3.5 h-3.5" style={{ color: m.fg }} /></span>
-                <span className="min-w-0 truncate" style={{ color: '#374151' }}>
-                  <strong style={{ color: '#111827' }}>{m.label}</strong>
+                <span className="min-w-0 truncate" style={{ color: 'var(--cms-ink-2)' }}>
+                  <strong style={{ color: 'var(--cms-ink)' }}>{m.label}</strong>
                   {a.payload?.kind && a.type === 'prospect_email' ? ` · ${a.payload.kind}` : ''}
                   {a.payload?.subject ? ` — « ${a.payload.subject} »` : ''}
                   {a.payload?.link ? ` → ${a.payload.link}` : ''}
                 </span>
-                <span className="ml-auto text-xs shrink-0" style={{ color: '#9CA3AF' }}>{new Date(a.payload?.at || a.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
+                <span className="ml-auto text-xs shrink-0" style={{ color: 'var(--cms-muted)' }}>{new Date(a.payload?.at || a.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })}</span>
               </div>
             ) })}
           </div>
@@ -676,12 +676,12 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
           { label: 'Devis', value: String(d?.devis.length ?? '…'), icon: FileText, accent: false },
           { label: 'Commandes', value: String(d?.commandes.length ?? '…'), icon: ShoppingBag, accent: false },
         ].map(k => (
-          <div key={k.label} className="rounded-xl p-4" style={{ ...card, borderColor: k.accent ? 'rgba(244,82,30,.25)' : '#E9ECEF' }}>
+          <div key={k.label} className="rounded-xl p-4" style={{ ...card, borderColor: k.accent ? 'rgba(244,82,30,.25)' : 'var(--cms-border)' }}>
             <div className="flex items-center justify-between mb-1.5">
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>{k.label}</p>
-              <k.icon className="w-4 h-4" style={{ color: k.accent ? ORANGE : '#94A3B8' }} />
+              <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>{k.label}</p>
+              <k.icon className="w-4 h-4" style={{ color: k.accent ? ORANGE : 'var(--cms-faint)' }} />
             </div>
-            <p className="text-2xl font-bold" style={{ color: k.accent ? ORANGE : '#111827' }}>{k.value}</p>
+            <p className="text-2xl font-bold" style={{ color: k.accent ? ORANGE : 'var(--cms-ink)' }}>{k.value}</p>
           </div>
         ))}
       </div>
@@ -689,37 +689,37 @@ export default function ClientDossier({ client, onBack }: { client: Client; onBa
       {/* Listes liées */}
       <div className="grid lg:grid-cols-3 gap-4">
         <div className="rounded-xl p-5" style={card}>
-          <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Devis</h2></div>
-          {d && d.devis.length === 0 && <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucun devis</p>}
+          <div className="flex items-center gap-2 mb-3"><FileText className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Devis</h2></div>
+          {d && d.devis.length === 0 && <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>Aucun devis</p>}
           <div className="space-y-2">
             {(d?.devis ?? []).map(x => (
-              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: '#F9FAFB' }}>
-                <span className="truncate" style={{ color: '#374151' }}>{x.service || 'Demande'}<span className="text-xs ml-1" style={{ color: '#9CA3AF' }}>{new Date(x.created_at).toLocaleDateString('fr-FR')}</span></span>
+              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: 'var(--cms-surface-2)' }}>
+                <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{x.service || 'Demande'}<span className="text-xs ml-1" style={{ color: 'var(--cms-muted)' }}>{new Date(x.created_at).toLocaleDateString('fr-FR')}</span></span>
                 <Badge value={x.statut} map={DEVIS_COLORS} />
               </div>
             ))}
           </div>
         </div>
         <div className="rounded-xl p-5" style={card}>
-          <div className="flex items-center gap-2 mb-3"><Receipt className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Factures</h2></div>
-          {d && d.factures.length === 0 && <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune facture</p>}
+          <div className="flex items-center gap-2 mb-3"><Receipt className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Factures</h2></div>
+          {d && d.factures.length === 0 && <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>Aucune facture</p>}
           <div className="space-y-2">
             {(d?.factures ?? []).map(x => (
-              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: '#F9FAFB' }}>
-                <span className="truncate font-mono text-xs" style={{ color: '#374151' }}>{x.numero}</span>
-                <span className="flex items-center gap-2 shrink-0"><strong style={{ color: '#111827' }}>{euro(x.montant_ttc)}</strong><Badge value={x.statut} map={FACT_COLORS} /></span>
+              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: 'var(--cms-surface-2)' }}>
+                <span className="truncate font-mono text-xs" style={{ color: 'var(--cms-ink-2)' }}>{x.numero}</span>
+                <span className="flex items-center gap-2 shrink-0"><strong style={{ color: 'var(--cms-ink)' }}>{euro(x.montant_ttc)}</strong><Badge value={x.statut} map={FACT_COLORS} /></span>
               </div>
             ))}
           </div>
         </div>
         <div className="rounded-xl p-5" style={card}>
-          <div className="flex items-center gap-2 mb-3"><ShoppingBag className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: '#111827' }}>Commandes Stripe</h2></div>
-          {d && d.commandes.length === 0 && <p className="text-xs" style={{ color: '#9CA3AF' }}>Aucune commande</p>}
+          <div className="flex items-center gap-2 mb-3"><ShoppingBag className="w-4 h-4" style={{ color: ORANGE }} /><h2 className="text-sm font-bold" style={{ color: 'var(--cms-ink)' }}>Commandes Stripe</h2></div>
+          {d && d.commandes.length === 0 && <p className="text-xs" style={{ color: 'var(--cms-muted)' }}>Aucune commande</p>}
           <div className="space-y-2">
             {(d?.commandes ?? []).map(x => (
-              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: '#F9FAFB' }}>
-                <span className="truncate" style={{ color: '#374151' }}>{x.service || 'Commande'}</span>
-                <span className="flex items-center gap-2 shrink-0"><strong style={{ color: '#111827' }}>{euro(x.montant)}</strong><Badge value={x.statut} map={CMD_COLORS} /></span>
+              <div key={x.id} className="flex items-center justify-between gap-2 text-sm p-2 rounded-lg" style={{ background: 'var(--cms-surface-2)' }}>
+                <span className="truncate" style={{ color: 'var(--cms-ink-2)' }}>{x.service || 'Commande'}</span>
+                <span className="flex items-center gap-2 shrink-0"><strong style={{ color: 'var(--cms-ink)' }}>{euro(x.montant)}</strong><Badge value={x.statut} map={CMD_COLORS} /></span>
               </div>
             ))}
           </div>

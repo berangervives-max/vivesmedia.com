@@ -2,13 +2,13 @@
 import { useState, useEffect, useMemo } from 'react'
 import { clientsService } from '@/services/supabase.service'
 import type { Client } from '@/types'
-import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List, Send, ArrowUpRight, Flame, CheckCircle2, Users, UserPlus } from 'lucide-react'
+import { Plus, Pencil, Trash2, Search, Mail, Phone, MapPin, ChevronLeft, ChevronRight, LayoutGrid, List, Send, ArrowUpRight, Flame, CheckCircle2, Users, UserPlus, Check } from 'lucide-react'
 import ClientDossier from '@/components/cms/ClientDossier'
 
 const STATUTS = ['prospect', 'actif', 'pause', 'termine'] as const
-const COLORS: Record<string, string> = { prospect: 'bg-blue-100 text-blue-700', actif: 'bg-green-100 text-green-700', pause: 'bg-orange-100 text-orange-700', termine: 'bg-gray-100 text-gray-500' }
+const COLORS: Record<string, string> = { prospect: 'bg-[var(--cms-info-bg)] text-[var(--cms-info-fg)]', actif: 'bg-[var(--cms-ok-bg)] text-[var(--cms-ok-fg)]', pause: 'bg-[var(--cms-warn-bg)] text-[var(--cms-warn-fg)]', termine: 'bg-[var(--cms-surface-3)] text-[var(--cms-muted)]' }
 const EMPTY: Omit<Client, 'id' | 'created_at' | 'updated_at'> = { nom: '', email: '', telephone: '', entreprise: '', secteur: '', statut: 'prospect', notes: '', stripe_customer_id: '' }
-const ORANGE = '#F4521E'
+const ORANGE = 'var(--cms-brand)'
 const WEBMAIL = ['gmail.', 'orange.fr', 'free.fr', 'wanadoo.fr', 'hotmail.', 'outlook.', 'live.', 'yahoo.', 'sfr.fr', 'laposte.net', 'icloud.', 'gmx.', 'aol.', 'bbox.fr', 'neuf.fr']
 
 const parseCommune = (n?: string) => (n?.match(/·\s*([^·]+?)\s*\(8\d{4}\)/) || [])[1] || ''
@@ -21,11 +21,11 @@ const hasContact = (c: Client) => !!(c.email || c.telephone)
 const normPhone = (t?: string) => (t || '').replace(/[\s.\-]/g, '').replace(/^\+33/, '0')
 const isMobile = (t?: string) => /^0[67]/.test(normPhone(t))
 // Couleur de priorité (barre gauche) : client (vert) · à contacter (orange) · contacté (bleu) · sans coordonnées (gris)
-const priorityColor = (c: Client) => c.statut !== 'prospect' ? '#16A34A' : isContacted(c) ? '#2563EB' : hasContact(c) ? ORANGE : '#CBD5E1'
+const priorityColor = (c: Client) => c.statut !== 'prospect' ? 'var(--cms-ok-fg)' : isContacted(c) ? 'var(--cms-info-fg)' : hasContact(c) ? ORANGE : 'var(--cms-faint)'
 
 // ── Code couleur par catégorie de secteur (avatar + puce secteur) ──
 const CAT_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
-  food: { bg: '#FEF3C7', fg: '#B45309', label: 'Restauration & alimentation' },
+  food: { bg: 'var(--cms-warn-bg)', fg: 'var(--cms-warn-fg)', label: 'Restauration & alimentation' },
   beaute: { bg: '#FCE7F3', fg: '#BE185D', label: 'Beauté & bien-être' },
   sante: { bg: '#CCFBF1', fg: '#0F766E', label: 'Santé' },
   btp: { bg: '#DBEAFE', fg: '#1D4ED8', label: 'Artisanat & BTP' },
@@ -33,7 +33,7 @@ const CAT_STYLE: Record<string, { bg: string; fg: string; label: string }> = {
   commerce: { bg: '#EDE9FE', fg: '#6D28D9', label: 'Commerce' },
   pro: { bg: '#D1FAE5', fg: '#047857', label: 'Services pro' },
   tourisme: { bg: '#CFFAFE', fg: '#0E7490', label: 'Tourisme' },
-  autre: { bg: '#F1F5F9', fg: '#475569', label: 'Autre' },
+  autre: { bg: 'var(--cms-surface-3)', fg: '#475569', label: 'Autre' },
 }
 const SECTOR_CAT: Record<string, keyof typeof CAT_STYLE> = {
   restaurant: 'food', 'restauration rapide': 'food', 'bar / café': 'food', pizzeria: 'food', traiteur: 'food', boulangerie: 'food', 'pâtisserie': 'food', boucherie: 'food', caviste: 'food', 'épicerie fine': 'food',
@@ -136,38 +136,39 @@ export default function CmsClientsPage() {
   const paged = filtered.slice(page * PER, page * PER + PER)
 
   const inputCls = 'w-full px-3 py-2 rounded-lg text-sm outline-none transition-colors'
-  const inputStyle = { border: '1px solid #E5E7EB', background: '#fff', color: '#111827' }
+  const inputStyle = { border: '1px solid var(--cms-border-2)', background: 'var(--cms-card)', color: 'var(--cms-ink)' }
 
   if (viewing) return <ClientDossier client={viewing} onBack={() => { setViewing(null); load() }} />
 
   if (editing) return (
     <div>
       <div className="mb-6">
-        <button onClick={() => setEditing(null)} className="text-xs mb-2 flex items-center gap-1" style={{ color: '#9CA3AF' }}>← Retour aux clients</button>
-        <h1 className="text-xl font-bold" style={{ color: '#111827' }}>{editing === 'new' ? 'Nouveau client' : 'Modifier le client'}</h1>
+        <button onClick={() => setEditing(null)} className="text-xs mb-2 flex items-center gap-1" style={{ color: 'var(--cms-muted)' }}>← Retour aux clients</button>
+        <p className="cms-eyebrow">CRM</p>
+        <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>{editing === 'new' ? 'Nouveau client' : 'Modifier le client'}</h1>
       </div>
-      <form onSubmit={save} className="rounded-xl p-6 space-y-5 max-w-2xl" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+      <form onSubmit={save} className="rounded-xl p-6 space-y-5 max-w-2xl" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
         <div className="grid md:grid-cols-2 gap-4">
           {([['Nom *', 'nom', true], ['Email', 'email', false], ['Téléphone', 'telephone', false], ['Entreprise', 'entreprise', false], ['Secteur', 'secteur', false]] as [string, keyof typeof EMPTY, boolean][]).map(([label, name, req]) => (
             <div key={name}>
-              <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: '#6B7280' }}>{label}</label>
+              <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: 'var(--cms-ink-2)' }}>{label}</label>
               <input required={req} value={form[name] as string} onChange={e => setForm(p => ({ ...p, [name]: e.target.value }))} className={inputCls} style={inputStyle} />
             </div>
           ))}
           <div>
-            <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: '#6B7280' }}>Statut</label>
+            <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: 'var(--cms-ink-2)' }}>Statut</label>
             <select value={form.statut} onChange={e => setForm(p => ({ ...p, statut: e.target.value as typeof STATUTS[number] }))} className={inputCls} style={inputStyle}>
               {STATUTS.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
         </div>
         <div>
-          <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: '#6B7280' }}>Notes</label>
+          <label className="text-xs font-semibold block mb-1.5 uppercase tracking-wide" style={{ color: 'var(--cms-ink-2)' }}>Notes</label>
           <textarea value={form.notes} onChange={e => setForm(p => ({ ...p, notes: e.target.value }))} rows={4} className={`${inputCls} resize-none`} style={inputStyle} />
         </div>
         <div className="flex gap-3 pt-2">
           <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white disabled:opacity-50 hover:opacity-90" style={{ background: ORANGE }}>{saving ? 'Sauvegarde...' : 'Sauvegarder'}</button>
-          <button type="button" onClick={() => setEditing(null)} className="px-5 py-2 rounded-lg text-sm" style={{ border: '1px solid #E5E7EB', color: '#6B7280', background: '#fff' }}>Annuler</button>
+          <button type="button" onClick={() => setEditing(null)} className="px-5 py-2 rounded-lg text-sm" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)', background: 'var(--cms-card)' }}>Annuler</button>
         </div>
       </form>
     </div>
@@ -175,9 +176,9 @@ export default function CmsClientsPage() {
 
   const kpis = [
     { key: 'a_contacter' as Segment, label: 'À contacter', value: counts.a_contacter, icon: Flame, color: ORANGE, hint: 'joignables, pas encore relancés' },
-    { key: 'contactes' as Segment, label: 'Contactés', value: counts.contactes, icon: CheckCircle2, color: '#2563EB', hint: 'un email a été envoyé' },
-    { key: 'clients' as Segment, label: 'Clients', value: counts.clients, icon: Users, color: '#16A34A', hint: 'convertis' },
-    { key: 'tous' as Segment, label: 'Total base', value: counts.tous, icon: UserPlus, color: '#64748B', hint: 'prospects + clients' },
+    { key: 'contactes' as Segment, label: 'Contactés', value: counts.contactes, icon: CheckCircle2, color: 'var(--cms-info-fg)', hint: 'un email a été envoyé' },
+    { key: 'clients' as Segment, label: 'Clients', value: counts.clients, icon: Users, color: 'var(--cms-ok-fg)', hint: 'convertis' },
+    { key: 'tous' as Segment, label: 'Total base', value: counts.tous, icon: UserPlus, color: 'var(--cms-muted)', hint: 'prospects + clients' },
   ]
   const chips: { key: Segment; label: string; n: number }[] = [
     { key: 'tous', label: 'Tous', n: counts.tous },
@@ -186,10 +187,10 @@ export default function CmsClientsPage() {
     { key: 'contactes', label: 'Contactés', n: counts.contactes },
     { key: 'clients', label: 'Clients', n: counts.clients },
     { key: 'sans_coord', label: 'Sans coordonnées', n: counts.sans_coord },
-    { key: 'sms', label: '📱 SMS-ready', n: counts.sms },
-    { key: 'email', label: '📧 Email-ready', n: counts.email },
-    { key: 'recherche', label: '🔎 À rechercher', n: counts.recherche },
-    { key: 'ecarter', label: '🗑️ À écarter', n: counts.ecarter },
+    { key: 'sms', label: 'SMS-ready', n: counts.sms },
+    { key: 'email', label: 'Email-ready', n: counts.email },
+    { key: 'recherche', label: 'À rechercher', n: counts.recherche },
+    { key: 'ecarter', label: 'À écarter', n: counts.ecarter },
   ]
 
   return (
@@ -197,16 +198,17 @@ export default function CmsClientsPage() {
       {/* Header */}
       <div className="mb-5 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Clients & Prospects</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>{counts.clients} client(s) · {counts.prospects} prospect(s)</p>
+          <p className="cms-eyebrow">CRM</p>
+          <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Clients <span className="cms-accent">& prospects</span></h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--cms-muted)' }}>{counts.clients} client(s) · {counts.prospects} prospect(s)</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {selMode && selected.size > 0 && (
-            <button onClick={delSelected} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: '#DC2626' }}>
+            <button onClick={delSelected} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: 'var(--cms-danger-fg)' }}>
               <Trash2 className="w-4 h-4" /> Supprimer ({selected.size})
             </button>
           )}
-          <button onClick={() => { setSelMode(m => !m); setSelected(new Set()) }} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid #E5E7EB', color: selMode ? '#DC2626' : '#6B7280', background: '#fff' }}>
+          <button onClick={() => { setSelMode(m => !m); setSelected(new Set()) }} className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-lg" style={{ border: '1px solid var(--cms-border-2)', color: selMode ? 'var(--cms-danger-fg)' : 'var(--cms-ink-2)', background: 'var(--cms-card)' }}>
             {selMode ? 'Annuler' : 'Sélectionner'}
           </button>
           <button onClick={() => open()} className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white hover:opacity-90" style={{ background: ORANGE }}>
@@ -221,13 +223,13 @@ export default function CmsClientsPage() {
           const on = segment === k.key
           return (
             <button key={k.key} onClick={() => setSegment(k.key)} className="text-left rounded-xl p-4 transition-all"
-              style={{ background: '#fff', border: `1px solid ${on ? k.color : '#E9ECEF'}`, boxShadow: on ? `0 0 0 1px ${k.color}` : 'none' }}>
+              style={{ background: 'var(--cms-card)', border: `1px solid ${on ? k.color : 'var(--cms-border)'}`, boxShadow: on ? `0 0 0 1px ${k.color}` : 'none' }}>
               <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs" style={{ color: '#9CA3AF' }}>{k.label}</span>
+                <span className="text-xs" style={{ color: 'var(--cms-muted)' }}>{k.label}</span>
                 <k.icon className="w-4 h-4" style={{ color: k.color }} />
               </div>
               <p className="text-2xl font-bold leading-none" style={{ color: k.color }}>{k.value}</p>
-              <p className="text-[11px] mt-1.5" style={{ color: '#9CA3AF' }}>{k.hint}</p>
+              <p className="text-[11px] mt-1.5" style={{ color: 'var(--cms-muted)' }}>{k.hint}</p>
             </button>
           )
         })}
@@ -238,14 +240,14 @@ export default function CmsClientsPage() {
         {chips.map(c => (
           <button key={c.key} onClick={() => setSegment(c.key)}
             className="px-3 py-1.5 rounded-full text-xs font-medium transition-colors flex items-center gap-1.5"
-            style={{ background: segment === c.key ? '#0F172A' : '#fff', color: segment === c.key ? '#fff' : '#6B7280', border: '1px solid #E5E7EB' }}>
-            {c.label} <span className="text-[10px] px-1.5 rounded-full" style={{ background: segment === c.key ? 'rgba(255,255,255,.2)' : '#F1F5F9' }}>{c.n}</span>
+            style={{ background: segment === c.key ? 'var(--cms-ink)' : 'var(--cms-card)', color: segment === c.key ? 'var(--cms-card)' : 'var(--cms-ink-2)', border: '1px solid var(--cms-border-2)' }}>
+            {c.label} <span className="text-[10px] px-1.5 rounded-full" style={{ background: segment === c.key ? 'rgba(255,255,255,.2)' : 'var(--cms-surface-3)' }}>{c.n}</span>
           </button>
         ))}
       </div>
       <div className="flex flex-col sm:flex-row gap-2 mb-4">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: '#9CA3AF' }} />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style={{ color: 'var(--cms-muted)' }} />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Rechercher (nom, ville, email, secteur…)"
             className="w-full pl-9 pr-4 py-2 rounded-lg text-sm outline-none" style={inputStyle} />
         </div>
@@ -258,10 +260,10 @@ export default function CmsClientsPage() {
           <option value="recent">Plus récents</option>
           <option value="nom">Nom (A-Z)</option>
         </select>
-        <div className="flex rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid #E5E7EB' }}>
+        <div className="flex rounded-lg overflow-hidden shrink-0" style={{ border: '1px solid var(--cms-border-2)' }}>
           {([['cards', LayoutGrid], ['list', List]] as const).map(([v, Icon]) => (
             <button key={v} onClick={() => setView(v)} className="px-3 py-2" title={v === 'cards' ? 'Cartes' : 'Liste'}
-              style={{ background: view === v ? '#0F172A' : '#fff', color: view === v ? '#fff' : '#9CA3AF' }}>
+              style={{ background: view === v ? 'var(--cms-ink)' : 'var(--cms-card)', color: view === v ? 'var(--cms-card)' : 'var(--cms-muted)' }}>
               <Icon className="w-4 h-4" />
             </button>
           ))}
@@ -269,22 +271,22 @@ export default function CmsClientsPage() {
       </div>
 
       {/* Légende code couleur */}
-      <div className="rounded-xl p-3 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-        <span className="font-semibold" style={{ color: '#6B7280' }}>Priorité (barre gauche) :</span>
-        {([['à contacter', ORANGE], ['contacté', '#2563EB'], ['client', '#16A34A'], ['sans coordonnées', '#CBD5E1']] as [string, string][]).map(([l, col]) => (
-          <span key={l} className="flex items-center gap-1" style={{ color: '#6B7280' }}><span className="w-2.5 h-2.5 rounded-sm" style={{ background: col }} />{l}</span>
+      <div className="rounded-xl p-3 mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px]" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
+        <span className="font-semibold" style={{ color: 'var(--cms-ink-2)' }}>Priorité (barre gauche) :</span>
+        {([['à contacter', ORANGE], ['contacté', 'var(--cms-info-fg)'], ['client', 'var(--cms-ok-fg)'], ['sans coordonnées', 'var(--cms-faint)']] as [string, string][]).map(([l, col]) => (
+          <span key={l} className="flex items-center gap-1" style={{ color: 'var(--cms-ink-2)' }}><span className="w-2.5 h-2.5 rounded-sm" style={{ background: col }} />{l}</span>
         ))}
-        <span className="w-px h-4" style={{ background: '#E5E7EB' }} />
-        <span className="font-semibold" style={{ color: '#6B7280' }}>Secteurs :</span>
+        <span className="w-px h-4" style={{ background: 'var(--cms-border-2)' }} />
+        <span className="font-semibold" style={{ color: 'var(--cms-ink-2)' }}>Secteurs :</span>
         {Object.values(CAT_STYLE).filter(c => c.label !== 'Autre').map(c => (
           <span key={c.label} className="px-1.5 py-0.5 rounded-full font-medium" style={{ background: c.bg, color: c.fg }}>{c.label}</span>
         ))}
-        <span className="w-px h-4" style={{ background: '#E5E7EB' }} />
-        <span style={{ color: '#6B7280' }}>Contact : <b style={{ color: '#16A34A' }}>mobile/pro</b> · <b style={{ color: '#D97706' }}>fixe/perso</b></span>
+        <span className="w-px h-4" style={{ background: 'var(--cms-border-2)' }} />
+        <span style={{ color: 'var(--cms-ink-2)' }}>Contact : <b style={{ color: 'var(--cms-ok-fg)' }}>mobile/pro</b> · <b style={{ color: 'var(--cms-warn-fg)' }}>fixe/perso</b></span>
       </div>
 
       {paged.length === 0 && (
-        <div className="text-center py-16 rounded-xl text-sm" style={{ background: '#fff', border: '1px solid #E9ECEF', color: '#9CA3AF' }}>Aucun résultat pour ce filtre.</div>
+        <div className="text-center py-16 rounded-xl text-sm" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)', color: 'var(--cms-muted)' }}>Aucun résultat pour ce filtre.</div>
       )}
 
       {/* Vue CARTES */}
@@ -295,49 +297,49 @@ export default function CmsClientsPage() {
             const sel = selected.has(c.id)
             return (
               <div key={c.id} onClick={() => rowClick(c)} className="group relative rounded-xl p-4 cursor-pointer transition-shadow hover:shadow-md"
-                style={{ background: sel ? '#FFF7F5' : '#fff', border: `1px solid ${sel ? ORANGE : '#E9ECEF'}`, borderLeft: `3px solid ${prio}` }}>
+                style={{ background: sel ? 'var(--cms-brand-wash)' : 'var(--cms-card)', border: `1px solid ${sel ? ORANGE : 'var(--cms-border)'}`, borderLeft: `3px solid ${prio}` }}>
                 {/* Sélection (mode lot) + suppression rapide */}
                 {selMode && (
-                  <span className="absolute top-2 left-2 w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold" style={{ background: sel ? ORANGE : '#fff', border: `1.5px solid ${sel ? ORANGE : '#CBD5E1'}`, color: '#fff' }}>{sel ? '✓' : ''}</span>
+                  <span className="absolute top-2 left-2 w-5 h-5 rounded flex items-center justify-center text-white" style={{ background: sel ? ORANGE : 'var(--cms-card)', border: `1.5px solid ${sel ? ORANGE : 'var(--cms-faint)'}` }}>{sel && <Check className="w-3 h-3" strokeWidth={3} />}</span>
                 )}
                 {!selMode && (
-                  <button onClick={e => { e.stopPropagation(); del(c.id) }} title="Supprimer" className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: '#9CA3AF' }}
-                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
-                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                  <button onClick={e => { e.stopPropagation(); del(c.id) }} title="Supprimer" className="absolute top-2 right-2 p-1.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: 'var(--cms-muted)' }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-danger-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-danger-fg)' }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}>
                     <Trash2 className="w-3.5 h-3.5" />
                   </button>
                 )}
                 <div className="flex items-start gap-3">
                   <div className="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                   <div className="min-w-0 flex-1">
-                    <p className="font-semibold truncate" style={{ color: '#111827' }}>{c.nom}</p>
-                    <p className="text-xs truncate" style={{ color: '#9CA3AF' }}>{c.entreprise || '—'}</p>
+                    <p className="font-semibold truncate" style={{ color: 'var(--cms-ink)' }}>{c.nom}</p>
+                    <p className="text-xs truncate" style={{ color: 'var(--cms-muted)' }}>{c.entreprise || '—'}</p>
                   </div>
-                  {score > 0 && <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: score >= 8 ? 'rgba(244,82,30,.1)' : '#F1F5F9', color: score >= 8 ? ORANGE : '#94A3B8' }}>{score}/10</span>}
+                  {score > 0 && <span className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0" style={{ background: score >= 8 ? 'rgba(244,82,30,.1)' : 'var(--cms-surface-3)', color: score >= 8 ? ORANGE : 'var(--cms-faint)' }}>{score}/10</span>}
                 </div>
                 <div className="flex items-center gap-2 mt-3 text-xs flex-wrap">
                   {c.secteur && <span className="px-2 py-0.5 rounded-full font-medium" style={{ background: ss.bg, color: ss.fg }}>{c.secteur}</span>}
-                  {commune && <span className="flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</span>}
+                  {commune && <span className="flex items-center gap-1" style={{ color: 'var(--cms-muted)' }}><MapPin className="w-3 h-3" />{commune}</span>}
                 </div>
                 <div className="mt-3 space-y-1 text-xs">
                   {c.telephone ? (
-                    <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: '#374151' }}>
-                      <Phone className="w-3.5 h-3.5" style={{ color: '#16A34A' }} /> {c.telephone}
-                      <span className="text-[9px] px-1 rounded" style={{ background: '#F1F5F9', color: '#64748B' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span>
+                    <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: 'var(--cms-ink-2)' }}>
+                      <Phone className="w-3.5 h-3.5" style={{ color: 'var(--cms-ok-fg)' }} /> {c.telephone}
+                      <span className="text-[9px] px-1 rounded" style={{ background: 'var(--cms-surface-3)', color: 'var(--cms-muted)' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span>
                     </a>
                   ) : null}
                   {c.email ? (
-                    <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: '#374151' }}>
-                      <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /> <span className="truncate">{c.email}</span>
-                      <span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{ek === 'pro' ? 'pro' : 'perso'}</span>
+                    <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1.5 hover:underline" style={{ color: 'var(--cms-ink-2)' }}>
+                      <Mail className="w-3.5 h-3.5 shrink-0" style={{ color: ek === 'pro' ? 'var(--cms-ok-fg)' : 'var(--cms-warn-fg)' }} /> <span className="truncate">{c.email}</span>
+                      <span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' } : { background: 'var(--cms-warn-bg)', color: 'var(--cms-warn-fg)' }}>{ek === 'pro' ? 'pro' : 'perso'}</span>
                     </a>
                   ) : null}
-                  {!hasContact(c) && <span className="flex items-center gap-1.5" style={{ color: '#B45309' }}><Search className="w-3.5 h-3.5" /> coordonnées à trouver</span>}
+                  {!hasContact(c) && <span className="flex items-center gap-1.5" style={{ color: 'var(--cms-warn-fg)' }}><Search className="w-3.5 h-3.5" /> coordonnées à trouver</span>}
                 </div>
-                <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid #F3F4F6' }}>
+                <div className="flex items-center justify-between mt-3 pt-3" style={{ borderTop: '1px solid var(--cms-surface-2)' }}>
                   <div className="flex items-center gap-1.5">
                     <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span>
-                    {isContacted(c) && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1" style={{ background: '#EFF6FF', color: '#2563EB' }}><Send className="w-2.5 h-2.5" />contacté</span>}
+                    {isContacted(c) && <span className="text-[10px] px-2 py-0.5 rounded-full font-medium flex items-center gap-1" style={{ background: 'var(--cms-info-bg)', color: 'var(--cms-info-fg)' }}><Send className="w-2.5 h-2.5" />contacté</span>}
                   </div>
                   <span className="text-xs font-semibold flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity" style={{ color: ORANGE }}>Ouvrir <ArrowUpRight className="w-3.5 h-3.5" /></span>
                 </div>
@@ -349,12 +351,12 @@ export default function CmsClientsPage() {
 
       {/* Vue LISTE */}
       {view === 'list' && paged.length > 0 && (
-        <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
+        <div className="rounded-xl overflow-hidden" style={{ background: 'var(--cms-card)', border: '1px solid var(--cms-border)' }}>
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F9FAFB' }}>
+              <tr style={{ borderBottom: '1px solid var(--cms-surface-2)', background: 'var(--cms-surface-2)' }}>
                 {['Nom', 'Secteur', 'Coordonnées', 'Suivi', 'Score', ''].map(h => (
-                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#9CA3AF' }}>{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: 'var(--cms-muted)' }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -363,40 +365,40 @@ export default function CmsClientsPage() {
                 const commune = parseCommune(c.notes); const score = parseScore(c.notes); const ek = emailKind(c.email); const prio = priorityColor(c); const ss = sectorStyle(c.secteur)
                 return (
                   <tr key={c.id} onClick={() => rowClick(c)} className="cursor-pointer"
-                    style={{ borderBottom: i < paged.length - 1 ? '1px solid #F3F4F6' : 'none', borderLeft: `3px solid ${prio}`, background: selected.has(c.id) ? '#FFF7F5' : 'transparent' }}
-                    onMouseEnter={e => { if (!selected.has(c.id)) (e.currentTarget as HTMLElement).style.background = '#FAFAFA' }}
+                    style={{ borderBottom: i < paged.length - 1 ? '1px solid var(--cms-surface-2)' : 'none', borderLeft: `3px solid ${prio}`, background: selected.has(c.id) ? 'var(--cms-brand-wash)' : 'transparent' }}
+                    onMouseEnter={e => { if (!selected.has(c.id)) (e.currentTarget as HTMLElement).style.background = 'var(--cms-surface-2)' }}
                     onMouseLeave={e => { if (!selected.has(c.id)) (e.currentTarget as HTMLElement).style.background = 'transparent' }}>
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
-                        {selMode && <span className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold shrink-0" style={{ background: selected.has(c.id) ? ORANGE : '#fff', border: `1.5px solid ${selected.has(c.id) ? ORANGE : '#CBD5E1'}`, color: '#fff' }}>{selected.has(c.id) ? '✓' : ''}</span>}
+                        {selMode && <span className="w-5 h-5 rounded flex items-center justify-center text-white shrink-0" style={{ background: selected.has(c.id) ? ORANGE : 'var(--cms-card)', border: `1.5px solid ${selected.has(c.id) ? ORANGE : 'var(--cms-faint)'}` }}>{selected.has(c.id) && <Check className="w-3 h-3" strokeWidth={3} />}</span>}
                         <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white shrink-0" style={{ background: ss.fg }}>{c.nom.charAt(0).toUpperCase()}</div>
                         <div className="min-w-0">
-                          <p className="font-medium truncate" style={{ color: '#111827' }}>{c.nom}</p>
-                          {commune && <p className="text-xs flex items-center gap-1" style={{ color: '#9CA3AF' }}><MapPin className="w-3 h-3" />{commune}</p>}
+                          <p className="font-medium truncate" style={{ color: 'var(--cms-ink)' }}>{c.nom}</p>
+                          {commune && <p className="text-xs flex items-center gap-1" style={{ color: 'var(--cms-muted)' }}><MapPin className="w-3 h-3" />{commune}</p>}
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">{c.secteur ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: ss.bg, color: ss.fg }}>{c.secteur}</span> : <span className="text-xs" style={{ color: '#9CA3AF' }}>—</span>}</td>
-                    <td className="px-4 py-3 text-xs" style={{ color: '#6B7280' }}>
-                      {c.telephone ? <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Phone className="w-3 h-3" style={{ color: isMobile(c.telephone) ? '#16A34A' : '#64748B' }} />{c.telephone}<span className="text-[9px] px-1 rounded" style={{ background: '#F1F5F9', color: '#64748B' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span></a> : null}
-                      {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Mail className="w-3 h-3 shrink-0" style={{ color: ek === 'pro' ? '#16A34A' : '#D97706' }} /><span className="truncate max-w-[170px]">{c.email}</span><span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: '#DCFCE7', color: '#16A34A' } : { background: '#FEF3C7', color: '#D97706' }}>{ek === 'pro' ? 'pro' : 'perso'}</span></a> : null}
-                      {!hasContact(c) && <span style={{ color: '#B45309' }}>à trouver</span>}
+                    <td className="px-4 py-3">{c.secteur ? <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: ss.bg, color: ss.fg }}>{c.secteur}</span> : <span className="text-xs" style={{ color: 'var(--cms-muted)' }}>—</span>}</td>
+                    <td className="px-4 py-3 text-xs" style={{ color: 'var(--cms-ink-2)' }}>
+                      {c.telephone ? <a href={`tel:${normPhone(c.telephone)}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Phone className="w-3 h-3" style={{ color: isMobile(c.telephone) ? 'var(--cms-ok-fg)' : 'var(--cms-muted)' }} />{c.telephone}<span className="text-[9px] px-1 rounded" style={{ background: 'var(--cms-surface-3)', color: 'var(--cms-muted)' }}>{isMobile(c.telephone) ? 'mobile' : 'fixe'}</span></a> : null}
+                      {c.email ? <a href={`mailto:${c.email}`} onClick={e => e.stopPropagation()} className="flex items-center gap-1 hover:underline"><Mail className="w-3 h-3 shrink-0" style={{ color: ek === 'pro' ? 'var(--cms-ok-fg)' : 'var(--cms-warn-fg)' }} /><span className="truncate max-w-[170px]">{c.email}</span><span className="text-[9px] px-1 rounded shrink-0" style={ek === 'pro' ? { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' } : { background: 'var(--cms-warn-bg)', color: 'var(--cms-warn-fg)' }}>{ek === 'pro' ? 'pro' : 'perso'}</span></a> : null}
+                      {!hasContact(c) && <span style={{ color: 'var(--cms-warn-fg)' }}>à trouver</span>}
                     </td>
                     <td className="px-4 py-3">
                       <span className={`text-[10px] px-2 py-0.5 rounded-full font-medium ${COLORS[c.statut]}`}>{c.statut}</span>
-                      {isContacted(c) && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: '#EFF6FF', color: '#2563EB' }}>contacté</span>}
+                      {isContacted(c) && <span className="ml-1 text-[10px] px-1.5 py-0.5 rounded-full font-medium" style={{ background: 'var(--cms-info-bg)', color: 'var(--cms-info-fg)' }}>contacté</span>}
                     </td>
-                    <td className="px-4 py-3">{score > 0 && <span className="text-xs font-bold" style={{ color: score >= 8 ? ORANGE : '#9CA3AF' }}>{score}/10</span>}</td>
+                    <td className="px-4 py-3">{score > 0 && <span className="text-xs font-bold" style={{ color: score >= 8 ? ORANGE : 'var(--cms-muted)' }}>{score}/10</span>}</td>
                     <td className="px-4 py-3" onClick={e => e.stopPropagation()}>
                       <div className="flex gap-1">
-                        <button onClick={() => open(c)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#F3F4F6'; (e.currentTarget as HTMLElement).style.color = '#374151' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                        <button onClick={() => open(c)} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-surface-2)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-ink-2)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}>
                           <Pencil className="w-3.5 h-3.5" />
                         </button>
-                        <button onClick={() => del(c.id)} className="p-1.5 rounded-md" style={{ color: '#9CA3AF' }}
-                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#FEF2F2'; (e.currentTarget as HTMLElement).style.color = '#EF4444' }}
-                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = '#9CA3AF' }}>
+                        <button onClick={() => del(c.id)} className="p-1.5 rounded-md" style={{ color: 'var(--cms-muted)' }}
+                          onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = 'var(--cms-danger-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-danger-fg)' }}
+                          onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = 'transparent'; (e.currentTarget as HTMLElement).style.color = 'var(--cms-muted)' }}>
                           <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
@@ -411,16 +413,16 @@ export default function CmsClientsPage() {
 
       {/* Pagination */}
       <div className="flex items-center justify-between mt-4 text-sm">
-        <span style={{ color: '#9CA3AF' }}>{filtered.length} résultat(s){pages > 1 ? ` · page ${page + 1}/${pages}` : ''}</span>
+        <span style={{ color: 'var(--cms-muted)' }}>{filtered.length} résultat(s){pages > 1 ? ` · page ${page + 1}/${pages}` : ''}</span>
         {pages > 1 && (
           <div className="flex gap-2">
-            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid #E5E7EB', color: '#374151' }}><ChevronLeft className="w-4 h-4" /></button>
-            <button onClick={() => setPage(p => Math.min(pages - 1, p + 1))} disabled={page >= pages - 1} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid #E5E7EB', color: '#374151' }}><ChevronRight className="w-4 h-4" /></button>
+            <button onClick={() => setPage(p => Math.max(0, p - 1))} disabled={page === 0} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}><ChevronLeft className="w-4 h-4" /></button>
+            <button onClick={() => setPage(p => Math.min(pages - 1, p + 1))} disabled={page >= pages - 1} className="p-2 rounded-lg disabled:opacity-40" style={{ border: '1px solid var(--cms-border-2)', color: 'var(--cms-ink-2)' }}><ChevronRight className="w-4 h-4" /></button>
           </div>
         )}
       </div>
 
-      <p className="text-xs mt-3" style={{ color: '#9CA3AF' }}>💡 Clique une carte pour ouvrir la fiche (analyse, appel, SMS, email perso + suivi). La barre colorée à gauche = <span style={{ color: ORANGE }}>à contacter</span> · <span style={{ color: '#2563EB' }}>contacté</span> · <span style={{ color: '#16A34A' }}>client</span> · <span style={{ color: '#94A3B8' }}>sans coordonnées</span>.</p>
+      <p className="text-xs mt-3" style={{ color: 'var(--cms-muted)' }}>Clique une carte pour ouvrir la fiche (analyse, appel, SMS, email perso + suivi). La barre colorée à gauche = <span style={{ color: ORANGE }}>à contacter</span> · <span style={{ color: 'var(--cms-info-fg)' }}>contacté</span> · <span style={{ color: 'var(--cms-ok-fg)' }}>client</span> · <span style={{ color: 'var(--cms-faint)' }}>sans coordonnées</span>.</p>
     </div>
   )
 }
