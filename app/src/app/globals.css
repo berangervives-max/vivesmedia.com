@@ -215,6 +215,10 @@
   --phase-recette-bg: #FBEEE6;    --phase-recette-fg: #C0562A;
   --phase-livraison-bg: #EAF5EE;  --phase-livraison-fg: #2E8B5A;
   --phase-maintenance-bg: #F0EEEB;--phase-maintenance-fg: #6E6862;
+  --sem-ok-bg: #EAF5EE;   --sem-ok-fg: #2E8B5A;
+  --sem-warn-bg: #FBF4E6; --sem-warn-fg: #A9781F;
+  --sem-danger-bg: #FCECEC; --sem-danger-fg: #C4392F;
+  --sem-info-bg: #EEF3FB; --sem-info-fg: #3A6DB0;
   --hub-shadow: 0 1px 2px rgb(20 16 12 / 0.04), 0 16px 44px -24px rgb(20 16 12 / 0.20);
   --hub-glow: 0 8px 26px -8px oklch(0.593 0.232 37 / 0.5);
 }
