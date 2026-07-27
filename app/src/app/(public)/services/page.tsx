@@ -2,10 +2,10 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
 import { creationFormules, iaServices, recurrentServices, maintenancePlans } from '@/data/tarifs-data'
+import { getLivePrices, applyLivePrices } from '@/lib/services-live'
 
-// Source de vérité partagée avec /tarifs (cf. src/data/tarifs-data.ts).
-const ecommerce = creationFormules[0]
-const catalogueVitrine = creationFormules.slice(1)
+// ISR : page pré-rendue (SEO) qui lit le catalogue /cms/services toutes les heures.
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Services & Tarifs — Création de sites web sur-mesure',
@@ -13,7 +13,11 @@ export const metadata: Metadata = {
   alternates: { canonical: 'https://vivesmedia.com/services' },
 }
 
-export default function ServicesPage() {
+export default async function ServicesPage() {
+  const live = await getLivePrices()
+  const formules = applyLivePrices(creationFormules, live)
+  const ecommerce = formules[0]
+  const catalogueVitrine = formules.slice(1)
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

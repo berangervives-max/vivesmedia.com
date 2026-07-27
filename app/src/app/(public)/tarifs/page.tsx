@@ -2,7 +2,11 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Check, Minus } from 'lucide-react'
 import { creationFormules, recurrentServices, maintenancePlans, tarifsFaq } from '@/data/tarifs-data'
+import { getLivePrices, applyLivePrices } from '@/lib/services-live'
 import TrackView from '@/components/analytics/TrackView'
+
+// ISR : la page reste pré-rendue (SEO) mais lit le catalogue /cms/services toutes les heures.
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'Tarifs création de site internet à Avignon — prix transparents',
@@ -31,10 +35,13 @@ function Cell({ value }: { value: string | boolean }) {
   return <span>{value}</span>
 }
 
-export default function TarifsPage() {
-  const formules = creationFormules // [ecommerce, catalogue, vitrine]
+export default async function TarifsPage() {
+  const live = await getLivePrices()
+  const formules = applyLivePrices(creationFormules, live) // [ecommerce, catalogue, vitrine], prix vivants
   // Ordre d'affichage du comparatif : vitrine → catalogue → e-commerce (prix croissant)
   const ordered = [formules[2], formules[1], formules[0]]
+  // La ligne « Paiement unique » du comparatif suit les prix vivants des formules.
+  const comparisonRows = comparison.rows.map((r, i) => (i === 0 ? { ...r, values: [ordered[0].price, ordered[1].price, ordered[2].price] } : r))
 
   const faqSchema = {
     '@context': 'https://schema.org',
@@ -85,7 +92,7 @@ export default function TarifsPage() {
               </tr>
             </thead>
             <tbody>
-              {comparison.rows.map((row, ri) => (
+              {comparisonRows.map((row, ri) => (
                 <tr key={row.label} className={ri % 2 === 1 ? 'bg-muted/30' : 'bg-white'}>
                   <td className="p-5 font-medium text-foreground">{row.label}</td>
                   {row.values.map((v, ci) => (
