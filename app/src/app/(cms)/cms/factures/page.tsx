@@ -4,7 +4,8 @@ import { facturesService } from '@/services/supabase.service'
 import { sendFacture } from '@/services/email.service'
 import type { Facture, FactureLigne } from '@/types'
 import { Plus, Trash2, Send, Pencil, Download, ExternalLink, CheckCircle2, ArrowLeft } from 'lucide-react'
-import { genererFacturePdf } from '@/lib/facture-pdf'
+// Moteur PDF premium chargé à la demande (allège le bundle de l'onglet)
+const telechargerFacturePdf = (f: import('@/types').Facture) => import('@/lib/facture-pdf-pro').then(m => m.genererFacturePdfPro(f))
 
 const STATUTS = ['brouillon', 'envoyee', 'payee', 'en_retard', 'annulee'] as const
 const ST: Record<string, { bg: string; fg: string; label: string }> = {
@@ -199,7 +200,7 @@ export default function CmsFacturesPage() {
                   <div className="flex gap-1">
                     {[
                       ...(f.statut !== 'payee' && f.statut !== 'annulee' ? [{ icon: CheckCircle2, onClick: () => facturesService.update(f.id, { statut: 'payee' }).then(load), hb: 'var(--cms-ok-bg)', hc: 'var(--cms-ok-fg)' }] : []),
-                      { icon: Download, onClick: () => genererFacturePdf(f), hb: 'var(--cms-brand-wash)', hc: 'var(--cms-brand)' },
+                      { icon: Download, onClick: () => telechargerFacturePdf(f), hb: 'var(--cms-brand-wash)', hc: 'var(--cms-brand)' },
                       { icon: Pencil, onClick: () => open(f), hb: 'var(--cms-surface-2)', hc: 'var(--cms-ink)' },
                       { icon: Send, onClick: () => sendEmail(f), hb: 'var(--cms-info-bg)', hc: 'var(--cms-info-fg)' },
                       { icon: Trash2, onClick: () => facturesService.delete(f.id).then(load), hb: 'var(--cms-danger-bg)', hc: 'var(--cms-danger-fg)' },
