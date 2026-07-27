@@ -88,6 +88,9 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
     router.replace('/cms/login')
   }
 
+  // Page de connexion : plein écran autonome, JAMAIS la sidebar/topbar autour.
+  if (pathname === '/cms/login') return <>{children}</>
+
   if (checking) return (
     <div className="cms-shell min-h-screen flex items-center justify-center" style={{ background: 'var(--cms-bg)' }}>
       <div className="w-5 h-5 border-2 border-t-transparent rounded-full animate-spin" style={{ borderColor: '#F4521E', borderTopColor: 'transparent' }} />
