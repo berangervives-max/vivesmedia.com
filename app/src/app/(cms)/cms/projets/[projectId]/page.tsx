@@ -8,6 +8,7 @@ import PhaseSelector from '@/components/admin/PhaseSelector'
 import FileUpload from '@/components/admin/FileUpload'
 import VideoManager from '@/components/admin/VideoManager'
 import ReviewButton from '@/components/admin/ReviewButton'
+import EnrollmentPanel from '@/components/admin/EnrollmentPanel'
 
 const TICKET_PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-secondary text-muted-foreground',
@@ -19,10 +20,14 @@ export default async function CmsProjetDetailPage({ params }: { params: Promise<
   const { projectId } = await params
   const supabase = await createServerSupabaseClient()
 
-  const { data: project } = await supabase.from('projects').select('*, clients(name, email, company)').eq('id', projectId).single()
+  const { data: project } = await supabase.from('projects').select('*, clients(id, name, email, company)').eq('id', projectId).single()
   if (!project) notFound()
 
   const client = Array.isArray(project.clients) ? project.clients[0] : project.clients
+  const { data: enrollments } = client?.id
+    ? await supabase.from('course_enrollments').select('course_slug').eq('client_id', client.id)
+    : { data: [] as { course_slug: string }[] }
+  const enrolledSlugs = (enrollments ?? []).map((e: { course_slug: string }) => e.course_slug)
 
   const [{ data: phaseHistory }, { data: files }, { data: videos }, { data: tickets }, { data: form }] = await Promise.all([
     supabase.from('phase_history').select('*').eq('project_id', projectId).order('changed_at', { ascending: false }),
@@ -136,9 +141,17 @@ export default async function CmsProjetDetailPage({ params }: { params: Promise<
         </TabsContent>
 
         <TabsContent value="training">
-          <div className="hub-card p-6">
-            <p className="text-sm font-semibold text-foreground mb-4">Vidéos de formation</p>
-            <VideoManager projectId={projectId} initialVideos={videos ?? []} />
+          <div className="space-y-4">
+            <div className="hub-card p-6">
+              <p className="text-sm font-semibold text-foreground mb-4">Vidéos de formation (propres au projet)</p>
+              <VideoManager projectId={projectId} initialVideos={videos ?? []} />
+            </div>
+            {client?.id && (
+              <div className="hub-card p-6">
+                <p className="text-sm font-semibold text-foreground mb-1">Accès aux formations vivesmedia</p>
+                <EnrollmentPanel clientId={client.id} initialEnrolled={enrolledSlugs} />
+              </div>
+            )}
           </div>
         </TabsContent>
 
