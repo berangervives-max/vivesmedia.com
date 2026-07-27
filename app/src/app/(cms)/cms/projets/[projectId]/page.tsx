@@ -9,6 +9,7 @@ import FileUpload from '@/components/admin/FileUpload'
 import VideoManager from '@/components/admin/VideoManager'
 import ReviewButton from '@/components/admin/ReviewButton'
 import EnrollmentPanel from '@/components/admin/EnrollmentPanel'
+import FormationGenerator from '@/components/admin/FormationGenerator'
 
 const TICKET_PRIORITY_COLORS: Record<string, string> = {
   low: 'bg-secondary text-muted-foreground',
@@ -152,6 +153,7 @@ export default async function CmsProjetDetailPage({ params }: { params: Promise<
                 <EnrollmentPanel clientId={client.id} initialEnrolled={enrolledSlugs} />
               </div>
             )}
+            <FormationGenerator />
           </div>
         </TabsContent>
 
