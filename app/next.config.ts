@@ -56,18 +56,22 @@ const nextConfig: NextConfig = {
     ];
   },
   async rewrites() {
-    // Le Hub Client (projet Vercel vivesmedia-hub, basePath /hub) est servi
-    // sous la même adresse que le site et le CMS → une seule session admin.
-    return [
-      {
-        source: "/hub",
-        destination: "https://vivesmedia-hub.vercel.app/hub",
-      },
-      {
-        source: "/hub/:path*",
-        destination: "https://vivesmedia-hub.vercel.app/hub/:path*",
-      },
-    ];
+    // MIGRATION EN COURS : fusion du Hub Client (vivesmedia-hub) dans cette appli.
+    // Le rewrite est en `beforeFiles` → l'ancien Hub externe garde TOUJOURS la main
+    // sur /hub/* pendant qu'on construit les routes natives dormantes à côté.
+    // Bascule finale : retirer ces deux entrées → le natif prend le relais (zéro downtime).
+    return {
+      beforeFiles: [
+        {
+          source: "/hub",
+          destination: "https://vivesmedia-hub.vercel.app/hub",
+        },
+        {
+          source: "/hub/:path*",
+          destination: "https://vivesmedia-hub.vercel.app/hub/:path*",
+        },
+      ],
+    };
   },
 };
 
