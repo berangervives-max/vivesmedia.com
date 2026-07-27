@@ -16,80 +16,55 @@ export default function CmsNewsletterPage() {
   }
 
   const actifs = subs.filter(s => s.actif).length
+  const cardStyle = { background: 'var(--cms-card)', border: '1px solid var(--cms-border)', boxShadow: 'var(--cms-shadow)' }
 
   return (
     <div>
-      {/* Header */}
-      <div className="mb-5 flex items-center justify-between">
+      <div className="mb-5 flex items-start justify-between gap-3 flex-wrap">
         <div>
-          <h1 className="text-xl font-bold" style={{ color: '#111827' }}>Newsletter</h1>
-          <p className="text-sm mt-0.5" style={{ color: '#9CA3AF' }}>
-            <span style={{ color: '#10B981', fontWeight: 600 }}>{actifs} abonné(s) actif(s)</span>
-            {subs.length > actifs && ` · ${subs.length - actifs} désabonné(s)`}
+          <p className="cms-eyebrow">Marketing</p>
+          <h1 className="text-2xl font-bold tracking-tight mt-1" style={{ color: 'var(--cms-ink)' }}>Newsletter</h1>
+          <p className="text-sm mt-1" style={{ color: 'var(--cms-muted)' }}>
+            <b style={{ color: 'var(--cms-ok-fg)' }}>{actifs} abonné(s) actif(s)</b>{subs.length > actifs && ` · ${subs.length - actifs} désabonné(s)`}
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={exportCSV}
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg transition-colors"
-            style={{ border: '1px solid #E5E7EB', color: '#374151', background: '#fff' }}
-            onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#F9FAFB'}
-            onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = '#fff'}>
-            <Download className="w-4 h-4" /> Exporter CSV
-          </button>
-          <Link href="/cms/campagnes"
-            className="flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-lg text-white transition-opacity hover:opacity-90"
-            style={{ background: '#F4521E' }}>
-            <Send className="w-4 h-4" /> Envoyer une campagne
-          </Link>
+          <button onClick={exportCSV} className="cms-btn cms-btn-secondary cms-btn-sm"><Download className="w-4 h-4" /> Exporter CSV</button>
+          <Link href="/cms/campagnes" className="cms-btn cms-btn-primary"><Send className="w-4 h-4" /> Envoyer une campagne</Link>
         </div>
       </div>
 
-      {/* KPI Card */}
       <div className="grid grid-cols-3 gap-4 mb-5">
         {[
-          { label: 'Total inscrits', value: subs.length, color: '#3B82F6' },
-          { label: 'Actifs', value: actifs, color: '#10B981' },
-          { label: 'Désabonnés', value: subs.length - actifs, color: '#9CA3AF' },
+          { label: 'Total inscrits', value: subs.length, color: 'var(--cms-info-fg)' },
+          { label: 'Actifs', value: actifs, color: 'var(--cms-ok-fg)' },
+          { label: 'Désabonnés', value: subs.length - actifs, color: 'var(--cms-muted)' },
         ].map(k => (
-          <div key={k.label} className="rounded-xl p-4" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-            <p className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</p>
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>{k.label}</p>
+          <div key={k.label} className="rounded-2xl p-4" style={cardStyle}>
+            <p className="text-2xl font-bold tracking-tight" style={{ color: k.color }}>{k.value}</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--cms-muted)' }}>{k.label}</p>
           </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="rounded-xl overflow-hidden" style={{ background: '#fff', border: '1px solid #E9ECEF' }}>
-        <table className="w-full text-sm">
+      <div className="rounded-2xl overflow-x-auto" style={cardStyle}>
+        <table className="w-full text-sm" style={{ minWidth: 520 }}>
           <thead>
-            <tr style={{ borderBottom: '1px solid #F3F4F6', background: '#F9FAFB' }}>
+            <tr style={{ borderBottom: '1px solid var(--cms-border)', background: 'var(--cms-surface-2)' }}>
               {['Email', 'Date inscription', 'Statut'].map(h => (
-                <th key={h} className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#9CA3AF' }}>{h}</th>
+                <th key={h} className="text-left px-4 py-3 text-[0.7rem] font-semibold uppercase tracking-wider" style={{ color: 'var(--cms-muted)' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
-            {subs.length === 0 && (
-              <tr><td colSpan={3} className="text-center py-12 text-sm" style={{ color: '#9CA3AF' }}>Aucun abonné</td></tr>
-            )}
+            {subs.length === 0 && <tr><td colSpan={3} className="text-center py-12 text-sm" style={{ color: 'var(--cms-muted)' }}>Aucun abonné</td></tr>}
             {subs.map((s, i) => (
-              <tr key={s.id} style={{ borderBottom: i < subs.length - 1 ? '1px solid #F3F4F6' : 'none' }}
-                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = '#FAFAFA'}
+              <tr key={s.id} style={{ borderBottom: i < subs.length - 1 ? '1px solid var(--cms-border)' : 'none' }}
+                onMouseEnter={e => (e.currentTarget as HTMLElement).style.background = 'var(--cms-surface-2)'}
                 onMouseLeave={e => (e.currentTarget as HTMLElement).style.background = 'transparent'}>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <Mail className="w-4 h-4 shrink-0" style={{ color: '#9CA3AF' }} />
-                    <span className="font-medium" style={{ color: '#111827' }}>{s.email}</span>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>
-                  {new Date(s.date_inscription).toLocaleDateString('fr-FR')}
-                </td>
-                <td className="px-4 py-3">
-                  <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${s.actif ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                    {s.actif ? 'Actif' : 'Désabonné'}
-                  </span>
-                </td>
+                <td className="px-4 py-3"><div className="flex items-center gap-3"><Mail className="w-4 h-4 shrink-0" style={{ color: 'var(--cms-muted)' }} /><span className="font-medium" style={{ color: 'var(--cms-ink)' }}>{s.email}</span></div></td>
+                <td className="px-4 py-3 text-xs" style={{ color: 'var(--cms-faint)' }}>{new Date(s.date_inscription).toLocaleDateString('fr-FR')}</td>
+                <td className="px-4 py-3"><span className="cms-badge" style={s.actif ? { background: 'var(--cms-ok-bg)', color: 'var(--cms-ok-fg)' } : { background: 'var(--cms-surface-2)', color: 'var(--cms-muted)' }}>{s.actif ? 'Actif' : 'Désabonné'}</span></td>
               </tr>
             ))}
           </tbody>
