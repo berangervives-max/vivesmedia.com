@@ -86,7 +86,7 @@ export default function CmsLoginPage() {
   const labelStyle = { color: 'rgba(255,255,255,.4)' } as const
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ background: 'var(--cms-sidebar)' }}>
+    <div className="cms-shell min-h-screen flex items-center justify-center px-4 relative overflow-hidden" style={{ background: 'var(--cms-sidebar)' }}>
       {/* Halo orange doux */}
       <div className="absolute pointer-events-none" style={{ top: '-160px', left: '50%', transform: 'translateX(-50%)', width: 620, height: 420, borderRadius: '9999px', background: 'radial-gradient(circle, rgba(244,82,30,.22) 0%, transparent 70%)' }} />
 
