@@ -62,7 +62,7 @@ export default function AProposPage() {
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-7 py-3.5 rounded-full transition-all hover:opacity-90"
-              style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.22)' }}>
+              style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.22)' }}>
               Lancer mon projet <ArrowUpRight className="w-4 h-4" />
             </Link>
             <a href="https://www.linkedin.com/in/b%C3%A9ranger-viv%C3%A8s-3397b61aa/" target="_blank" rel="noopener noreferrer"

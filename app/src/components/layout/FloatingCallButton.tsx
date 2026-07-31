@@ -26,7 +26,7 @@ export default function FloatingCallButton() {
       onClick={() => { track('cta_clicked', { location: 'floating_desktop', label: 'Réserver un appel', destination: 'booking_modal' }); openBooking() }}
       aria-label="Réserver un appel de 30 minutes"
       className={`hidden sm:flex fixed bottom-6 right-6 z-40 items-center gap-2 text-white font-semibold pl-4 pr-5 py-3 rounded-full transition-all duration-300 hover:scale-105 ${show ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
-      style={{ backgroundColor: '#F4521E', boxShadow: '0 10px 34px rgba(244,82,30,0.45)' }}
+      style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 10px 34px rgba(244,82,30,0.45)' }}
     >
       <CalendarClock className="w-4 h-4" />
       Réserver un appel

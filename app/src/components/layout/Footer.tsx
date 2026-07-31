@@ -86,7 +86,7 @@ export default function Footer() {
                 <a href="https://calendar.google.com/calendar/r/eventedit?text=Appel+découverte+vivesmedia" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-foreground text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-foreground/90 transition-colors">
                   <Calendar className="w-3 h-3" /> Google Agenda <ArrowUpRight className="w-3 h-3" />
                 </a>
-                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: '#F4521E' }}>
+                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
                   Devis gratuit <ArrowUpRight className="w-3 h-3" />
                 </Link>
               </div>

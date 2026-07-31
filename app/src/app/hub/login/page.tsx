@@ -85,7 +85,7 @@ export default function HubLoginPage() {
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">Adresse email</Label>
                 <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="vous@exemple.com" required autoFocus className="h-11 rounded-xl border-border" />
               </div>
-              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 text-white font-semibold h-11 rounded-full transition-all hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: '#F4521E', boxShadow: '0 4px 20px rgba(244,82,30,0.3)' }}>
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 text-white font-semibold h-11 rounded-full transition-all hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 4px 20px rgba(244,82,30,0.3)' }}>
                 {loading ? 'Vérification…' : <>Continuer <ArrowUpRight className="w-4 h-4" /></>}
               </button>
               <p className="text-center text-xs text-muted-foreground pt-1">Lien de connexion sécurisé envoyé par email</p>
@@ -100,7 +100,7 @@ export default function HubLoginPage() {
                 <Label htmlFor="password" className="text-sm font-medium text-foreground">Mot de passe</Label>
                 <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" required autoFocus className="h-11 rounded-xl border-border" />
               </div>
-              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 text-white font-semibold h-11 rounded-full transition-all hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: '#F4521E', boxShadow: '0 4px 20px rgba(244,82,30,0.3)' }}>
+              <button type="submit" disabled={loading} className="w-full flex items-center justify-center gap-2 text-white font-semibold h-11 rounded-full transition-all hover:opacity-90 disabled:opacity-60" style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 4px 20px rgba(244,82,30,0.3)' }}>
                 {loading ? 'Connexion…' : <>Se connecter <ArrowUpRight className="w-4 h-4" /></>}
               </button>
               <button type="button" onClick={() => { setStep('email'); setPassword('') }} className="w-full text-xs text-muted-foreground underline underline-offset-4">

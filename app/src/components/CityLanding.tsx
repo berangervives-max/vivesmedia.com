@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { ArrowUpRight, Check, MapPin } from 'lucide-react'
 import JsonLd from '@/components/seo/JsonLd'
-import { faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
+import { faqSchema, breadcrumbSchema, SITE_URL, LOCALBUSINESS_ID } from '@/lib/schema'
 import { CITIES, type City } from '@/lib/cities-data'
 
 const SERVICES = [
@@ -20,14 +20,26 @@ const WHY = [
 ]
 
 export default function CityLanding({ city }: { city: City }) {
+  // Le prestataire est le node LocalBusiness (ProfessionalService) du graphe global,
+  // et non plus l'Organization : c'est lui qui porte l'adresse, les coordonnées GPS
+  // et le priceRange, donc c'est lui qui produit le signal SEO local.
+  //
+  // ⚠️ On ne crée VOLONTAIREMENT pas un LocalBusiness distinct par ville.
+  // vivesmedia.com n'a qu'un seul établissement réel (Avignon) et travaille en
+  // full remote. Déclarer 4 LocalBusiness « à Orange », « à Nîmes »… avec la même
+  // adresse avignonnaise reviendrait à inventer des établissements inexistants :
+  // c'est exactement ce que Google sanctionne (données structurées trompeuses).
+  // La modélisation correcte pour un prestataire mono-site qui rayonne est celle
+  // déjà en place : UN LocalBusiness + `areaServed` listant les villes couvertes.
   const cityServiceSchema = {
     '@context': 'https://schema.org',
     '@type': 'Service',
     name: `Création de site internet sur-mesure à ${city.city}`,
     serviceType: 'Création de site internet',
-    provider: { '@id': `${SITE_URL}/#organization` },
+    provider: { '@id': LOCALBUSINESS_ID },
     areaServed: { '@type': 'City', name: city.city, containedInPlace: { '@type': 'AdministrativeArea', name: city.dept } },
     url: `${SITE_URL}/${city.slug}`,
+    mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/${city.slug}` },
     description: `Création de sites internet vitrines, e-commerce et sur-mesure à ${city.city} (${city.dept}, ${city.deptNum}) : design UX/UI, SEO et automatisation inclus.`,
   }
 
@@ -59,7 +71,7 @@ export default function CityLanding({ city }: { city: City }) {
             de {city.city} et ses environs. Design unique, SEO et automatisation inclus. Livraison en 3 semaines, devis gratuit sous 24h.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
               Devis gratuit sous 24h <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/realisations" className="flex items-center gap-2 text-foreground font-semibold px-6 py-4 rounded-full border border-black/10 hover:bg-black/5 transition-colors">
@@ -152,7 +164,7 @@ export default function CityLanding({ city }: { city: City }) {
         <div className="rounded-3xl p-10 md:p-14 text-center" style={{ background: '#0F0F0F' }}>
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">Votre projet web à {city.city} commence ici</h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Parlons de votre site. Devis gratuit, détaillé et sans engagement, sous 24h.</p>
-          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#F4521E' }}>
+          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: 'var(--brand-cta)' }}>
             Demander mon devis gratuit <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

@@ -4,9 +4,25 @@ import Link from 'next/link'
 import { ArrowUpRight, ArrowLeft } from 'lucide-react'
 import { articlesService } from '@/services/supabase.service'
 import JsonLd from '@/components/seo/JsonLd'
-import { breadcrumbSchema, SITE_URL } from '@/lib/schema'
+import { breadcrumbSchema, articleSchema, faqSchema, faqFromArticleHtml, SITE_URL } from '@/lib/schema'
 
-const STATIC: Record<string, any> = {
+// Articles de secours, servis si Supabase est injoignable. Typés explicitement
+// (la règle projet est 0 `any`) et alignés sur la table `articles`.
+// L'optionalité suit celle de `Article` (src/types/index.ts) pour qu'une ligne
+// Supabase reste assignable à cette variable sans cast.
+type StaticArticle = {
+  slug: string
+  titre: string
+  extrait?: string
+  categorie?: string
+  date_pub?: string
+  image_url?: string
+  contenu?: string
+  updated_at?: string
+  tags?: string
+}
+
+const STATIC: Record<string, StaticArticle> = {
   'geo-shopify-zero-clic-strategie-2026': {
     slug: 'geo-shopify-zero-clic-strategie-2026', titre: 'Survivre au Zéro-Clic : Pourquoi le GEO est votre priorité Shopify devant le SEO en 2026',
     extrait: "En 2026, 58 % des recherches Google n'aboutissent à aucun clic.", categorie: 'Actualité IA & E-commerce', date_pub: '2026-01-25',
@@ -65,23 +81,16 @@ export default async function BlogArticlePage({ params }: Props) {
   try { const data = await articlesService.getBySlug(slug); if (data) article = data } catch {}
   if (!article) notFound()
 
+  // FAQPage généré depuis la section « FAQ » réellement présente dans l'article.
+  // Vide si l'article n'en a pas → aucun balisage émis (on ne balise jamais une FAQ
+  // invisible pour l'utilisateur). S'applique automatiquement à tous les articles,
+  // existants comme futurs, puisque ce fichier est le gabarit partagé.
+  const articleFaq = faqFromArticleHtml(article.contenu)
+
   return (
     <article className="min-h-screen bg-background pt-28 pb-20">
-      <JsonLd data={{
-        '@context': 'https://schema.org',
-        '@type': 'BlogPosting',
-        headline: article.titre,
-        description: article.extrait,
-        ...(article.image_url ? { image: article.image_url } : {}),
-        datePublished: article.date_pub,
-        dateModified: article.date_pub,
-        url: `${SITE_URL}/blog/${slug}`,
-        ...(article.categorie ? { articleSection: article.categorie } : {}),
-        inLanguage: 'fr-FR',
-        author: { '@type': 'Person', name: 'Béranger Vives' },
-        publisher: { '@id': `${SITE_URL}/#organization` },
-        mainEntityOfPage: { '@type': 'WebPage', '@id': `${SITE_URL}/blog/${slug}` },
-      }} />
+      <JsonLd data={articleSchema({ ...article, slug })} />
+      {articleFaq.length > 0 && <JsonLd data={faqSchema(articleFaq)} />}
       <JsonLd data={breadcrumbSchema([
         { name: 'Accueil', url: SITE_URL },
         { name: 'Blog', url: `${SITE_URL}/blog` },
@@ -92,8 +101,14 @@ export default async function BlogArticlePage({ params }: Props) {
           <ArrowLeft className="w-4 h-4" /> Retour au blog
         </Link>
         <div className="mb-6">
-          <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-secondary text-muted-foreground">{article.categorie}</span>
-          <p className="mt-3 text-xs text-muted-foreground">{new Date(article.date_pub).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          {article.categorie && (
+            <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-secondary text-muted-foreground">{article.categorie}</span>
+          )}
+          {/* Sans ce garde, un article sans date_pub affichait « Invalid Date » en clair
+              sur la page (new Date(undefined)). Le `any` d'origine masquait le cas. */}
+          {article.date_pub && (
+            <p className="mt-3 text-xs text-muted-foreground">{new Date(article.date_pub).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          )}
         </div>
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">{article.titre}</h1>
         <p className="text-lg text-muted-foreground leading-relaxed mb-10 pb-10 border-b border-border">{article.extrait}</p>

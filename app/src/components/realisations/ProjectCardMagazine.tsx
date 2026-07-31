@@ -72,7 +72,7 @@ export default function ProjectCardMagazine({
             {p.featured && (
               <span
                 className="absolute right-4 top-3.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white"
-                style={{ backgroundColor: '#F4521E' }}
+                style={{ backgroundColor: 'var(--brand-cta)' }}
               >
                 Dernier projet
               </span>

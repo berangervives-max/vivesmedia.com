@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
     // Ancienne URL "agence" → nouvelle URL "freelance" (positionnement réel), 301 permanent.
     return [
       { source: "/agence-web-vaucluse", destination: "/freelance-web-vaucluse", permanent: true },
+      // /devis n'a JAMAIS existé (404 en prod) alors que 3 articles publiés y envoient
+      // leur CTA de fin : geo-tpe-pme-chatgpt-perplexity-2026,
+      // prix-site-ecommerce-shopify-2026, shopify-woocommerce-prestashop-comparatif-2026.
+      // 301 vers /contact pour récupérer ces clics au lieu de les perdre sur un 404.
+      { source: "/devis", destination: "/contact", permanent: true },
     ];
   },
   async headers() {
@@ -22,7 +27,15 @@ const nextConfig: NextConfig = {
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://images.unsplash.com https://*.supabase.co https://www.googletagmanager.com https://www.google-analytics.com https://*.g.doubleclick.net https://analytics.ahrefs.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://*.i.posthog.com https://www.google-analytics.com https://*.google-analytics.com https://*.supabase.co https://analytics.ahrefs.com https://sibautomation.com https://api.brevo.com https://*.stripe.com",
+      // ATTENTION — deux origines ci-dessous ont été ajoutées après avoir OBSERVÉ de
+      // VRAIES violations en production (console Chrome sur /contact, 31/07/2026) :
+      //  · https://*.analytics.google.com → GA4 poste ses hits sur
+      //    region1.analytics.google.com, qui n'est PAS couvert par *.google-analytics.com
+      //    (domaine différent). Sans cette entrée, basculer la CSP en « enforce »
+      //    coupait TOUTE la mesure GA4, en silence.
+      //  · https://*.brevo.com → le tracking Brevo appelle in-automate.brevo.com,
+      //    alors que seul api.brevo.com était autorisé.
+      "connect-src 'self' https://*.i.posthog.com https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://*.supabase.co https://analytics.ahrefs.com https://sibautomation.com https://*.brevo.com https://*.stripe.com",
       "frame-src https://js.stripe.com https://hooks.stripe.com",
       "frame-ancestors 'self'",
       "base-uri 'self'",
@@ -40,9 +53,21 @@ const nextConfig: NextConfig = {
       // Ne fuit pas l'URL complète vers les sites tiers.
       { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
       // Coupe les API sensibles non utilisées par le site.
-      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+      { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()" },
       { key: "X-DNS-Prefetch-Control", value: "on" },
-      // CSP en observation (ne bloque pas). À passer en "Content-Security-Policy" plus tard.
+      // Isole le contexte de navigation : une fenêtre ouverte depuis le site (ou qui
+      // ouvre le site) ne peut plus manipuler notre `window` (protection tabnabbing /
+      // fuites cross-origin). `same-origin-allow-popups` et non `same-origin` pour ne
+      // PAS casser les popups de paiement Stripe, qui ont besoin du lien opener.
+      { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
+      // Empêche un site tiers d'intégrer nos ressources sans en-tête explicite.
+      { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+      // CSP TOUJOURS en observation (ne bloque rien) — VOLONTAIRE, voir le rapport :
+      // deux violations réelles (GA4 region1 + Brevo in-automate) tournaient en prod ;
+      // elles sont corrigées ci-dessus, mais il faut une fenêtre d'observation sur les
+      // pages non testées (articles, réalisations, /cms, /hub, tunnel Stripe) avant de
+      // basculer. Pour passer en blocage : renommer cette clé en
+      // "Content-Security-Policy" — et seulement après 0 violation constatée.
       { key: "Content-Security-Policy-Report-Only", value: csp },
     ];
     return [

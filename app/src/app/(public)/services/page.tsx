@@ -42,7 +42,7 @@ export default async function ServicesPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/40">01</span>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Le plus populaire</span>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Le plus populaire</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{ecommerce.title}</h2>
               <p className="text-4xl sm:text-5xl font-bold text-white mb-1">{ecommerce.price}</p>
@@ -112,7 +112,7 @@ export default async function ServicesPage() {
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono text-muted-foreground">{s.num}</span>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Nouveau</span>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Nouveau</span>
               </div>
               <h2 className="text-lg font-bold text-foreground mb-1">{s.title}</h2>
               <p className="text-xl font-bold mb-4" style={{ color: '#F4521E' }}>{s.price}</p>
@@ -177,7 +177,7 @@ export default async function ServicesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
           {maintenancePlans.map(m => (
             <div key={m.name} className={`rounded-2xl border p-7 bg-white flex flex-col ${m.recommended ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}>
-              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Recommandé</span>}
+              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>}
               <p className="font-bold text-foreground text-lg">{m.name}</p>
               <p className="text-3xl font-bold text-foreground mt-1 mb-6">{m.price}</p>
               <ul className="space-y-3 flex-1">

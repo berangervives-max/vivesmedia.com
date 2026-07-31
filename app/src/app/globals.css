@@ -57,8 +57,15 @@
   --card-foreground: oklch(0.216 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.216 0 0);
-  --primary: oklch(0.593 0.232 37);       /* #F4521E — orange accent */
+  --primary: oklch(0.593 0.232 37);       /* #F4521E — orange accent (décor : puces, filets) */
   --primary-foreground: oklch(1 0 0);     /* blanc sur orange */
+  /* Orange ACTION accessible — à utiliser dès que l'orange sert de FOND derrière du
+     texte blanc (boutons, badges). #F4521E ne donne que 3.46:1 avec du blanc, sous le
+     minimum WCAG AA de 4.5:1 pour du texte normal. #CD4519 monte à 4.71:1 en gardant
+     exactement la teinte (14.6° vs 14.7°) et la saturation de la marque.
+     #F4521E reste utilisé pour le purement décoratif (puces, filets, barres de
+     progression), où aucun ratio de contraste n'est requis. */
+  --brand-cta: #CD4519;
   --secondary: oklch(0.944 0 0);          /* #F0F0F0 — zones secondaires */
   --secondary-foreground: oklch(0.216 0 0);
   --muted: oklch(0.944 0 0);              /* #F0F0F0 */
@@ -166,8 +173,12 @@
   --cms-surface-2: #F1EEEA;
   --cms-border: #EAE5DF;
   --cms-border-2: #DED8D0;
-  --cms-brand: #F4521E;
-  --cms-brand-2: #DA430F;
+  /* Boutons du back-office : même contrainte WCAG que le site public.
+     #F4521E = 3.46:1 et l'ancien hover #DA430F = 4.38:1 échouaient tous deux
+     avec du texte blanc. #CD4519 = 4.71:1, hover #B03A14 = 6.07:1 (plus foncé
+     au survol, comme avant). */
+  --cms-brand: #CD4519;
+  --cms-brand-2: #B03A14;
   --cms-brand-wash: #FCEFE9;
   --cms-sidebar: #16130F;
   --cms-ok-bg: #EAF5EE; --cms-ok-fg: #2E8B5A;

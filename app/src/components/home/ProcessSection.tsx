@@ -94,7 +94,7 @@ export default function ProcessSection() {
           className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/contact"
             className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-all shadow-lg"
-            style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.25)' }}>
+            style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.25)' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>
           <Link href="/realisations"

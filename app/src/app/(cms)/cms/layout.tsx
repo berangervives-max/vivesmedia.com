@@ -136,7 +136,7 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
                     <Link key={href} href={href} onClick={() => setSidebarOpen(false)}
                       className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm transition-all duration-150"
                       style={{
-                        background: active ? '#F4521E' : 'transparent',
+                        background: active ? 'var(--brand-cta)' : 'transparent',
                         color: active ? '#fff' : 'rgba(255,255,255,.52)',
                         fontWeight: active ? 600 : 400,
                         boxShadow: active ? '0 8px 18px -8px rgba(244,82,30,.85)' : 'none',
@@ -197,7 +197,7 @@ export default function CmsLayout({ children }: { children: React.ReactNode }) {
           </Link>
 
           <div className="w-8 h-8 rounded-xl flex items-center justify-center text-xs font-bold text-white shrink-0"
-            style={{ background: '#F4521E' }}>
+            style={{ background: 'var(--brand-cta)' }}>
             B
           </div>
         </header>

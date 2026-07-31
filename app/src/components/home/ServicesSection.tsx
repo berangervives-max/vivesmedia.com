@@ -171,7 +171,7 @@ export default function ServicesSection() {
           <Link
             href="/contact"
             className="group inline-flex items-center gap-2.5 text-sm font-semibold text-white px-6 py-3 rounded-full transition-all duration-300 hover:gap-4"
-            style={{ backgroundColor: '#F4521E' }}
+            style={{ backgroundColor: 'var(--brand-cta)' }}
           >
             Demander un devis gratuit
             <ArrowRight className="w-4 h-4" />

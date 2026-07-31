@@ -146,7 +146,7 @@ export default function ContactPage() {
                 <input value={rTel} onChange={e => setRTel(e.target.value)} required inputMode="tel" placeholder="06 12 34 56 78"
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
                 <button type="submit" disabled={rStatus === 'loading' || !rNom || !rTel}
-                  className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: '#F4521E' }}>
+                  className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: 'var(--brand-cta)' }}>
                   {rStatus === 'loading' ? '…' : 'Être rappelé'}
                 </button>
               </form>
@@ -222,7 +222,7 @@ export default function ContactPage() {
               {!codeSent ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
-                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
+                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: 'var(--brand-cta)' }}>
                     {sending ? 'Envoi…' : '✉️ Vérifier mon email'}
                   </button>
                   <span className="text-xs text-muted-foreground">On vous envoie un code à 6 chiffres pour confirmer votre adresse (obligatoire).</span>
@@ -262,7 +262,7 @@ export default function ContactPage() {
 
           <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !codeSent || code.length !== 6}
             className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: '#F4521E' }}>
+            style={{ backgroundColor: 'var(--brand-cta)' }}>
             {status === 'loading' ? 'Envoi en cours...' : !codeSent ? 'Vérifiez votre email d\'abord' : code.length !== 6 ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
         </form>
