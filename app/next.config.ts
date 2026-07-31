@@ -60,8 +60,11 @@ const nextConfig: NextConfig = {
       // fuites cross-origin). `same-origin-allow-popups` et non `same-origin` pour ne
       // PAS casser les popups de paiement Stripe, qui ont besoin du lien opener.
       { key: "Cross-Origin-Opener-Policy", value: "same-origin-allow-popups" },
-      // Empêche un site tiers d'intégrer nos ressources sans en-tête explicite.
-      { key: "Cross-Origin-Resource-Policy", value: "same-site" },
+      // NB : on n'ajoute PAS Cross-Origin-Resource-Policy. En "same-site" il
+      // empêcherait tout site tiers de charger nos images/polices (aperçus,
+      // partenaires, articles qui nous citent) pour un gain faible ici, le site
+      // n'étant de toute façon pas cross-origin isolated. À n'activer que si un
+      // besoin d'isolation (SharedArrayBuffer) apparaît.
       // CSP TOUJOURS en observation (ne bloque rien) — VOLONTAIRE, voir le rapport :
       // deux violations réelles (GA4 region1 + Brevo in-automate) tournaient en prod ;
       // elles sont corrigées ci-dessus, mais il faut une fenêtre d'observation sur les
