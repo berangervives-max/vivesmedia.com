@@ -259,8 +259,18 @@
   overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 0.75rem;
-  background: var(--card);
   -webkit-overflow-scrolling: touch;
+  /* Ombres de défilement (technique Komarov, 100% CSS) : sans elles, le tableau
+     est coupé net sur le filet en mobile et rien n'indique qu'une colonne reste
+     à droite — sur un comparatif, le lecteur raterait la moitié de l'info.
+     Les deux dégradés `local` masquent l'ombre quand on est au bout ; les deux
+     ombres `scroll` restent collées au bord tant qu'il y a du contenu caché. */
+  background:
+    linear-gradient(to right, var(--card) 60%, transparent) left center / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--card) 60%, transparent) right center / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(18 18 18 / 0.13), transparent) left center / 0.9rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(18 18 18 / 0.13), transparent) right center / 0.9rem 100% no-repeat scroll,
+    var(--card);
 }
 .article-content table {
   width: 100%;
