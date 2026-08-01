@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase'
 import type { Article } from '@/types'
 import { Plus, Pencil, Trash2, Eye, EyeOff, BookOpen, CalendarClock, Send, Check, Loader2, X, Upload, MousePointerClick } from 'lucide-react'
 import Kpis from '@/components/cms/Kpis'
+import { enhanceArticleHtml } from '@/lib/article-html'
 
 /** Upload une image vers le bucket Supabase `realisations` (dossier articles/) → URL publique. */
 async function uploadArticleImage(file: File): Promise<string> {
@@ -169,9 +170,12 @@ export default function CmsArticlesPage() {
             </div>
             <textarea value={form.contenu} onChange={e => setForm(p => ({ ...p, contenu: e.target.value }))} rows={12}
               className={`${inputCls} font-mono resize-y`} style={{ ...inputStyle, fontSize: '12px', background: 'var(--cms-surface-2)' }} />
+            {/* `article-content` = la mise en forme réelle du blog public, donc
+                l'aperçu montre ce que verra le lecteur. Avant, `prose prose-sm`
+                ne produisait rien (@tailwindcss/typography n'est pas installé). */}
             {previewHtml && (
-              <div className="mt-3 rounded-lg border p-5 prose prose-sm max-w-none" style={{ borderColor: 'var(--cms-border-2)', background: 'var(--cms-card)' }}
-                dangerouslySetInnerHTML={{ __html: form.contenu || '<p style="color:var(--cms-muted)">(contenu vide)</p>' }} />
+              <div className="mt-3 rounded-lg border p-5 article-content" style={{ borderColor: 'var(--cms-border-2)', background: 'var(--cms-card)' }}
+                dangerouslySetInnerHTML={{ __html: enhanceArticleHtml(form.contenu) || '<p style="color:var(--cms-muted)">(contenu vide)</p>' }} />
             )}
           </div>
           <label className="flex items-center gap-3 cursor-pointer">

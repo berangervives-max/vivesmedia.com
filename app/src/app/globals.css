@@ -160,6 +160,200 @@
 }
 
 /* ============================================================
+   ARTICLE DE BLOG — hiérarchie typographique du contenu injecté
+   ------------------------------------------------------------
+   Le corps d'un article vient de Supabase (colonne `contenu`, HTML brut)
+   et est injecté via dangerouslySetInnerHTML : ses balises n'ont donc
+   AUCUNE classe. Or le Preflight de Tailwind remet h2/h3/ul/table à plat
+   (font-size: inherit, marges à 0, listes sans puce, tables sans bordure).
+   Sans la règle ci-dessous, un article se lit comme un seul bloc de texte.
+
+   Choix : CSS ciblé plutôt que @tailwindcss/typography.
+   1) c'est la convention déjà en place ici (.cms-*, .hub-*, .btn-orange-glow) ;
+   2) le plugin imposerait ~25 surcharges --tw-prose-* pour retrouver nos
+      tokens, plus la neutralisation de ses partis pris (guillemets courbes,
+      backticks autour du code, max-width) : autant de code, une dépendance
+      en plus ;
+   3) il ne gère pas le débordement horizontal des tableaux en mobile.
+
+   Contraste : les liens utilisent --brand-cta (#CD4519, 4.71:1 sur fond
+   clair = WCAG AA), pas #F4521E (3.46:1, réservé au décoratif : puces, filets).
+   ============================================================ */
+.article-content {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+.article-content > *:first-child { margin-top: 0; }
+.article-content > *:last-child { margin-bottom: 0; }
+
+/* Titres — l'écart de taille ET le filet au-dessus des h2 donnent
+   la structure « chapitres » sur des articles longs (10+ sections). */
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  scroll-margin-top: 6.5rem; /* la navbar est fixe : évite les ancres sous le header */
+}
+.article-content h2 {
+  font-size: clamp(1.625rem, 1.35rem + 1.1vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin: 4rem 0 1.125rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.article-content h2:first-child { margin-top: 0; padding-top: 0; border-top: 0; }
+.article-content h3 {
+  font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 2.75rem 0 0.75rem;
+}
+.article-content h4 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin: 2rem 0 0.5rem;
+}
+
+/* Corps de texte */
+.article-content p { margin: 0 0 1.375rem; }
+.article-content strong,
+.article-content b { color: var(--foreground); font-weight: 600; }
+.article-content em { font-style: italic; }
+
+/* Liens : couleur de marque accessible + soulignement (le soulignement est
+   le repère non chromatique exigé par WCAG 1.4.1). */
+.article-content a {
+  color: var(--brand-cta);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--brand-cta) 45%, transparent);
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.article-content a:hover {
+  text-decoration-color: var(--brand-cta);
+  text-decoration-thickness: 2px;
+}
+
+/* Listes */
+.article-content ul,
+.article-content ol { margin: 1.5rem 0; padding-left: 1.5rem; }
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li { margin-bottom: 0.6rem; padding-left: 0.25rem; }
+.article-content li::marker { color: var(--primary); font-weight: 600; }
+.article-content li > p { margin-bottom: 0.5rem; }
+.article-content li > ul,
+.article-content li > ol { margin: 0.6rem 0 0; }
+
+/* Tableaux — enveloppés par enhanceArticleHtml() pour pouvoir défiler
+   horizontalement en mobile au lieu d'écraser les colonnes. */
+.article-content .article-table {
+  margin: 2.25rem 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--card);
+  -webkit-overflow-scrolling: touch;
+}
+.article-content table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.article-content thead { background: var(--secondary); }
+.article-content th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.article-content td {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+.article-content tbody tr:first-child td { border-top: 0; }
+
+/* Citations — l'accent éditorial du site (Instrument Serif italique,
+   comme .cms-accent / .hub-accent). */
+.article-content blockquote {
+  margin: 2rem 0;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 3px solid var(--primary);
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--foreground);
+}
+.article-content blockquote p:last-child { margin-bottom: 0; }
+
+/* Code */
+.article-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--secondary);
+  color: var(--foreground);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+}
+.article-content pre {
+  margin: 2rem 0;
+  padding: 1.15rem 1.25rem;
+  background: var(--foreground);
+  color: #F4F4F4;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+.article-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Médias et séparateurs */
+.article-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 2rem 0;
+  border-radius: 0.9rem;
+  border: 1px solid var(--border);
+}
+.article-content figure { margin: 2rem 0; }
+.article-content figure img { margin: 0; }
+.article-content figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+.article-content hr { margin: 3rem 0; border: 0; border-top: 1px solid var(--border); }
+
+@media (max-width: 640px) {
+  .article-content { font-size: 1rem; line-height: 1.7; }
+  .article-content h2 { margin-top: 3rem; padding-top: 1.5rem; }
+  .article-content h3 { margin-top: 2.25rem; }
+  .article-content th,
+  .article-content td { padding: 0.65rem 0.85rem; }
+}
+
+/* ============================================================
    DA /cms — SCOPÉ à .cms-shell (n'affecte JAMAIS le site public)
    Réutilise Inter Tight + Instrument Serif (font-heading) du repo.
    ============================================================ */
