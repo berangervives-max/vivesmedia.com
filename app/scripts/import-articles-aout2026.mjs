@@ -14,6 +14,8 @@
  * OPTIONS
  *   --draft    force publie=false même sur un article DÉJÀ publié (par défaut,
  *              une mise à jour ne touche jamais au statut de publication).
+ *   --publish  force publie=true (mise en ligne explicite, décidée par Béranger).
+ *              --draft et --publish sont mutuellement exclusifs.
  *   --dry-run  affiche ce qui serait écrit, sans rien écrire en base.
  *
  * FORMAT ATTENDU DU FICHIER
@@ -154,7 +156,7 @@ function expandArgs(args) {
 }
 
 // ── Import d'un fichier ───────────────────────────────────────────────────
-async function importFile(file, { dryRun, forceDraft }) {
+async function importFile(file, { dryRun, forceDraft, forcePublish }) {
   const { data: fm, body } = parseFrontmatter(readFileSync(file, 'utf8'))
 
   for (const required of ['slug', 'titre']) {
@@ -206,6 +208,7 @@ async function importFile(file, { dryRun, forceDraft }) {
     }
     payload.updated_at = new Date().toISOString()
     if (forceDraft) payload.publie = false
+    if (forcePublish) payload.publie = true
     const { data, error } = await sb
       .from('articles')
       .update(payload)
@@ -213,11 +216,12 @@ async function importFile(file, { dryRun, forceDraft }) {
       .select('id, slug, publie, date_pub')
       .single()
     if (error) throw error
+    const publieNote = forceDraft ? 'forcé à false' : forcePublish ? 'forcé à true' : 'inchangé'
     return {
       ...data,
       action: 'MIS À JOUR',
       images,
-      note: `image_url ${imageNote} · publie ${forceDraft ? 'forcé à false' : 'inchangé'}`,
+      note: `image_url ${imageNote} · publie ${publieNote}`,
     }
   }
 
@@ -237,10 +241,15 @@ async function importFile(file, { dryRun, forceDraft }) {
 const argv = process.argv.slice(2)
 const dryRun = argv.includes('--dry-run')
 const forceDraft = argv.includes('--draft')
+const forcePublish = argv.includes('--publish')
 const paths = argv.filter((a) => !a.startsWith('--'))
 
 if (!paths.length) {
-  console.error('Usage : node scripts/import-articles-aout2026.mjs <fichier.md> [autre.md ...] [--draft] [--dry-run]')
+  console.error('Usage : node scripts/import-articles-aout2026.mjs <fichier.md> [autre.md ...] [--draft|--publish] [--dry-run]')
+  process.exit(1)
+}
+if (forceDraft && forcePublish) {
+  console.error('✖ --draft et --publish sont mutuellement exclusifs.')
   process.exit(1)
 }
 
@@ -252,7 +261,7 @@ let ko = 0
 for (const file of files) {
   const name = basename(file)
   try {
-    const r = await importFile(file, { dryRun, forceDraft })
+    const r = await importFile(file, { dryRun, forceDraft, forcePublish })
     console.log(`✅ ${r.action.padEnd(11)} ${r.slug}`)
     console.log(`   id       : ${r.id}`)
     console.log(`   publie   : ${r.publie === undefined ? '—' : r.publie}   date_pub : ${r.date_pub ?? '—'}`)
