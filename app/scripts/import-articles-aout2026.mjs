@@ -195,7 +195,15 @@ async function importFile(file, { dryRun, forceDraft }) {
   }
 
   if (existing) {
-    // Mise à jour : on ne touche NI à image_url NI au statut de publication.
+    // Mise à jour : le statut de publication n'est jamais touché ici.
+    // image_url : on ne l'écrase QUE si le fichier en apporte une valeur réelle
+    // (génération des visuels terminée) ; un ré-import sans image_url dans le
+    // frontmatter préserve donc la valeur déjà en base, comme avant.
+    let imageNote = existing.image_url ? 'conservée' : 'toujours vide'
+    if (fm.image_url && fm.image_url.trim()) {
+      payload.image_url = fm.image_url.trim()
+      imageNote = existing.image_url ? 'mise à jour' : 'ajoutée'
+    }
     payload.updated_at = new Date().toISOString()
     if (forceDraft) payload.publie = false
     const { data, error } = await sb
@@ -209,7 +217,7 @@ async function importFile(file, { dryRun, forceDraft }) {
       ...data,
       action: 'MIS À JOUR',
       images,
-      note: `image_url ${existing.image_url ? 'conservée' : 'toujours vide'} · publie ${forceDraft ? 'forcé à false' : 'inchangé'}`,
+      note: `image_url ${imageNote} · publie ${forceDraft ? 'forcé à false' : 'inchangé'}`,
     }
   }
 
