@@ -58,8 +58,15 @@
   --card-foreground: oklch(0.216 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.216 0 0);
-  --primary: #FF6B00;                     /* orange accent — punchy */
+  --primary: #FF6B00;                     /* orange accent — punchy (décor : puces, filets) */
   --primary-foreground: oklch(1 0 0);     /* blanc sur orange */
+  /* Orange ACTION accessible — à utiliser dès que l'orange sert de FOND derrière du
+     texte blanc (boutons, badges). #FF6B00 ne donne que ~2.9:1 avec du blanc, sous le
+     minimum WCAG AA de 4.5:1 pour du texte normal. #BF5000 monte à ~4.8:1 en gardant
+     la même teinte (même angle ~24.7°), assombrie pour la lisibilité.
+     #FF6B00 reste utilisé pour le purement décoratif (puces, filets, barres de
+     progression), où aucun ratio de contraste n'est requis. */
+  --brand-cta: #BF5000;
   --secondary: oklch(0.944 0 0);          /* #F0F0F0 — zones secondaires */
   --secondary-foreground: oklch(0.216 0 0);
   --muted: oklch(0.944 0 0);              /* #F0F0F0 */
@@ -154,6 +161,286 @@
 }
 
 /* ============================================================
+   ARTICLE DE BLOG — hiérarchie typographique du contenu injecté
+   ------------------------------------------------------------
+   Le corps d'un article vient de Supabase (colonne `contenu`, HTML brut)
+   et est injecté via dangerouslySetInnerHTML : ses balises n'ont donc
+   AUCUNE classe. Or le Preflight de Tailwind remet h2/h3/ul/table à plat
+   (font-size: inherit, marges à 0, listes sans puce, tables sans bordure).
+   Sans la règle ci-dessous, un article se lit comme un seul bloc de texte.
+
+   Choix : CSS ciblé plutôt que @tailwindcss/typography.
+   1) c'est la convention déjà en place ici (.cms-*, .hub-*, .btn-orange-glow) ;
+   2) le plugin imposerait ~25 surcharges --tw-prose-* pour retrouver nos
+      tokens, plus la neutralisation de ses partis pris (guillemets courbes,
+      backticks autour du code, max-width) : autant de code, une dépendance
+      en plus ;
+   3) il ne gère pas le débordement horizontal des tableaux en mobile.
+
+   Contraste : les liens utilisent --brand-cta (#BF5000, ~4.8:1 sur fond
+   clair = WCAG AA), pas #FF6B00 (~2.9:1, réservé au décoratif : puces, filets).
+   ============================================================ */
+.article-content {
+  /* Mesure de lecture (« measure ») — la largeur de la colonne de texte.
+     Mesuré sur la page live avant correction : le conteneur (max-w-3xl, 720px)
+     donnait 96 caractères par ligne en médiane, jusqu'à 104. Au-delà de ~75,
+     l'œil rate la ligne suivante au retour chariot et le texte se lit comme
+     une masse : c'est la première cause du « trop bloc ».
+
+     34.375rem = 550px ≈ 73 caractères réels à 17px (mesuré, pas estimé).
+
+     En `rem` et NON en `ch`, alors que `ch` semblait le choix naturel pour
+     exprimer une largeur « en caractères » : une custom property garde son
+     unité et se recalcule sur la taille de police de CHAQUE élément qui la
+     consomme. Un `56ch` hérité donnait 550px sur un paragraphe (17px) mais
+     1174px sur un h2 (32px) et 790px sur un h3 : les titres débordaient la
+     colonne et ne s'alignaient plus sur leurs propres paragraphes. Le rem se
+     résout sur la racine, donc à l'identique pour tout le monde.
+     (Si la taille du corps de texte change un jour, recalculer cette valeur.)
+
+     line-height 1.75 : conservé. Il n'était pas trop faible dans l'absolu,
+     il était sous-dimensionné POUR des lignes de 96 caractères (plus la ligne
+     est longue, plus il faut d'interligne pour la suivre). À 73 caractères,
+     1.75 est le bon appairage — les deux réglages sont désormais cohérents. */
+  --measure: 34.375rem;
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--muted-foreground);
+}
+
+/* Le texte courant se cale sur la mesure et se centre ; les blocs larges
+   (tableaux, images, code, filets) gardent toute la largeur du conteneur.
+   Sans cette exception, le tableau comparatif (718px mesurés) tomberait à
+   550px et se mettrait à défiler sur DESKTOP — une régression face aux
+   ombres de défilement ajoutées juste avant pour le mobile.
+
+   NB : tous les écarts verticaux ci-dessous utilisent `margin-block` et non
+   le raccourci `margin`. C'est volontaire : un `margin: 4rem 0 1.125rem`
+   remettrait les marges latérales à 0 et casserait silencieusement le
+   centrage `margin-inline: auto` de cette règle. */
+.article-content > * {
+  max-width: var(--measure);
+  margin-inline: auto;
+}
+.article-content > img,
+.article-content > figure,
+.article-content > pre,
+.article-content > hr,
+.article-content > .article-table { max-width: none; }
+
+.article-content > *:first-child { margin-block-start: 0; }
+.article-content > *:last-child { margin-block-end: 0; }
+
+/* Titres — l'écart de taille ET le filet au-dessus des h2 donnent
+   la structure « chapitres » sur des articles longs (10+ sections). */
+.article-content h2,
+.article-content h3,
+.article-content h4 {
+  color: var(--foreground);
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+  scroll-margin-top: 6.5rem; /* la navbar est fixe : évite les ancres sous le header */
+}
+/* Marges des titres : la marge BASSE reste nettement inférieure à l'écart
+   entre deux paragraphes (1.65em ≈ 28px). C'est la loi de proximité : un
+   titre doit être visuellement collé au texte qu'il introduit, sinon il
+   flotte entre deux sections et la structure disparaît. */
+.article-content h2 {
+  font-size: clamp(1.625rem, 1.35rem + 1.1vw, 2rem);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-block: 4.5rem 1.25rem;
+  padding-top: 2rem;
+  border-top: 1px solid var(--border);
+}
+.article-content h2:first-child { margin-block-start: 0; padding-top: 0; border-top: 0; }
+.article-content h3 {
+  font-size: clamp(1.25rem, 1.15rem + 0.45vw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  margin-block: 3rem 0.875rem;
+}
+.article-content h4 {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  line-height: 1.4;
+  margin-block: 2.25rem 0.625rem;
+}
+
+/* Corps de texte — l'écart entre paragraphes était le vrai défaut : 22px,
+   soit MOINS que l'interligne (29.75px). Deux paragraphes étaient donc plus
+   proches l'un de l'autre que deux lignes d'un même paragraphe, et le texte
+   se soudait en un seul pavé. 1.65em (≈28px) porte le blanc visible entre
+   paragraphes à ~41px contre ~13px entre deux lignes : le rapport passe de
+   2,7 à 3,2 et la coupure redevient lisible d'un coup d'œil.
+   Unité `em` et non `rem` : l'écart suit la police, y compris sa réduction
+   mobile plus bas. */
+.article-content p { margin-block: 0 1.65em; }
+.article-content strong,
+.article-content b { color: var(--foreground); font-weight: 600; }
+.article-content em { font-style: italic; }
+
+/* Liens : couleur de marque accessible + soulignement (le soulignement est
+   le repère non chromatique exigé par WCAG 1.4.1). */
+.article-content a {
+  color: var(--brand-cta);
+  font-weight: 500;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+  text-decoration-color: color-mix(in srgb, var(--brand-cta) 45%, transparent);
+  transition: text-decoration-color 0.15s ease, color 0.15s ease;
+}
+.article-content a:hover {
+  text-decoration-color: var(--brand-cta);
+  text-decoration-thickness: 2px;
+}
+
+/* Listes — l'espace est symétrique AU-DESSUS et en dessous (2rem), et
+   légèrement supérieur à l'écart entre paragraphes : la liste se détache
+   comme un bloc autonome au lieu de sembler accrochée au paragraphe qui la
+   précède. À l'inverse, l'écart entre items reste petit (0.65rem) pour que
+   les items restent perçus comme UN groupe et non comme n paragraphes. */
+.article-content ul,
+.article-content ol { margin-block: 2rem; padding-left: 1.5rem; }
+.article-content ul { list-style: disc; }
+.article-content ol { list-style: decimal; }
+.article-content li { margin-bottom: 0.65rem; padding-left: 0.25rem; }
+.article-content li:last-child { margin-bottom: 0; }
+.article-content li::marker { color: var(--primary); font-weight: 600; }
+.article-content li > p { margin-block: 0 0.5rem; }
+.article-content li > ul,
+.article-content li > ol { margin-block: 0.65rem 0; }
+
+/* Tableaux — enveloppés par enhanceArticleHtml() pour pouvoir défiler
+   horizontalement en mobile au lieu d'écraser les colonnes. */
+.article-content .article-table {
+  /* 3rem (contre 2.25rem) : le tableau reprend toute la largeur du conteneur
+     alors que le texte est calé sur la mesure ; il lui faut un blanc plus
+     franc que l'écart entre paragraphes pour se lire comme une figure. */
+  margin-block: 3rem;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  -webkit-overflow-scrolling: touch;
+  /* Ombres de défilement (technique Komarov, 100% CSS) : sans elles, le tableau
+     est coupé net sur le filet en mobile et rien n'indique qu'une colonne reste
+     à droite — sur un comparatif, le lecteur raterait la moitié de l'info.
+     Les deux dégradés `local` masquent l'ombre quand on est au bout ; les deux
+     ombres `scroll` restent collées au bord tant qu'il y a du contenu caché. */
+  background:
+    linear-gradient(to right, var(--card) 60%, transparent) left center / 2.5rem 100% no-repeat local,
+    linear-gradient(to left, var(--card) 60%, transparent) right center / 2.5rem 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgb(18 18 18 / 0.13), transparent) left center / 0.9rem 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgb(18 18 18 / 0.13), transparent) right center / 0.9rem 100% no-repeat scroll,
+    var(--card);
+}
+.article-content table {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+.article-content thead { background: var(--secondary); }
+.article-content th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--foreground);
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.article-content td {
+  padding: 0.8rem 1rem;
+  border-top: 1px solid var(--border);
+  vertical-align: top;
+}
+.article-content tbody tr:first-child td { border-top: 0; }
+
+/* Citations — l'accent éditorial du site (Instrument Serif italique,
+   comme .cms-accent / .hub-accent). */
+.article-content blockquote {
+  margin-block: 2.75rem;
+  padding: 0.25rem 0 0.25rem 1.25rem;
+  border-left: 3px solid var(--primary);
+  font-family: var(--font-heading);
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--foreground);
+}
+.article-content blockquote p:last-child { margin-bottom: 0; }
+
+/* Code */
+.article-content code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background: var(--secondary);
+  color: var(--foreground);
+  padding: 0.15em 0.4em;
+  border-radius: 0.35rem;
+}
+.article-content pre {
+  margin-block: 2.75rem;
+  padding: 1.15rem 1.25rem;
+  background: var(--foreground);
+  color: #F4F4F4;
+  border-radius: 0.75rem;
+  overflow-x: auto;
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+.article-content pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+  font-size: inherit;
+}
+
+/* Médias et séparateurs — 3rem : comme les tableaux, une image occupe toute
+   la largeur pendant que le texte est calé sur la mesure. Avec les 2rem
+   d'avant, l'image se retrouvait à peine plus détachée que deux paragraphes
+   et le rythme de la page s'aplatissait. */
+.article-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin-block: 3rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--border);
+}
+.article-content figure { margin-block: 3rem; }
+.article-content figure img { margin-block: 0; }
+.article-content figcaption {
+  margin-top: 0.7rem;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--muted-foreground);
+}
+.article-content hr { margin-block: 3.5rem; border: 0; border-top: 1px solid var(--border); }
+
+@media (max-width: 640px) {
+  /* La mesure (56ch ≈ 518px à 16px) dépasse la largeur utile du mobile
+     (~342px à 390px de viewport) : elle ne s'applique donc pas, la colonne
+     reste pleine largeur. Rien à neutraliser.
+     L'écart entre paragraphes suit tout seul la police (unité `em`) : 1.65em
+     = 26.4px à 16px. Les écarts structurels, eux, se resserrent un peu pour
+     ne pas gaspiller de hauteur sur un petit écran. */
+  .article-content { font-size: 1rem; line-height: 1.7; }
+  .article-content h2 { margin-block-start: 3.25rem; padding-top: 1.5rem; }
+  .article-content h3 { margin-block-start: 2.5rem; }
+  .article-content ul,
+  .article-content ol { margin-block: 1.75rem; }
+  .article-content img,
+  .article-content figure,
+  .article-content .article-table { margin-block: 2.25rem; }
+  .article-content th,
+  .article-content td { padding: 0.65rem 0.85rem; }
+}
+
+/* ============================================================
    DA /cms — SCOPÉ à .cms-shell (n'affecte JAMAIS le site public)
    Réutilise Inter Tight + Instrument Serif (font-heading) du repo.
    ============================================================ */
@@ -167,8 +454,12 @@
   --cms-surface-2: #F1EEEA;
   --cms-border: #EAE5DF;
   --cms-border-2: #DED8D0;
-  --cms-brand: #F4521E;
-  --cms-brand-2: #DA430F;
+  /* Boutons du back-office : même contrainte WCAG que le site public.
+     #F4521E = 3.46:1 et l'ancien hover #DA430F = 4.38:1 échouaient tous deux
+     avec du texte blanc. #CD4519 = 4.71:1, hover #B03A14 = 6.07:1 (plus foncé
+     au survol, comme avant). */
+  --cms-brand: #CD4519;
+  --cms-brand-2: #B03A14;
   --cms-brand-wash: #FCEFE9;
   --cms-sidebar: #16130F;
   --cms-ok-bg: #EAF5EE; --cms-ok-fg: #2E8B5A;

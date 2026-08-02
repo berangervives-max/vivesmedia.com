@@ -83,7 +83,7 @@ export default async function TarifsPage() {
                   <th key={f.slug} className="p-5 text-center align-bottom">
                     <span className="block text-base font-bold">{f.title.replace('Site ', '')}</span>
                     {i === 2 && (
-                      <span className="mt-2 inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>
+                      <span className="mt-2 inline-block text-[10px] font-semibold px-2.5 py-0.5 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>
                         Le plus populaire
                       </span>
                     )}
@@ -201,7 +201,7 @@ export default async function TarifsPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4 mt-4">
           {maintenancePlans.map(m => (
             <div key={m.name} className={`rounded-2xl border p-7 bg-white flex flex-col ${m.recommended ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}>
-              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Recommandé</span>}
+              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>}
               <p className="font-bold text-foreground text-lg">Maintenance {m.name}</p>
               <p className="text-3xl font-bold text-foreground mt-1 mb-6">{m.price}</p>
               <ul className="space-y-3 flex-1">

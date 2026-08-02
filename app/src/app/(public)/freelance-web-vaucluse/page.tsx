@@ -80,7 +80,7 @@ export default function AgenceWebVauclusePage() {
             Livraison en 3 semaines, devis gratuit sous 24h.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
               Devis gratuit sous 24h <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/realisations" className="flex items-center gap-2 text-foreground font-semibold px-6 py-4 rounded-full border border-black/10 hover:bg-black/5 transition-colors">
@@ -176,7 +176,7 @@ export default function AgenceWebVauclusePage() {
         <div className="rounded-3xl p-10 md:p-14 text-center" style={{ background: '#0F0F0F' }}>
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">Votre projet web dans le Vaucluse commence ici</h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Parlons de votre site. Devis gratuit, détaillé et sans engagement, sous 24h.</p>
-          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#FF6B00' }}>
+          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: 'var(--brand-cta)' }}>
             Demander mon devis gratuit <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

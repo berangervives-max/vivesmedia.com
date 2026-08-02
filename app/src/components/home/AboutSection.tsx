@@ -64,7 +64,7 @@ export default function AboutSection() {
               className="mt-8 flex gap-3">
               <Link href="/realisations"
                 className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full text-white btn-orange-glow"
-                style={{ backgroundColor: '#FF6B00' }}>
+                style={{ backgroundColor: 'var(--brand-cta)' }}>
                 Voir mes réalisations <ArrowUpRight className="w-4 h-4" />
               </Link>
               <Link href="/a-propos"

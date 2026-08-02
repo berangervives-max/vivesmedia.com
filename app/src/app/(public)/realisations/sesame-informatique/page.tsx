@@ -70,7 +70,7 @@ export default function SesameInformatiquePage() {
         <div className="mt-7">
           <a href="https://sesame-preview.vercel.app/" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
-            style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
             Visiter le site en ligne <ExternalLink className="h-4 w-4" />
           </a>
         </div>
@@ -277,7 +277,7 @@ export default function SesameInformatiquePage() {
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link href="/contact"
                 className="inline-flex items-center gap-2 rounded-full px-8 py-4 font-semibold text-white transition-all hover:scale-105"
-                style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
+                style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
                 Lancer mon projet <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link href="/realisations"

@@ -36,7 +36,7 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
               className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
-              style={{ backgroundColor: '#FF6B00' }}>
+              style={{ backgroundColor: 'var(--brand-cta)' }}>
               Lancer mon projet <ArrowUpRight className="w-4 h-4" />
             </Link>
             <button type="button"

@@ -28,7 +28,7 @@ export default function StickyMobileCta() {
         href="/contact"
         onClick={() => track('cta_clicked', { location: 'sticky_mobile', label: 'Devis gratuit', destination: '/contact' })}
         className="pointer-events-auto flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-full"
-        style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}
+        style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}
       >
         Devis gratuit <ArrowUpRight className="w-4 h-4" />
       </Link>

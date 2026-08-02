@@ -41,7 +41,7 @@ export default function Navbar() {
             <button type="button" onClick={openBooking} className="hidden lg:flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full border transition-colors hover:bg-foreground/5" style={{ borderColor: 'rgba(17,24,39,0.15)', color: '#111827' }}>
               <CalendarClock className="w-3.5 h-3.5" style={{ color: '#FF6B00' }} /> Réserver un appel
             </button>
-            <Link href="/contact" className="hidden sm:flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: '#FF6B00' }}>
+            <Link href="/contact" className="hidden sm:flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
               Devis Gratuit <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>

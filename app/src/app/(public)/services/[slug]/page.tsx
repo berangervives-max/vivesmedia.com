@@ -57,7 +57,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/30">{s.num}</span>
                 {s.badge && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>{s.badge}</span>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>{s.badge}</span>
                 )}
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-4">{s.title}</h1>
@@ -219,7 +219,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   className={`rounded-2xl border p-6 flex flex-col ${plan.highlighted ? 'bg-foreground border-foreground' : 'bg-white border-border'}`}
                 >
                   {plan.highlighted && (
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full self-start mb-4" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Recommandé</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full self-start mb-4" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>
                   )}
                   <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white/60' : 'text-muted-foreground'}`}>{plan.name}</p>
                   <p className={`text-2xl font-bold mb-0.5 ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>{plan.price}</p>

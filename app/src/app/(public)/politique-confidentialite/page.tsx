@@ -111,7 +111,7 @@ export default function PolitiqueConfidentialite() {
         </div>
 
         <div className="mt-12">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-full" style={{ backgroundColor: '#FF6B00' }}>
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-full" style={{ backgroundColor: 'var(--brand-cta)' }}>
             Retour à l'accueil
           </Link>
         </div>
