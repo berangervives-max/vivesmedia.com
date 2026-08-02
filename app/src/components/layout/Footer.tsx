@@ -44,8 +44,8 @@ export default function Footer() {
               ) : (
                 <form onSubmit={handleSubscribe} className="flex gap-2">
                   <input type="text" name="website" value={website} onChange={e => setWebsite(e.target.value)} tabIndex={-1} autoComplete="off" aria-hidden="true" className="absolute left-[-9999px] w-px h-px opacity-0" />
-                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="votre@email.com" className="flex-1 border border-border rounded-full px-4 py-2 text-xs focus:outline-none focus:border-foreground/30 min-w-0" />
-                  <button type="submit" className="bg-foreground text-white text-xs px-4 py-2 rounded-full hover:bg-foreground/90 transition-colors flex-shrink-0">OK</button>
+                  <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="votre@email.com" className="flex-1 border border-border rounded-xl px-4 py-2 text-xs focus:outline-none focus:border-foreground/30 min-w-0" />
+                  <button type="submit" className="bg-foreground text-white text-xs px-4 py-2 rounded-xl hover:bg-foreground/90 transition-colors flex-shrink-0">OK</button>
                 </form>
               )}
             </div>
@@ -83,10 +83,10 @@ export default function Footer() {
                 <li><a href="mailto:contact@vivesmedia.com" className="text-sm text-muted-foreground hover:text-foreground transition-colors">contact@vivesmedia.com</a></li>
               </ul>
               <div className="mt-5 space-y-2">
-                <a href="https://calendar.google.com/calendar/r/eventedit?text=Appel+découverte+vivesmedia" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-foreground text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-foreground/90 transition-colors">
+                <a href="https://calendar.google.com/calendar/r/eventedit?text=Appel+découverte+vivesmedia" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-foreground text-white text-xs font-semibold px-5 py-2.5 rounded-xl hover:bg-foreground/90 transition-colors">
                   <Calendar className="w-3 h-3" /> Google Agenda <ArrowUpRight className="w-3 h-3" />
                 </a>
-                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
+                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
                   Devis gratuit <ArrowUpRight className="w-3 h-3" />
                 </Link>
               </div>

@@ -127,10 +127,14 @@ export default function ServicesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.25, ease }}
-            className="mt-5 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full"
-            style={{ background: '#FFF4ED', color: '#FF6B00' }}
+            className="mt-8 flex items-center gap-4 rounded-xl px-6 py-5"
+            style={{ background: '#FFF4ED' }}
           >
-            <CreditCard className="w-4 h-4 shrink-0" /> Paiement en 1 fois ou en abonnement dès 89 €/mois — sur tous les types de sites
+            <CreditCard className="w-7 h-7 shrink-0" style={{ color: '#FF6B00' }} />
+            <p className="text-lg sm:text-xl font-bold leading-snug" style={{ color: '#B8460A' }}>
+              Paiement en 1 fois ou en abonnement dès 89&nbsp;€/mois
+              <span className="block text-sm font-medium opacity-80 mt-0.5">sur tous les types de sites</span>
+            </p>
           </motion.div>
         </div>
 
@@ -170,7 +174,7 @@ export default function ServicesSection() {
           </p>
           <Link
             href="/contact"
-            className="group inline-flex items-center gap-2.5 text-sm font-semibold text-white px-6 py-3 rounded-full transition-all duration-300 hover:gap-4"
+            className="group inline-flex items-center gap-2.5 text-sm font-semibold text-white px-6 py-3 rounded-xl transition-all duration-300 hover:gap-4"
             style={{ backgroundColor: 'var(--brand-cta)' }}
           >
             Demander un devis gratuit

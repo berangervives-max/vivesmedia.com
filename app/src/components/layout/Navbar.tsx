@@ -38,10 +38,10 @@ export default function Navbar() {
             <button onClick={() => setMobileOpen(true)} aria-label="Ouvrir le menu" className="lg:hidden p-2 text-foreground/60 hover:text-foreground">
               <Menu className="w-5 h-5" />
             </button>
-            <button type="button" onClick={openBooking} className="hidden lg:flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-full border transition-colors hover:bg-foreground/5" style={{ borderColor: 'rgba(17,24,39,0.15)', color: '#111827' }}>
+            <button type="button" onClick={openBooking} className="hidden lg:flex items-center gap-2 text-sm font-semibold px-4 py-2.5 rounded-xl border transition-colors hover:bg-foreground/5" style={{ borderColor: 'rgba(17,24,39,0.15)', color: '#111827' }}>
               <CalendarClock className="w-3.5 h-3.5" style={{ color: '#FF6B00' }} /> Réserver un appel
             </button>
-            <Link href="/contact" className="hidden sm:flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
+            <Link href="/contact" className="hidden sm:flex items-center gap-2 text-white text-sm font-semibold px-5 py-2.5 rounded-xl hover:opacity-90 transition-colors" style={{ backgroundColor: 'var(--brand-cta)' }}>
               Devis Gratuit <ArrowUpRight className="w-3.5 h-3.5" />
             </Link>
           </div>
@@ -65,10 +65,10 @@ export default function Navbar() {
                   </li>
                 ))}
               </ul>
-              <Link href="/contact" onClick={() => setMobileOpen(false)} className="mt-10 flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-6 py-3 rounded-full w-full">
+              <Link href="/contact" onClick={() => setMobileOpen(false)} className="mt-10 flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-6 py-3 rounded-xl w-full">
                 Devis Gratuit <ArrowUpRight className="w-4 h-4" />
               </Link>
-              <button type="button" onClick={() => { setMobileOpen(false); openBooking() }} className="mt-3 flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-full w-full border" style={{ borderColor: 'rgba(17,24,39,0.15)', color: '#111827' }}>
+              <button type="button" onClick={() => { setMobileOpen(false); openBooking() }} className="mt-3 flex items-center justify-center gap-2 font-semibold px-6 py-3 rounded-xl w-full border" style={{ borderColor: 'rgba(17,24,39,0.15)', color: '#111827' }}>
                 <CalendarClock className="w-4 h-4" style={{ color: '#FF6B00' }} /> Réserver un appel
               </button>
             </motion.div>

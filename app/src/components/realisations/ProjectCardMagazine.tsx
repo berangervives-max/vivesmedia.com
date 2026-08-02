@@ -50,8 +50,8 @@ export default function ProjectCardMagazine({
     >
       <Link href={p.href} className={`group block ${big ? 'grid items-center gap-8 md:grid-cols-2 lg:gap-12' : ''}`}>
         {/* ── Cadre image (marge interne = l'image respire) ── */}
-        <div className="rounded-[1.7rem] border border-border bg-card p-2.5 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_24px_60px_-24px_rgba(18,18,18,0.28)]">
-          <div className={`relative overflow-hidden rounded-[1.25rem] bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[16/9]' : 'aspect-[16/10]'}`}>
+        <div className="rounded-md border border-border bg-card p-2.5 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_24px_60px_-24px_rgba(18,18,18,0.28)]">
+          <div className={`relative overflow-hidden rounded-sm bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[16/9]' : 'aspect-[16/10]'}`}>
             <img
               src={p.img}
               alt={`${p.name} — ${p.type}`}

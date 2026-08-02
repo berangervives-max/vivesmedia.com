@@ -5,11 +5,11 @@ import { motion } from 'framer-motion'
 import ProjectCardMagazine, { type MagazineCard } from '@/components/realisations/ProjectCardMagazine'
 
 const PROJECTS: MagazineCard[] = [
-  { name: 'Vives Reports', type: 'Site Éditorial · Guide Touristique Rome', year: '2022', href: '/realisations/vives-reports', img: '/images/realisations/vivesreports-desktop.png', tags: ['Éditorial', 'SEO', 'React'], featured: true },
+  { name: 'Vives Reports', type: 'Site Éditorial · Guide Touristique Rome', year: '2026', href: '/realisations/vives-reports', img: '/images/realisations/vivesreports-desktop.png', tags: ['Éditorial', 'SEO', 'React'], featured: true },
   { num: '01', name: 'Marine Caro', type: 'Site Vitrine · Architecte en Provence', year: '2026', href: '/realisations/marine-caro', img: '/images/realisations/marine-desktop.jpg', tags: ['Site Vitrine', 'Architecture', 'SEO'] },
   { num: '02', name: 'CADENCE', type: 'Concept & Site · Studio Multisport', year: '2026', href: '/realisations/cadence', img: '/images/realisations/cadence-desktop.png', tags: ['Concept', 'Direction Artistique', 'Sport'] },
   { num: '03', name: 'Stoop', type: 'Site Vitrine · Logistique & Transport', year: '2026', href: '/realisations/stoop', img: '/images/realisations/stoop-desktop.jpg', tags: ['Site Vitrine', 'Direction Artistique', 'SEO'] },
-  { num: '04', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2025', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Refonte'] },
+  { num: '04', name: 'Sésame Informatique', type: 'Refonte Site · ERP B2B Négoce', year: '2026', href: '/realisations/sesame-informatique', img: '/thumbnails/sesame-hero.png', tags: ['B2B', 'ERP', 'Refonte'] },
   { num: '05', name: 'Yannis Amielh', type: 'Portfolio · Mannequin Éditorial', year: '2026', href: '/realisations/yannis-amielh', img: '/images/realisations/yannis-site-desktop.jpg', tags: ['Portfolio', 'Direction Artistique', '3D'] },
 ]
 

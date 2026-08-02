@@ -45,46 +45,43 @@ export default function TestimonialsSection() {
           className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground max-w-2xl leading-tight">
           Ce que disent mes clients <span className="font-accent font-normal">satisfaits</span>
         </motion.h2>
-        <div className="grid md:grid-cols-2 gap-6 mt-14">
-          <motion.a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
-            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="rounded-2xl border border-border bg-white p-8 md:p-10 flex flex-col justify-between min-h-[280px] shadow-sm hover:shadow-md transition-all cursor-pointer">
-            <Stars />
-            <div className="mt-4">
-              <p className="text-xl md:text-2xl text-foreground leading-relaxed font-light">"{items[0]?.text}"</p>
-              <div className="mt-6 flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${items[0]?.color}`}>{items[0]?.initial}</div>
-                <div><p className="text-sm font-semibold text-foreground">{items[0]?.name}</p><p className="text-xs text-muted-foreground">{items[0]?.company}</p></div>
-              </div>
-            </div>
-          </motion.a>
-          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
-            className="rounded-2xl overflow-hidden border border-border min-h-[280px] relative">
-            <img src="/images/09bd18d81_p1049296-high-8vjn4x.webp" alt="Customer story" className="w-full h-full object-cover absolute inset-0" />
-            <div className="absolute inset-0 bg-black/30" />
-            <div className="relative p-8 md:p-10 flex flex-col justify-between h-full min-h-[280px]">
-              <Stars />
-              <div className="mt-auto">
-                <p className="text-7xl md:text-8xl font-bold text-white">5.0<span className="text-3xl text-white/50">/5</span></p>
-                <p className="text-white/70 mt-2">sur Google · avis vérifiés</p>
-              </div>
-            </div>
-          </motion.div>
+      </div>
+
+      {/* Bandeau vivant : les avis défilent directement sur le fond de la page, deux rangées en sens opposés — pas de cartes, pas d'encarts. */}
+      <div className="mt-14 space-y-5">
+        <div className="marquee-row marquee-mask overflow-hidden">
+          <div className="animate-marquee flex gap-14 pr-14">
+            {[...items, ...items].map((t, i) => (
+              <a key={i} href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-4 shrink-0 max-w-md hover:opacity-70 transition-opacity">
+                <Stars />
+                <p className="text-foreground/80 text-base leading-snug font-light">
+                  "{t?.text}" <span className="text-muted-foreground font-medium not-italic">— {t?.name}{t?.company ? `, ${t.company}` : ''}</span>
+                </p>
+              </a>
+            ))}
+          </div>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-          {items.slice(1, 7).map((t, i) => (
-            <motion.a key={i} href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.05 * i }}
-              className="rounded-2xl border border-border bg-white p-8 shadow-sm min-h-[220px] flex flex-col justify-between hover:shadow-md transition-all cursor-pointer">
-              <Stars />
-              <p className="text-lg text-foreground leading-relaxed font-light mt-4">"{t?.text}"</p>
-              <div className="mt-6 flex items-center gap-3">
-                <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${t?.color}`}>{t?.initial}</div>
-                <div><p className="text-sm font-semibold text-foreground">{t?.name}</p><p className="text-xs text-muted-foreground">{t?.company}</p></div>
-              </div>
-            </motion.a>
-          ))}
+        <div className="marquee-row marquee-mask overflow-hidden">
+          <div className="animate-marquee-reverse flex gap-14 pr-14">
+            {[...items, ...items].reverse().map((t, i) => (
+              <a key={i} href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
+                className="group flex items-center gap-4 shrink-0 max-w-md hover:opacity-70 transition-opacity">
+                <Stars />
+                <p className="text-foreground/80 text-base leading-snug font-light">
+                  "{t?.text}" <span className="text-muted-foreground font-medium not-italic">— {t?.name}{t?.company ? `, ${t.company}` : ''}</span>
+                </p>
+              </a>
+            ))}
+          </div>
         </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto px-6">
+        <a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"
+          className="mt-12 inline-flex items-center gap-2 text-sm font-semibold text-foreground hover:opacity-70 transition-opacity">
+          5.0/5 sur Google — voir tous les avis <span aria-hidden>→</span>
+        </a>
       </div>
     </section>
   )

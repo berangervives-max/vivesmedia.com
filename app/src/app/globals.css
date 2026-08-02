@@ -80,7 +80,7 @@
   --chart-3: oklch(0.439 0 0);
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
-  --radius: 0.75rem;
+  --radius: 0.375rem; /* Béranger 02/08/2026 : sitewide moins arrondi (était 0.75rem) */
   --sidebar: oklch(0.98 0 0);
   --sidebar-foreground: oklch(0.216 0 0);
   --sidebar-primary: oklch(0.593 0.232 37);
@@ -156,6 +156,26 @@
 .animate-marquee {
   animation: marquee 30s linear infinite;
   width: max-content;
+}
+
+@keyframes marquee-reverse {
+  0% { transform: translateX(-50%); }
+  100% { transform: translateX(0); }
+}
+.animate-marquee-reverse {
+  animation: marquee-reverse 34s linear infinite;
+  width: max-content;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee, .animate-marquee-reverse { animation-play-state: paused; }
+}
+.marquee-mask {
+  mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 64px, #000 calc(100% - 64px), transparent 100%);
+}
+.marquee-row:hover .animate-marquee,
+.marquee-row:hover .animate-marquee-reverse {
+  animation-play-state: paused;
 }
 
 /* ============================================================

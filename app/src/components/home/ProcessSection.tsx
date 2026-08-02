@@ -93,12 +93,12 @@ export default function ProcessSection() {
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
           className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/contact"
-            className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-all shadow-lg"
+            className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-xl hover:opacity-90 transition-all shadow-lg"
             style={{ backgroundColor: 'var(--brand-cta)', boxShadow: '0 8px 30px rgba(244,82,30,0.25)' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>
           <Link href="/realisations"
-            className="flex items-center gap-2 text-sm font-medium px-6 py-3.5 rounded-full border border-border text-foreground hover:border-foreground transition-colors">
+            className="flex items-center gap-2 text-sm font-medium px-6 py-3.5 rounded-xl border border-border text-foreground hover:border-foreground transition-colors">
             Voir les réalisations
           </Link>
         </motion.div>

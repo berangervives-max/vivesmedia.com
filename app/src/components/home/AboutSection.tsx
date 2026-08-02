@@ -46,29 +46,29 @@ export default function AboutSection() {
               Originaire d'Avignon, je travaille en full remote avec des entreprises partout en France.
             </motion.p>
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}
-              className="mt-8 grid grid-cols-2 gap-3">
+              className="mt-8 grid grid-cols-2 gap-x-6 gap-y-4">
               {[
                 { label: 'Full Remote', desc: 'Je travaille à distance, partout en France' },
                 { label: 'Interlocuteur unique', desc: 'Un seul contact du brief à la livraison' },
                 { label: 'Devis sous 24h', desc: 'Réponse garantie, sans engagement' },
                 { label: 'Basé à Avignon', desc: 'Déplacement possible sur demande' },
               ].map((item, i) => (
-                <motion.div key={item.label} initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }} transition={{ delay: 0.35 + i * 0.05 }}
-                  className="p-4 rounded-xl border border-border bg-secondary/40">
+                <motion.div key={item.label} initial={{ opacity: 0, x: -8 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.35 + i * 0.05 }}
+                  className="border-l-2 pl-3.5" style={{ borderColor: '#FF6B00' }}>
                   <p className="text-sm font-semibold text-foreground">{item.label}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                 </motion.div>
               ))}
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}
               className="mt-8 flex gap-3">
               <Link href="/realisations"
-                className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full text-white btn-orange-glow"
+                className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-xl text-white btn-orange-glow"
                 style={{ backgroundColor: 'var(--brand-cta)' }}>
                 Voir mes réalisations <ArrowUpRight className="w-4 h-4" />
               </Link>
               <Link href="/a-propos"
-                className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-full border border-border text-foreground hover:border-foreground transition-colors">
+                className="flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl border border-border text-foreground hover:border-foreground transition-colors">
                 En savoir plus
               </Link>
             </motion.div>

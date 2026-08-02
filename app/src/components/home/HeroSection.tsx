@@ -35,13 +35,13 @@ export default function HeroSection() {
           className="mt-10 flex flex-col items-center gap-6">
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
-              className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
+              className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-xl btn-orange-glow"
               style={{ backgroundColor: 'var(--brand-cta)' }}>
               Lancer mon projet <ArrowUpRight className="w-4 h-4" />
             </Link>
             <button type="button"
               onClick={() => { track('cta_clicked', { location: 'hero', label: 'Réserver un appel', destination: 'booking_modal' }); openBooking() }}
-              className="flex items-center gap-2 font-semibold px-8 py-4 rounded-full border transition-colors hover:bg-foreground/5"
+              className="flex items-center gap-2 font-semibold px-8 py-4 rounded-xl border transition-colors hover:bg-foreground/5"
               style={{ borderColor: 'rgba(17,24,39,0.18)', color: '#111827' }}>
               <CalendarClock className="w-4 h-4" style={{ color: '#FF6B00' }} /> Réserver un appel
             </button>
