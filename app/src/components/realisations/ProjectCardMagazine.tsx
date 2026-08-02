@@ -28,9 +28,11 @@ function Tag({ label }: { label: string }) {
 
 /**
  * Vignette éditoriale « carte magazine ».
- * L'image est ENCADRÉE (marge interne : elle respire, jamais en bord perdu),
- * et les métadonnées (nom serif italique · type · année · tags) sont posées
- * dessous comme une légende de magazine. Inspiration : Locomotive.
+ * L'image est présentée DIRECTEMENT, sans cadre ni bordure — comme sur le vrai
+ * site de Locomotive (agence citée en référence) : image nue, puis un filet
+ * fin sous l'image avant la légende (nom serif italique · type · année · tags).
+ * Béranger (02/08/2026) : le cadre précédent (marge + bordure) faisait "écran
+ * dans l'écran", corrigé après recherche sur Locomotive/Awwwards.
  */
 export default function ProjectCardMagazine({
   p,
@@ -49,46 +51,44 @@ export default function ProjectCardMagazine({
       transition={{ duration: 0.6, delay: index * 0.07, ease }}
     >
       <Link href={p.href} className={`group block ${big ? 'grid items-center gap-8 md:grid-cols-2 lg:gap-12' : ''}`}>
-        {/* ── Cadre image (marge interne = l'image respire) ── */}
-        <div className="rounded-md border border-border bg-card p-2.5 transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_24px_60px_-24px_rgba(18,18,18,0.28)]">
-          <div className={`relative overflow-hidden rounded-sm bg-secondary ${big ? 'aspect-[16/10] sm:aspect-[16/9]' : 'aspect-[16/10]'}`}>
-            <img
-              src={p.img}
-              alt={`${p.name} — ${p.type}`}
-              loading="lazy"
-              className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"
-            />
-            {/* Voile discret au survol pour la profondeur */}
-            <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/[0.04]" />
+        {/* ── Image directe, sans cadre ── */}
+        <div className={`relative overflow-hidden rounded-lg bg-secondary transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_24px_60px_-24px_rgba(18,18,18,0.28)] ${big ? 'aspect-[16/10] sm:aspect-[16/9]' : 'aspect-[16/10]'}`}>
+          <img
+            src={p.img}
+            alt={`${p.name} — ${p.type}`}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[900ms] ease-out group-hover:scale-[1.04]"
+          />
+          {/* Voile discret au survol pour la profondeur */}
+          <div className="absolute inset-0 bg-foreground/0 transition-colors duration-500 group-hover:bg-foreground/[0.04]" />
 
-            {/* Index éditorial */}
-            {p.num && (
-              <span className="absolute left-4 top-3.5 rounded-full bg-card/85 px-2 py-0.5 font-mono text-[11px] text-muted-foreground backdrop-blur-sm">
-                {p.num}
-              </span>
-            )}
+          {/* Index éditorial */}
+          {p.num && (
+            <span className="absolute left-4 top-3.5 rounded-full bg-card/85 px-2 py-0.5 font-mono text-[11px] text-muted-foreground backdrop-blur-sm">
+              {p.num}
+            </span>
+          )}
 
-            {/* Badge dernier projet */}
-            {p.featured && (
-              <span
-                className="absolute right-4 top-3.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white"
-                style={{ backgroundColor: 'var(--brand-cta)' }}
-              >
-                Dernier projet
-              </span>
-            )}
+          {/* Badge dernier projet */}
+          {p.featured && (
+            <span
+              className="absolute right-4 top-3.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white"
+              style={{ backgroundColor: 'var(--brand-cta)' }}
+            >
+              Dernier projet
+            </span>
+          )}
 
-            {/* Pastille flèche au survol (si pas de badge) */}
-            {!p.featured && (
-              <span className="absolute right-4 top-3.5 flex h-9 w-9 translate-y-1 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
-                <ArrowUpRight className="h-4 w-4 text-foreground" />
-              </span>
-            )}
-          </div>
+          {/* Pastille flèche au survol (si pas de badge) */}
+          {!p.featured && (
+            <span className="absolute right-4 top-3.5 flex h-9 w-9 translate-y-1 items-center justify-center rounded-full bg-white opacity-0 shadow-lg transition-all duration-500 group-hover:translate-y-0 group-hover:opacity-100">
+              <ArrowUpRight className="h-4 w-4 text-foreground" />
+            </span>
+          )}
         </div>
 
-        {/* ── Légende éditoriale ── */}
-        <div className={big ? '' : 'px-1.5 pt-5'}>
+        {/* ── Légende éditoriale, séparée par un filet fin (façon Locomotive) ── */}
+        <div className={big ? 'border-t border-border pt-5 mt-5' : 'border-t border-border pt-4 mt-4'}>
           <div className="flex items-baseline justify-between gap-4">
             <h3 className={`font-accent leading-tight text-foreground ${big ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl'}`}>
               {p.name}

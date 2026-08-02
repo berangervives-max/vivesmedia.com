@@ -330,9 +330,11 @@ export default function ContactPage() {
               { slug: 'stoop', name: 'Stoop', label: 'Logistique · B2B', img: '/images/realisations/stoop-desktop.jpg' },
               { slug: 'vives-reports', name: 'Vives Reports', label: 'SaaS · Reporting', img: '/images/realisations/vivesreports-desktop.png' },
             ].map(r => (
-              <a key={r.slug} href={`/realisations/${r.slug}`} className="group rounded-2xl overflow-hidden border border-border bg-white hover:shadow-md transition-shadow">
-                <img src={r.img} alt={r.name} className="w-full h-36 object-cover object-top" />
-                <div className="p-4">
+              <a key={r.slug} href={`/realisations/${r.slug}`} className="group">
+                <div className="rounded-lg overflow-hidden">
+                  <img src={r.img} alt={r.name} className="w-full h-36 object-cover object-top transition-transform duration-500 group-hover:scale-[1.03]" />
+                </div>
+                <div className="border-t border-border pt-3 mt-3">
                   <p className="font-semibold text-foreground text-sm">{r.name}</p>
                   <p className="text-xs text-muted-foreground">{r.label}</p>
                 </div>
