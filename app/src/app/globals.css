@@ -60,13 +60,11 @@
   --popover-foreground: oklch(0.216 0 0);
   --primary: #FF6B00;                     /* orange accent — punchy (décor : puces, filets) */
   --primary-foreground: oklch(1 0 0);     /* blanc sur orange */
-  /* Orange ACTION accessible — à utiliser dès que l'orange sert de FOND derrière du
-     texte blanc (boutons, badges). #FF6B00 ne donne que ~2.9:1 avec du blanc, sous le
-     minimum WCAG AA de 4.5:1 pour du texte normal. #BF5000 monte à ~4.8:1 en gardant
-     la même teinte (même angle ~24.7°), assombrie pour la lisibilité.
-     #FF6B00 reste utilisé pour le purement décoratif (puces, filets, barres de
-     progression), où aucun ratio de contraste n'est requis. */
-  --brand-cta: #BF5000;
+  /* Béranger (02/08/2026) : CTA alignés sur le même orange punchy que le logo (#FF6B00),
+     jugé plus flashy que la variante assombrie #BF5000 utilisée précédemment pour le
+     contraste WCAG (~4.8:1). #FF6B00 ne donne que ~2.9:1 avec du texte blanc, sous le
+     minimum WCAG AA (3:1 même en grand texte) — arbitrage assumé en faveur du visuel. */
+  --brand-cta: #FF6B00;
   --secondary: oklch(0.944 0 0);          /* #F0F0F0 — zones secondaires */
   --secondary-foreground: oklch(0.216 0 0);
   --muted: oklch(0.944 0 0);              /* #F0F0F0 */
