@@ -1,8 +1,50 @@
 ﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { ArrowUpRight, CheckCircle2, AlertCircle, Check } from 'lucide-react'
+import { ArrowUpRight, CheckCircle2, AlertCircle, Check, Phone, Mail } from 'lucide-react'
 import { track } from '@/lib/analytics'
+
+/** Icône WhatsApp (bulle officielle) — pas d'emoji, cohérent avec le reste des icônes du site. */
+function WhatsAppIcon({ className, style }: { className?: string; style?: React.CSSProperties }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} style={style}>
+      <path d="M12 2C6.5 2 2 6.5 2 12c0 1.9.5 3.6 1.5 5.2L2 22l4.9-1.5C8.5 21.5 10.2 22 12 22c5.5 0 10-4.5 10-10S17.5 2 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .9.9-2.9-.2-.3C4.2 15 3.8 13.5 3.8 12c0-4.5 3.7-8.2 8.2-8.2s8.2 3.7 8.2 8.2-3.7 8.2-8.2 8.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.2.2-.7.8-.8.9-.1.2-.3.2-.5.1-.7-.3-1.4-.7-2-1.3-.5-.5-1-1.1-1.4-1.8-.1-.2 0-.4.1-.5.1-.1.2-.3.4-.4.1-.1.2-.3.2-.4.1-.2 0-.3 0-.5-.1-.1-.6-1.5-.8-2-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.5.1-.7.3-.2.2-.9.9-.9 2.2s1 2.6 1.1 2.7c.1.2 2 3 4.8 4.2.7.3 1.2.5 1.6.6.7.2 1.3.2 1.8.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.2-1.2-.1-.2-.3-.2-.5-.3z"/>
+    </svg>
+  )
+}
+
+/** Code de vérification en 6 cases séparées (pattern standard OTP) plutôt qu'un champ texte générique. */
+function OtpInput({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+  const refs = useRef<Array<HTMLInputElement | null>>([])
+  const digits = Array.from({ length: 6 }, (_, i) => value[i] || '')
+
+  const setDigit = (i: number, d: string) => {
+    const clean = d.replace(/\D/g, '').slice(-1)
+    const next = digits.slice()
+    next[i] = clean
+    onChange(next.join('').replace(/\s+$/, ''))
+    if (clean && i < 5) refs.current[i + 1]?.focus()
+  }
+  const onKeyDown = (i: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !digits[i] && i > 0) refs.current[i - 1]?.focus()
+  }
+  const onPaste = (e: React.ClipboardEvent) => {
+    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6)
+    if (pasted) { e.preventDefault(); onChange(pasted); refs.current[Math.min(pasted.length, 5)]?.focus() }
+  }
+
+  return (
+    <div className="flex gap-2" onPaste={onPaste} role="group" aria-label="Code de vérification à 6 chiffres">
+      {digits.map((d, i) => (
+        <input key={i} ref={el => { refs.current[i] = el }} value={d} inputMode="numeric" maxLength={1}
+          name={`otp-${i}`} id={`otp-${i}`} aria-label={`Chiffre ${i + 1} sur 6`}
+          onChange={e => setDigit(i, e.target.value)} onKeyDown={e => onKeyDown(i, e)}
+          className="w-11 h-13 sm:w-12 sm:h-14 rounded-xl border border-border text-center text-lg font-semibold tabular-nums focus:outline-none focus:border-foreground/40 focus:ring-2 transition-colors"
+          style={{ ['--tw-ring-color' as string]: d ? 'var(--brand-cta)' : 'transparent', borderColor: d ? 'var(--brand-cta)' : undefined, background: d ? '#FFF4ED' : undefined }} />
+      ))}
+    </div>
+  )
+}
 
 const PROJECT_TYPES = [
   { id: 'site-vitrine', label: 'Site Vitrine', desc: 'Présentation de votre activité' },
@@ -132,19 +174,24 @@ export default function ContactPage() {
           <p className="text-muted-foreground mb-10">Réponse garantie sous 24h, sans engagement.</p>
         </motion.div>
 
-        {/* Chemin RAPIDE (faible friction) — alternative au formulaire long */}
-        <div className="mb-10 rounded-2xl p-6" style={{ background: '#0F172A' }}>
-          <p className="text-white font-semibold mb-1">Pressé ? Le plus rapide 👇</p>
-          <p className="text-xs mb-4" style={{ color: 'rgba(255,255,255,.6)' }}>Laissez juste votre prénom + numéro, je vous rappelle. Ou écrivez-moi sur WhatsApp.</p>
+        {/* Chemin RAPIDE (faible friction) — alternative au formulaire long. Même carte blanche que le reste de la page. */}
+        <div className="mb-10 bg-white rounded-2xl border border-border p-6">
+          <div className="flex items-center gap-3 mb-1">
+            <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#FFF4ED' }}>
+              <Phone className="w-4 h-4" style={{ color: 'var(--brand-cta)' }} />
+            </div>
+            <p className="text-foreground font-semibold">Pressé ? On vous rappelle</p>
+          </div>
+          <p className="text-xs text-muted-foreground mb-4 ml-12">Laissez juste votre prénom + numéro. Ou écrivez sur WhatsApp.</p>
           {rStatus === 'ok' ? (
-            <p className="text-sm flex items-center gap-2" style={{ color: '#4ade80' }}><Check className="w-4 h-4" /> Merci {rNom} ! Je vous rappelle très vite.</p>
+            <p className="text-sm flex items-center gap-2 text-green-600 ml-12"><Check className="w-4 h-4" /> Merci {rNom} ! Je vous rappelle très vite.</p>
           ) : (
             <div className="flex flex-col sm:flex-row gap-3">
               <form onSubmit={sendRappel} className="flex flex-1 flex-col sm:flex-row gap-2">
                 <input value={rNom} onChange={e => setRNom(e.target.value)} required placeholder="Prénom"
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm border border-border focus:outline-none focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10" />
                 <input value={rTel} onChange={e => setRTel(e.target.value)} required inputMode="tel" placeholder="06 12 34 56 78"
-                  className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
+                  className="flex-1 px-4 py-2.5 rounded-xl text-sm border border-border focus:outline-none focus:border-foreground/30 focus:ring-2 focus:ring-foreground/10" />
                 <button type="submit" disabled={rStatus === 'loading' || !rNom || !rTel}
                   className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: 'var(--brand-cta)' }}>
                   {rStatus === 'loading' ? '…' : 'Être rappelé'}
@@ -152,13 +199,13 @@ export default function ContactPage() {
               </form>
               {WHATSAPP && (
                 <a href={`https://wa.me/${WHATSAPP}`} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap" style={{ background: '#25D366', color: '#0F172A' }}>
-                  WhatsApp
+                  className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap border border-border text-foreground hover:border-foreground/30 transition-colors">
+                  <WhatsAppIcon className="w-4 h-4" style={{ color: '#25D366' }} /> WhatsApp
                 </a>
               )}
             </div>
           )}
-          {rStatus === 'error' && <p className="text-xs mt-2" style={{ color: '#FCA5A5' }}>Erreur — réessayez ou utilisez le formulaire ci-dessous.</p>}
+          {rStatus === 'error' && <p className="text-xs mt-2 text-red-600 ml-12">Erreur — réessayez ou utilisez le formulaire ci-dessous.</p>}
         </div>
 
         <div className="mb-8">
@@ -218,27 +265,33 @@ export default function ContactPage() {
               ))}
             </div>
             {/* Vérification email (anti-faux email) par code */}
-            <div className="rounded-xl p-4" style={{ background: '#FFF7F4', border: '1px solid #FCD9CC' }}>
+            <div className="rounded-xl p-5" style={{ background: '#FFF9F6', border: '1px solid #FCE4D6' }}>
               {!codeSent ? (
                 <div className="flex flex-wrap items-center gap-3">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0" style={{ background: '#FFF4ED' }}>
+                    <Mail className="w-4 h-4" style={{ color: 'var(--brand-cta)' }} />
+                  </div>
+                  <div className="flex-1 min-w-[200px]">
+                    <p className="text-sm font-semibold text-foreground">Confirmer votre email</p>
+                    <p className="text-xs text-muted-foreground">Un code à 6 chiffres vous sera envoyé pour valider votre adresse.</p>
+                  </div>
                   <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
-                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: 'var(--brand-cta)' }}>
-                    {sending ? 'Envoi…' : '✉️ Vérifier mon email'}
+                    className="text-sm font-semibold px-4 py-2.5 rounded-xl text-white disabled:opacity-50 whitespace-nowrap" style={{ background: 'var(--brand-cta)' }}>
+                    {sending ? 'Envoi…' : 'Recevoir mon code'}
                   </button>
-                  <span className="text-xs text-muted-foreground">On vous envoie un code à 6 chiffres pour confirmer votre adresse (obligatoire).</span>
                 </div>
               ) : (
                 <div>
-                  <label className="text-sm font-medium text-foreground block mb-1.5">Code reçu par email</label>
-                  <div className="flex items-center gap-3">
-                    <input value={code} onChange={e => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))} inputMode="numeric" placeholder="123456"
-                      className="w-32 px-4 py-2.5 rounded-xl border border-border text-sm tracking-widest text-center focus:outline-none focus:border-foreground/30" />
-                    <button type="button" onClick={sendCode} disabled={sending} className="text-xs underline text-muted-foreground">Renvoyer le code</button>
-                    {code.length === 6 && <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> prêt</span>}
+                  <label className="text-sm font-medium text-foreground block mb-2">Code reçu par email</label>
+                  <div className="flex items-center gap-4 flex-wrap">
+                    <OtpInput value={code} onChange={v => setCode(v)} />
+                    {code.length === 6
+                      ? <span className="text-xs text-green-600 flex items-center gap-1"><Check className="w-3.5 h-3.5" /> Prêt</span>
+                      : <button type="button" onClick={sendCode} disabled={sending} className="text-xs underline text-muted-foreground">Renvoyer le code</button>}
                   </div>
                 </div>
               )}
-              {codeMsg && <p className="text-xs mt-2" style={{ color: codeMsg.ok ? '#16A34A' : '#DC2626' }}>{codeMsg.text}</p>}
+              {codeMsg && <p className="text-xs mt-3" style={{ color: codeMsg.ok ? '#16A34A' : '#DC2626' }}>{codeMsg.text}</p>}
             </div>
 
             <div>
