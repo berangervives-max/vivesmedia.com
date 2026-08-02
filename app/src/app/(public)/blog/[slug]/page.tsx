@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowLeft } from 'lucide-react'
@@ -106,7 +106,7 @@ export default async function BlogArticlePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: article.contenu || '' }} />
         {/* Maillage interne — diffuse l'autorité de l'article vers les pages services */}
         <div className="mt-14 pt-10 border-t border-border">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Aller plus loin</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF6B00' }}>Aller plus loin</p>
           <h2 className="text-xl font-bold text-foreground mb-5">Les services liés à cet article</h2>
           <div className="grid sm:grid-cols-2 gap-3">
             {relatedServices(article).map((s) => (

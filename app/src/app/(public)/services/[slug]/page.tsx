@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
@@ -57,7 +57,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/30">{s.num}</span>
                 {s.badge && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>{s.badge}</span>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>{s.badge}</span>
                 )}
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-4">{s.title}</h1>
@@ -104,8 +104,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
         {/* ── PROBLÈME CLIENT ── */}
         {s.problem && (
-          <div className="mb-16 rounded-2xl border-l-4 bg-white p-6 md:p-8" style={{ borderColor: '#F4521E' }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Le problème qu'on règle</p>
+          <div className="mb-16 rounded-2xl border-l-4 bg-white p-6 md:p-8" style={{ borderColor: '#FF6B00' }}>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Le problème qu'on règle</p>
             <p className="text-foreground text-base sm:text-lg leading-relaxed">{s.problem}</p>
           </div>
         )}
@@ -123,15 +123,15 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         {/* ── DESCRIPTION + FEATURES ── */}
         <div className="grid md:grid-cols-2 gap-12 mb-16">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Ce service en détail</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF6B00' }}>Ce service en détail</p>
             <p className="text-foreground text-base leading-relaxed">{s.description}</p>
           </div>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>Ce qui est inclus</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF6B00' }}>Ce qui est inclus</p>
             <ul className="space-y-4">
               {s.features.map(f => (
                 <li key={f.title} className="flex gap-3">
-                  <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#F4521E' }} />
+                  <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#FF6B00' }} />
                   <div>
                     <p className="text-sm font-semibold text-foreground">{f.title}</p>
                     <p className="text-sm text-muted-foreground">{f.desc}</p>
@@ -145,7 +145,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         {/* ── EN DÉTAIL (deep dive) ── */}
         {detail && detail.length > 0 && (
           <div className="mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>En détail</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>En détail</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">Comment ça marche, concrètement</h2>
             <div className="space-y-6">
               {detail.map(sec => (
@@ -156,7 +156,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                     <div className="grid sm:grid-cols-2 gap-x-8 gap-y-4">
                       {sec.points.map(p => (
                         <div key={p.title} className="flex gap-3">
-                          <Check className="w-4 h-4 shrink-0 mt-1" style={{ color: '#F4521E' }} />
+                          <Check className="w-4 h-4 shrink-0 mt-1" style={{ color: '#FF6B00' }} />
                           <div>
                             <p className="text-sm font-semibold text-foreground">{p.title}</p>
                             <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
@@ -174,7 +174,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         {/* ── POUR QUI ── */}
         {s.forWhom && (
           <div className="mb-16 bg-white rounded-2xl border border-border p-6 md:p-8">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Pour qui</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Pour qui</p>
             <h2 className="text-xl sm:text-2xl font-bold text-foreground mb-6">
               Ce service est fait pour vous <span className="italic font-normal">si&nbsp;:</span>
             </h2>
@@ -182,7 +182,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <ul className="space-y-3">
                 {s.forWhom.yes.map(item => (
                   <li key={item} className="flex items-start gap-2.5">
-                    <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#F4521E' }} />
+                    <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#FF6B00' }} />
                     <span className="text-sm text-foreground">{item}</span>
                   </li>
                 ))}
@@ -208,7 +208,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         {/* ── PRICING TIERS ── */}
         {s.pricing && (
           <div className="mb-16">
-            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Formules</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Formules</p>
             <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
               Choisissez votre <span className="italic font-normal">niveau.</span>
             </h2>
@@ -219,7 +219,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   className={`rounded-2xl border p-6 flex flex-col ${plan.highlighted ? 'bg-foreground border-foreground' : 'bg-white border-border'}`}
                 >
                   {plan.highlighted && (
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full self-start mb-4" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Recommandé</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-full self-start mb-4" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Recommandé</span>
                   )}
                   <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white/60' : 'text-muted-foreground'}`}>{plan.name}</p>
                   <p className={`text-2xl font-bold mb-0.5 ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>{plan.price}</p>
@@ -227,7 +227,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   <ul className="space-y-2.5 flex-1 mt-2">
                     {plan.features.map(f => (
                       <li key={f} className="flex items-start gap-2">
-                        <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.highlighted ? 'text-white/60' : ''}`} style={plan.highlighted ? {} : { color: '#F4521E' }} />
+                        <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.highlighted ? 'text-white/60' : ''}`} style={plan.highlighted ? {} : { color: '#FF6B00' }} />
                         <span className={`text-sm ${plan.highlighted ? 'text-white/80' : 'text-foreground'}`}>{f}</span>
                       </li>
                     ))}
@@ -246,7 +246,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
         {/* ── PROCESSUS ── */}
         <div className="mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Comment ça se passe</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Comment ça se passe</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
             Simple, <span className="italic font-normal">du début à la fin.</span>
           </h2>
@@ -268,7 +268,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
         {/* ── TESTIMONIALS ── */}
         <div className="mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Avis clients</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Avis clients</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
             Ce qu'ils en disent, <span className="italic font-normal">vraiment.</span>
           </h2>
@@ -276,7 +276,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             {s.testimonials.map(t => (
               <div key={t.name} className="bg-white rounded-2xl border border-border p-6 flex flex-col">
                 <div className="flex gap-0.5 mb-4">
-                  {[1,2,3,4,5].map(n => <Star key={n} className="w-4 h-4 fill-current" style={{ color: '#F4521E' }} />)}
+                  {[1,2,3,4,5].map(n => <Star key={n} className="w-4 h-4 fill-current" style={{ color: '#FF6B00' }} />)}
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">"{t.text}"</p>
                 <div className="flex items-center gap-3">
@@ -301,7 +301,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
         {/* ── FAQ ── */}
         <div className="mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Questions fréquentes</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Questions fréquentes</p>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
             Tout ce que vous <span className="italic font-normal">voulez savoir.</span>
           </h2>

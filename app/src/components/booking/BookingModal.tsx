@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useState } from 'react'
 import { X, ExternalLink, CalendarClock } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -78,7 +78,7 @@ export default function BookingModal() {
             <div className="flex items-start justify-between gap-4 px-5 sm:px-6 pt-5 pb-4 border-b" style={{ borderColor: '#F1F3F5' }}>
               <div className="flex items-center gap-3">
                 <span className="flex items-center justify-center w-10 h-10 rounded-full shrink-0" style={{ background: 'rgba(244,82,30,0.1)' }}>
-                  <CalendarClock className="w-5 h-5" style={{ color: '#F4521E' }} />
+                  <CalendarClock className="w-5 h-5" style={{ color: '#FF6B00' }} />
                 </span>
                 <div>
                   <h2 className="font-bold text-base leading-tight" style={{ color: '#111827' }}>Réserve ton appel découverte</h2>

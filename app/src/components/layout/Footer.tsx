@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { useState } from 'react'
 import { ArrowUpRight, Calendar } from 'lucide-react'
@@ -34,7 +34,7 @@ export default function Footer() {
         <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
           <div className="lg:max-w-xs">
             <Link href="/" className="inline-block mb-4">
-              <span className="font-bold text-xl text-foreground tracking-tight">vivesmedia<span style={{ color: '#F4521E' }}>.com</span></span>
+              <span className="font-bold text-xl text-foreground tracking-tight">vivesmedia<span style={{ color: '#FF6B00' }}>.com</span></span>
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed mb-6">Sites sur-mesure, pensés pour convertir. Originaire d'Avignon · Full remote · Partout en France</p>
             <div className="mb-6">
@@ -86,7 +86,7 @@ export default function Footer() {
                 <a href="https://calendar.google.com/calendar/r/eventedit?text=Appel+découverte+vivesmedia" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-foreground text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:bg-foreground/90 transition-colors">
                   <Calendar className="w-3 h-3" /> Google Agenda <ArrowUpRight className="w-3 h-3" />
                 </a>
-                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: '#F4521E' }}>
+                <Link href="/contact" className="flex items-center gap-2 text-white text-xs font-semibold px-5 py-2.5 rounded-full hover:opacity-90 transition-colors" style={{ backgroundColor: '#FF6B00' }}>
                   Devis gratuit <ArrowUpRight className="w-3 h-3" />
                 </Link>
               </div>

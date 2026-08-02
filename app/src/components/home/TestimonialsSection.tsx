@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Star } from 'lucide-react'
@@ -43,7 +43,7 @@ export default function TestimonialsSection() {
         </motion.a>
         <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground max-w-2xl leading-tight">
-          Ce que disent mes clients <span className="font-heading italic font-normal">satisfaits</span>
+          Ce que disent mes clients <span className="font-accent font-normal">satisfaits</span>
         </motion.h2>
         <div className="grid md:grid-cols-2 gap-6 mt-14">
           <motion.a href={GOOGLE_REVIEWS_URL} target="_blank" rel="noopener noreferrer"

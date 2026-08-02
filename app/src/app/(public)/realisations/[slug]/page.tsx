@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, ArrowLeft, ExternalLink } from 'lucide-react'
@@ -62,9 +62,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 function SectionHead({ eyebrow, title, accent, light = false }: { eyebrow: string; title: React.ReactNode; accent?: React.ReactNode; light?: boolean }) {
   return (
     <Reveal>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#F4521E' }}>{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#FF6B00' }}>{eyebrow}</p>
       <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.08] tracking-tight ${light ? 'text-white' : 'text-foreground'}`}>
-        {title}{accent && <> <span className={`font-heading italic font-normal ${light ? 'text-white/55' : 'text-foreground/55'}`}>{accent}</span></>}
+        {title}{accent && <> <span className={`font-accent font-normal ${light ? 'text-white/55' : 'text-foreground/55'}`}>{accent}</span></>}
       </h2>
     </Reveal>
   )
@@ -102,7 +102,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Toutes les réalisations
         </Link>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#FF6B00' }}>
           Étude de cas · {r.year}
         </p>
         <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
@@ -119,7 +119,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
           <div className="mt-7">
             <a href={r.liveUrl} target="_blank" rel="nofollow noopener noreferrer"
               className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
-              style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+              style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
               Visiter le site en ligne <ExternalLink className="h-4 w-4" />
             </a>
           </div>
@@ -151,8 +151,8 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               )}
               {r.context.problem && (
                 <Reveal>
-                  <p className="mb-3 text-xs uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Le problème</p>
-                  <p className="border-l-2 pl-6 text-xl leading-relaxed text-foreground sm:text-2xl" style={{ borderColor: '#F4521E' }}>{r.context.problem}</p>
+                  <p className="mb-3 text-xs uppercase tracking-[0.2em]" style={{ color: '#FF6B00' }}>Le problème</p>
+                  <p className="border-l-2 pl-6 text-xl leading-relaxed text-foreground sm:text-2xl" style={{ borderColor: '#FF6B00' }}>{r.context.problem}</p>
                 </Reveal>
               )}
             </div>
@@ -186,7 +186,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
                   <div className="space-y-8">
                     {r.typography.map((t) => (
                       <div key={t.font + t.role} className="border-t border-border pt-5">
-                        <p className="mb-1 text-xs uppercase tracking-[0.15em]" style={{ color: '#F4521E' }}>{t.role}</p>
+                        <p className="mb-1 text-xs uppercase tracking-[0.15em]" style={{ color: '#FF6B00' }}>{t.role}</p>
                         <p
                           className={`text-4xl leading-none text-foreground sm:text-5xl ${t.serif ? 'italic' : 'font-bold tracking-tight'}`}
                           style={{ fontFamily: `'${t.font}', ${t.serif ? 'serif' : 'sans-serif'}` }}
@@ -260,7 +260,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               ) : (
                 <Reveal key={d.title}>
                   <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-7 sm:p-8">
-                    <span className="mb-4 h-1.5 w-8 rounded-full" style={{ backgroundColor: '#F4521E' }} />
+                    <span className="mb-4 h-1.5 w-8 rounded-full" style={{ backgroundColor: '#FF6B00' }} />
                     <h3 className="text-lg font-bold text-foreground">{d.title}</h3>
                     <p className="mt-2.5 text-[15px] leading-relaxed text-muted-foreground">{d.why}</p>
                   </div>
@@ -318,7 +318,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               {process.map((step) => (
                 <Reveal key={step.step}>
                   <div className="grid gap-4 border-t border-border py-9 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-12">
-                    <span className="font-mono text-sm font-semibold" style={{ color: '#F4521E' }}>{step.step}</span>
+                    <span className="font-mono text-sm font-semibold" style={{ color: '#FF6B00' }}>{step.step}</span>
                     <div>
                       <h3 className="text-xl font-bold text-foreground sm:text-2xl">{step.title}</h3>
                       <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted-foreground">{step.desc}</p>
@@ -340,7 +340,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
               {r.results.map((stat, i) => (
                 <Reveal key={stat.label} delay={i * 0.06}>
                   <div className="border-t border-white/15 pt-6">
-                    <p className="text-4xl font-bold leading-none tracking-tight sm:text-5xl" style={{ color: '#F4521E' }}>{stat.value}</p>
+                    <p className="text-4xl font-bold leading-none tracking-tight sm:text-5xl" style={{ color: '#FF6B00' }}>{stat.value}</p>
                     <p className="mt-4 text-sm leading-snug text-white/55">{stat.label}</p>
                   </div>
                 </Reveal>
@@ -372,7 +372,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
           <div className="mx-auto grid max-w-4xl gap-14 px-6 md:grid-cols-2">
             {r.stack.length > 0 && (
               <Reveal>
-                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Technologies</p>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#FF6B00' }}>Technologies</p>
                 <h3 className="mb-7 text-2xl font-bold text-foreground">La stack du projet</h3>
                 <div className="flex flex-wrap gap-2.5">
                   {r.stack.map(t => (
@@ -383,7 +383,7 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
             )}
             {r.services.length > 0 && (
               <Reveal>
-                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>Services utilisés</p>
+                <p className="mb-5 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#FF6B00' }}>Services utilisés</p>
                 <h3 className="mb-7 text-2xl font-bold text-foreground">Le même résultat pour vous</h3>
                 <div className="flex flex-col gap-3">
                   {r.services.map(svc => (
@@ -429,13 +429,13 @@ export default async function RealisationPage({ params }: { params: Promise<{ sl
             <p className="mb-4 text-xs uppercase tracking-[0.2em] text-white/40">Votre projet est le prochain</p>
             <h3 className="mx-auto max-w-xl text-3xl font-bold leading-tight text-white sm:text-4xl">
               Un projet similaire ?{' '}
-              <span className="font-heading italic font-normal">Parlons-en.</span>
+              <span className="font-accent font-normal">Parlons-en.</span>
             </h3>
             <p className="mx-auto mt-4 max-w-md text-white/60">Devis gratuit sous 24h, sans engagement.</p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link href="/contact"
                 className="inline-flex items-center gap-2 rounded-full px-8 py-4 font-semibold text-white transition-all hover:scale-105"
-                style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
+                style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
                 Lancer mon projet <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link href="/realisations"

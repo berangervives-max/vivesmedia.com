@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 
 export const metadata: Metadata = {
@@ -13,13 +13,13 @@ export default function PolitiqueConfidentialite() {
   return (
     <div className="min-h-screen bg-background pt-28 pb-24">
       <div className="max-w-3xl mx-auto px-6">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Confidentialité</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Confidentialité</p>
         <h1 className="text-3xl md:text-4xl font-bold text-foreground leading-tight">
           Politique de confidentialité <span className="italic font-normal">&amp; cookies</span>
         </h1>
         <p className="mt-3 text-sm text-muted-foreground">Dernière mise à jour : {MAJ}</p>
 
-        <div className="mt-10 space-y-8 text-[15px] leading-relaxed text-muted-foreground [&_h2]:text-foreground [&_h2]:font-semibold [&_h2]:text-lg [&_h2]:mt-2 [&_h2]:mb-2 [&_strong]:text-foreground [&_a]:text-[#F4521E] [&_a]:underline [&_a]:underline-offset-2">
+        <div className="mt-10 space-y-8 text-[15px] leading-relaxed text-muted-foreground [&_h2]:text-foreground [&_h2]:font-semibold [&_h2]:text-lg [&_h2]:mt-2 [&_h2]:mb-2 [&_strong]:text-foreground [&_a]:text-[#FF6B00] [&_a]:underline [&_a]:underline-offset-2">
 
           <section>
             <h2>1. Responsable du traitement</h2>
@@ -111,7 +111,7 @@ export default function PolitiqueConfidentialite() {
         </div>
 
         <div className="mt-12">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-full" style={{ backgroundColor: '#F4521E' }}>
+          <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white px-6 py-3 rounded-full" style={{ backgroundColor: '#FF6B00' }}>
             Retour à l'accueil
           </Link>
         </div>

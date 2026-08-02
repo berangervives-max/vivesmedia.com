@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useEffect, useRef, useState } from 'react'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
@@ -35,10 +35,10 @@ export default function AboutSection() {
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           <div>
             <motion.p initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#F4521E' }}>À propos</motion.p>
+              className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF6B00' }}>À propos</motion.p>
             <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}
               className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
-              Un freelance dédié à votre{' '}<span className="font-heading italic font-normal">croissance digitale</span>
+              Un freelance dédié à votre{' '}<span className="font-accent font-normal">croissance digitale</span>
             </motion.h2>
             <motion.p initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}
               className="mt-6 text-muted-foreground leading-relaxed text-base">
@@ -64,7 +64,7 @@ export default function AboutSection() {
               className="mt-8 flex gap-3">
               <Link href="/realisations"
                 className="flex items-center gap-2 text-sm font-semibold px-5 py-2.5 rounded-full text-white btn-orange-glow"
-                style={{ backgroundColor: '#F4521E' }}>
+                style={{ backgroundColor: '#FF6B00' }}>
                 Voir mes réalisations <ArrowUpRight className="w-4 h-4" />
               </Link>
               <Link href="/a-propos"
@@ -77,7 +77,7 @@ export default function AboutSection() {
             {STATS.map((stat, i) => (
               <motion.div key={stat.label} initial={{ opacity: 0, x: 20 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, delay: 0.15 * i }}
                 className="py-8 first:pt-0 last:pb-0">
-                <span className="text-6xl md:text-7xl font-bold tracking-tight" style={{ color: '#F4521E' }}>
+                <span className="text-6xl md:text-7xl font-bold tracking-tight" style={{ color: '#FF6B00' }}>
                   <CountUp target={stat.value} suffix={stat.suffix} />
                 </span>
                 <p className="text-muted-foreground text-sm mt-2 font-medium">{stat.label}</p>

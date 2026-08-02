@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { ChevronDown } from 'lucide-react'
@@ -31,7 +31,7 @@ export default function FaqSection() {
       <div className="max-w-3xl mx-auto px-6">
         <motion.h2 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
           className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight">
-          Des questions ?<br />Voici les <span className="font-heading italic font-normal">réponses</span>
+          Des questions ?<br />Voici les <span className="font-accent font-normal">réponses</span>
         </motion.h2>
         <div className="mt-12">{FAQS.map((faq, i) => <AccordionItem key={i} q={faq.q} a={faq.a} />)}</div>
       </div>

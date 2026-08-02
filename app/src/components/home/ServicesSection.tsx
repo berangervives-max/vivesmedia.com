@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowRight, CreditCard } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -66,7 +66,7 @@ function ServiceRow({ s, index }: { s: Service; index: number }) {
             {s.title}
           </span>
           {s.badge && (
-            <span className="hidden sm:inline text-[10px] font-medium uppercase tracking-wider shrink-0" style={{ color: '#F4521E' }}>
+            <span className="hidden sm:inline text-[10px] font-medium uppercase tracking-wider shrink-0" style={{ color: '#FF6B00' }}>
               {s.badge}
             </span>
           )}
@@ -78,7 +78,7 @@ function ServiceRow({ s, index }: { s: Service; index: number }) {
           <ArrowUpRight className="absolute inset-0 w-4 h-4 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-4 group-hover:-translate-y-4 group-hover:opacity-0" />
           <ArrowUpRight
             className="absolute inset-0 w-4 h-4 -translate-x-4 translate-y-4 opacity-0 transition-all duration-300 group-hover:translate-x-0 group-hover:translate-y-0 group-hover:opacity-100"
-            style={{ color: '#F4521E' }}
+            style={{ color: '#FF6B00' }}
           />
         </span>
       </Link>
@@ -99,7 +99,7 @@ export default function ServicesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
             className="text-xs font-semibold uppercase tracking-[0.2em] mb-4"
-            style={{ color: '#F4521E' }}
+            style={{ color: '#FF6B00' }}
           >
             Services
           </motion.p>
@@ -111,7 +111,7 @@ export default function ServicesSection() {
             className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground max-w-2xl leading-[1.1] tracking-tight"
           >
             Ce que je fais,{' '}
-            <span className="font-heading italic font-normal" style={{ color: '#F4521E' }}>concrètement.</span>
+            <span className="font-accent font-normal" style={{ color: '#FF6B00' }}>concrètement.</span>
           </motion.h2>
           <motion.p
             initial={{ opacity: 0, y: 12 }}
@@ -128,7 +128,7 @@ export default function ServicesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.25, ease }}
             className="mt-5 inline-flex items-center gap-2 text-sm font-semibold px-4 py-2 rounded-full"
-            style={{ background: '#FFF4ED', color: '#F4521E' }}
+            style={{ background: '#FFF4ED', color: '#FF6B00' }}
           >
             <CreditCard className="w-4 h-4 shrink-0" /> Paiement en 1 fois ou en abonnement dès 89 €/mois — sur tous les types de sites
           </motion.div>
@@ -166,12 +166,12 @@ export default function ServicesSection() {
         >
           <p className="text-base sm:text-lg text-muted-foreground">
             Vous hésitez entre plusieurs services ?{' '}
-            <span className="font-heading italic text-foreground">Parlons-en.</span>
+            <span className="font-accent text-foreground">Parlons-en.</span>
           </p>
           <Link
             href="/contact"
             className="group inline-flex items-center gap-2.5 text-sm font-semibold text-white px-6 py-3 rounded-full transition-all duration-300 hover:gap-4"
-            style={{ backgroundColor: '#F4521E' }}
+            style={{ backgroundColor: '#FF6B00' }}
           >
             Demander un devis gratuit
             <ArrowRight className="w-4 h-4" />

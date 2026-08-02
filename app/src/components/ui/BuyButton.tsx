@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState } from 'react'
 import { ArrowUpRight, Loader2 } from 'lucide-react'
 import { track } from '@/lib/analytics'
@@ -41,7 +41,7 @@ export default function BuyButton({ offer, label, price, mode }: Props) {
       onClick={handleClick}
       disabled={loading}
       className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3.5 rounded-full text-sm btn-orange-glow disabled:opacity-60"
-      style={{ backgroundColor: '#F4521E' }}
+      style={{ backgroundColor: '#FF6B00' }}
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{label} <ArrowUpRight className="w-4 h-4" /></>}
     </button>

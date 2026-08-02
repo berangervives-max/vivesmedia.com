@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, ArrowLeft, ExternalLink } from 'lucide-react'
 import Reveal from '@/components/ui/Reveal'
@@ -34,9 +34,9 @@ const SECTIONS_SITE = [
 function SectionHead({ eyebrow, title, accent }: { eyebrow: string; title: React.ReactNode; accent?: React.ReactNode }) {
   return (
     <Reveal>
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#F4521E' }}>{eyebrow}</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#FF6B00' }}>{eyebrow}</p>
       <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-[1.08] tracking-tight text-foreground">
-        {title}{accent && <> <span className="font-heading italic font-normal text-foreground/55">{accent}</span></>}
+        {title}{accent && <> <span className="font-accent font-normal text-foreground/55">{accent}</span></>}
       </h2>
     </Reveal>
   )
@@ -52,7 +52,7 @@ export default function SesameInformatiquePage() {
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
           Toutes les réalisations
         </Link>
-        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#F4521E' }}>
+        <p className="mb-6 text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: '#FF6B00' }}>
           Étude de cas · 2025
         </p>
         <h1 className="text-4xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-6xl lg:text-7xl">
@@ -70,7 +70,7 @@ export default function SesameInformatiquePage() {
         <div className="mt-7">
           <a href="https://sesame-preview.vercel.app/" target="_blank" rel="noopener noreferrer"
             className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.03]"
-            style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
             Visiter le site en ligne <ExternalLink className="h-4 w-4" />
           </a>
         </div>
@@ -215,7 +215,7 @@ export default function SesameInformatiquePage() {
             {SECTIONS_SITE.map((s) => (
               <Reveal key={s.num}>
                 <div className="grid gap-4 border-t border-border py-8 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-10">
-                  <span className="font-mono text-sm font-semibold" style={{ color: '#F4521E' }}>{s.num}</span>
+                  <span className="font-mono text-sm font-semibold" style={{ color: '#FF6B00' }}>{s.num}</span>
                   <div>
                     <h3 className="text-xl font-bold text-foreground sm:text-2xl">{s.title}</h3>
                     <p className="mt-3 max-w-2xl text-lg leading-relaxed text-muted-foreground">{s.desc}</p>
@@ -271,13 +271,13 @@ export default function SesameInformatiquePage() {
             <p className="mb-4 text-xs uppercase tracking-[0.2em] text-white/40">Votre projet est le prochain</p>
             <h3 className="mx-auto max-w-xl text-3xl font-bold leading-tight text-white sm:text-4xl">
               Un site qui convertit,{' '}
-              <span className="font-heading italic font-normal">pas juste qui existe</span>
+              <span className="font-accent font-normal">pas juste qui existe</span>
             </h3>
             <p className="mx-auto mt-4 max-w-md text-white/60">Devis gratuit sous 24h, sans engagement.</p>
             <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
               <Link href="/contact"
                 className="inline-flex items-center gap-2 rounded-full px-8 py-4 font-semibold text-white transition-all hover:scale-105"
-                style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
+                style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}>
                 Lancer mon projet <ArrowUpRight className="h-4 w-4" />
               </Link>
               <Link href="/realisations"

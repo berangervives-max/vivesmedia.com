@@ -1,4 +1,4 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { ArrowUpRight, Check, MapPin } from 'lucide-react'
 import JsonLd from '@/components/seo/JsonLd'
 import { faqSchema, breadcrumbSchema, SITE_URL } from '@/lib/schema'
@@ -47,19 +47,19 @@ export default function CityLanding({ city }: { city: City }) {
       <section className="relative pt-36 pb-20 bg-gradient-to-b from-[#f0eeff] via-background to-background overflow-hidden">
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[400px] rounded-full bg-primary/10 blur-[140px] pointer-events-none" />
         <div className="relative max-w-4xl mx-auto px-6 text-center">
-          <span className="inline-flex items-center gap-2 text-sm font-medium px-4 py-1.5 rounded-full mb-6" style={{ background: '#FEEFE9', color: '#F4521E' }}>
+          <span className="inline-flex items-center gap-2 text-sm font-medium px-4 py-1.5 rounded-full mb-6" style={{ background: '#FEEFE9', color: '#FF6B00' }}>
             <MapPin className="w-3.5 h-3.5" /> {city.city} · {city.dept} · {city.deptNum}
           </span>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold text-foreground leading-[1.07] tracking-tight">
             Freelance web à {city.city} —{' '}
-            <span className="font-heading italic font-normal">sur-mesure</span>
+            <span className="font-accent font-normal">sur-mesure</span>
           </h1>
           <p className="mt-6 text-muted-foreground text-base md:text-lg max-w-2xl mx-auto leading-relaxed">
             Création de sites internet sur-mesure — vitrine, e-commerce, UX/UI — pour les entreprises et indépendants
             de {city.city} et ses environs. Design unique, SEO et automatisation inclus. Livraison en 3 semaines, devis gratuit sous 24h.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
+            <Link href="/contact" className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.35)' }}>
               Devis gratuit sous 24h <ArrowUpRight className="w-4 h-4" />
             </Link>
             <Link href="/realisations" className="flex items-center gap-2 text-foreground font-semibold px-6 py-4 rounded-full border border-black/10 hover:bg-black/5 transition-colors">
@@ -85,7 +85,7 @@ export default function CityLanding({ city }: { city: City }) {
         <div className="grid md:grid-cols-3 gap-6">
           {SERVICES.map((s) => (
             <Link key={s.href} href={s.href} className="group rounded-2xl p-6 border border-black/8 hover:border-black/20 hover:shadow-lg transition-all bg-white">
-              <p className="text-xs font-semibold mb-2" style={{ color: '#F4521E' }}>{s.price}</p>
+              <p className="text-xs font-semibold mb-2" style={{ color: '#FF6B00' }}>{s.price}</p>
               <h3 className="text-lg font-bold text-foreground mb-2 flex items-center justify-between">{s.title}<ArrowUpRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" /></h3>
               <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
             </Link>
@@ -99,7 +99,7 @@ export default function CityLanding({ city }: { city: City }) {
         <ul className="space-y-3">
           {WHY.map((item) => (
             <li key={item} className="flex items-start gap-3 text-muted-foreground">
-              <Check className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#F4521E' }} />
+              <Check className="w-5 h-5 mt-0.5 shrink-0" style={{ color: '#FF6B00' }} />
               <span>{item}</span>
             </li>
           ))}
@@ -152,7 +152,7 @@ export default function CityLanding({ city }: { city: City }) {
         <div className="rounded-3xl p-10 md:p-14 text-center" style={{ background: '#0F0F0F' }}>
           <h2 className="text-2xl md:text-4xl font-bold text-white mb-4">Votre projet web à {city.city} commence ici</h2>
           <p className="text-white/60 mb-8 max-w-xl mx-auto">Parlons de votre site. Devis gratuit, détaillé et sans engagement, sous 24h.</p>
-          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#F4521E' }}>
+          <Link href="/contact" className="inline-flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:scale-105 transition-all" style={{ backgroundColor: '#FF6B00' }}>
             Demander mon devis gratuit <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>

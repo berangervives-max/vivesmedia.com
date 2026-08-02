@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Mentions légales — vivesmedia.com',
@@ -20,7 +20,7 @@ export default function MentionsLegalesPage() {
   return (
     <div className="min-h-screen bg-background pt-28 pb-20">
       <div className="max-w-3xl mx-auto px-6">
-        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Informations légales</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Informations légales</p>
         <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight mb-4">Mentions légales</h1>
         <p className="text-muted-foreground mb-12">Dernière mise à jour : {new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
 

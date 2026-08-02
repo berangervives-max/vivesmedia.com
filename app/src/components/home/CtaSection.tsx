@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { ArrowUpRight, CalendarClock } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -14,7 +14,7 @@ export default function CtaSection() {
           <div className="absolute inset-0 bg-black/60" />
           <div className="relative">
             <h3 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight">
-              Transformez votre présence en ligne en{' '}<span className="font-heading italic font-normal">machine de croissance</span>
+              Transformez votre présence en ligne en{' '}<span className="font-accent font-normal">machine de croissance</span>
             </h3>
             <p className="mt-6 text-white/70 max-w-xl mx-auto">Vos concurrents investissent déjà. Rejoignez les entreprises qui convertissent leurs visiteurs en clients avec vivesmedia.com.</p>
             <p className="mt-6 inline-flex items-center gap-2 text-sm font-medium text-white/90 rounded-full px-4 py-1.5" style={{ background: 'rgba(255,255,255,0.1)' }}>

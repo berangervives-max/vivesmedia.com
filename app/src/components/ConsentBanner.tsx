@@ -1,9 +1,9 @@
-'use client'
+﻿'use client'
 
 /**
  * Bannière de consentement RGPD/CNIL + Google Consent Mode v2 (mode avancé),
  * dessinée 100 % à la DA vivesmedia.com (Inter Tight + Instrument Serif italique,
- * orange #F4521E, pilules rounded-full + lueur, tokens foreground/muted).
+ * orange #FF6B00, pilules rounded-full + lueur, tokens foreground/muted).
  * - « Refuser » aussi accessible que « Accepter » (exigence CNIL).
  * - Au choix : gtag consent update + opt-in/opt-out PostHog, mémorisé 12 mois.
  * Le défaut « denied » est posé AVANT gtag (script inline dans layout.tsx).
@@ -15,7 +15,7 @@ import { ArrowUpRight, ShieldCheck } from 'lucide-react'
 import posthog from 'posthog-js'
 
 const COOKIE = 'vm_consent'
-const ORANGE = '#F4521E'
+const ORANGE = '#FF6B00'
 
 declare global {
   interface Window {

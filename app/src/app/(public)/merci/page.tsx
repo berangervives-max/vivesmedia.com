@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { CheckCircle2 } from 'lucide-react'
 import TrackView from '@/components/analytics/TrackView'
@@ -29,7 +29,7 @@ export default async function MerciPage({ searchParams }: { searchParams: Promis
           <a href="mailto:contact@vivesmedia.com" className="underline hover:text-foreground">contact@vivesmedia.com</a>
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <Link href="/" className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3 rounded-full text-sm btn-orange-glow" style={{ backgroundColor: '#F4521E' }}>
+          <Link href="/" className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3 rounded-full text-sm btn-orange-glow" style={{ backgroundColor: '#FF6B00' }}>
             Retour à l'accueil
           </Link>
           <Link href="/realisations" className="flex items-center justify-center gap-2 border border-border text-foreground font-medium px-6 py-3 rounded-full text-sm hover:border-foreground transition-colors">

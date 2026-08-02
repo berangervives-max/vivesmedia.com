@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { getPublishedRealisationsData } from '@/services/supabase.service'
@@ -70,7 +70,7 @@ export default async function RealisationsPage() {
     <div className="min-h-screen bg-background pt-28 pb-20">
       <div className="max-w-7xl mx-auto px-6">
         <div className="mb-12">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Réalisations</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Réalisations</p>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl">
             Des projets pensés pour <span className="italic font-normal">marquer les esprits</span>
           </h1>

@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { ArrowUpRight, CheckCircle2, AlertCircle, Check } from 'lucide-react'
@@ -125,7 +125,7 @@ export default function ContactPage() {
     <div className="min-h-screen bg-background pt-28 pb-20">
       <div className="max-w-3xl mx-auto px-6">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Devis Gratuit</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Devis Gratuit</p>
           <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight mb-3">
             Lançons votre <span className="italic font-normal">projet ensemble</span>
           </h1>
@@ -146,7 +146,7 @@ export default function ContactPage() {
                 <input value={rTel} onChange={e => setRTel(e.target.value)} required inputMode="tel" placeholder="06 12 34 56 78"
                   className="flex-1 px-4 py-2.5 rounded-xl text-sm outline-none" style={{ background: 'rgba(255,255,255,.1)', color: '#fff', border: '1px solid rgba(255,255,255,.15)' }} />
                 <button type="submit" disabled={rStatus === 'loading' || !rNom || !rTel}
-                  className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: '#F4521E' }}>
+                  className="px-5 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 whitespace-nowrap" style={{ background: '#FF6B00' }}>
                   {rStatus === 'loading' ? '…' : 'Être rappelé'}
                 </button>
               </form>
@@ -164,10 +164,10 @@ export default function ContactPage() {
         <div className="mb-8">
           <div className="flex justify-between items-center text-xs mb-1.5">
             <span className="text-muted-foreground">Progression de votre demande</span>
-            <span className="font-semibold" style={{ color: '#F4521E' }}>{progress}%</span>
+            <span className="font-semibold" style={{ color: '#FF6B00' }}>{progress}%</span>
           </div>
           <div className="h-1.5 rounded-full overflow-hidden bg-foreground/10">
-            <motion.div className="h-full rounded-full" style={{ backgroundColor: '#F4521E' }}
+            <motion.div className="h-full rounded-full" style={{ backgroundColor: '#FF6B00' }}
               animate={{ width: `${progress}%` }} transition={{ duration: 0.4 }} />
           </div>
         </div>
@@ -185,7 +185,7 @@ export default function ContactPage() {
                   className={`p-4 rounded-xl border text-left transition-all ${form.service === t.id ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/30'}`}>
                   <p className="text-sm font-semibold text-foreground">{t.label}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{t.desc}</p>
-                  {form.service === t.id && <Check className="w-3.5 h-3.5 mt-2" style={{ color: '#F4521E' }} />}
+                  {form.service === t.id && <Check className="w-3.5 h-3.5 mt-2" style={{ color: '#FF6B00' }} />}
                 </button>
               ))}
             </div>
@@ -199,7 +199,7 @@ export default function ContactPage() {
                   className={`p-4 rounded-xl border text-left transition-all ${form.budget === b.id ? 'border-foreground bg-foreground/5' : 'border-border hover:border-foreground/30'}`}>
                   <p className="text-sm font-semibold text-foreground">{b.label}</p>
                   <p className="text-xs text-muted-foreground mt-0.5">{b.desc}</p>
-                  {form.budget === b.id && <Check className="w-3.5 h-3.5 mt-2" style={{ color: '#F4521E' }} />}
+                  {form.budget === b.id && <Check className="w-3.5 h-3.5 mt-2" style={{ color: '#FF6B00' }} />}
                 </button>
               ))}
             </div>
@@ -222,7 +222,7 @@ export default function ContactPage() {
               {!codeSent ? (
                 <div className="flex flex-wrap items-center gap-3">
                   <button type="button" onClick={sendCode} disabled={sending || !emailValid(form.email)}
-                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#F4521E' }}>
+                    className="text-sm font-semibold px-4 py-2 rounded-lg text-white disabled:opacity-50" style={{ background: '#FF6B00' }}>
                     {sending ? 'Envoi…' : '✉️ Vérifier mon email'}
                   </button>
                   <span className="text-xs text-muted-foreground">On vous envoie un code à 6 chiffres pour confirmer votre adresse (obligatoire).</span>
@@ -256,20 +256,20 @@ export default function ContactPage() {
 
           <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-xs text-muted-foreground">
             {['Réponse sous 24 h', 'Sans engagement', '100 % gratuit'].map(t => (
-              <span key={t} className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" style={{ color: '#F4521E' }} /> {t}</span>
+              <span key={t} className="flex items-center gap-1.5"><Check className="w-3.5 h-3.5" style={{ color: '#FF6B00' }} /> {t}</span>
             ))}
           </div>
 
           <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !codeSent || code.length !== 6}
             className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
-            style={{ backgroundColor: '#F4521E' }}>
+            style={{ backgroundColor: '#FF6B00' }}>
             {status === 'loading' ? 'Envoi en cours...' : !codeSent ? 'Vérifiez votre email d\'abord' : code.length !== 6 ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
         </form>
 
         {/* Preuve : vraies réalisations (rassure au moment de décider) */}
         <div className="mt-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color: '#F4521E' }}>Ils m'ont fait confiance</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-1 text-center" style={{ color: '#FF6B00' }}>Ils m'ont fait confiance</p>
           <p className="text-center text-muted-foreground text-sm mb-6">Des projets réels, livrés de A à Z.</p>
           <div className="grid sm:grid-cols-3 gap-4">
             {[
@@ -287,7 +287,7 @@ export default function ContactPage() {
             ))}
           </div>
           <p className="text-center mt-6">
-            <a href="/realisations" className="text-sm font-medium hover:underline" style={{ color: '#F4521E' }}>Voir toutes mes réalisations →</a>
+            <a href="/realisations" className="text-sm font-medium hover:underline" style={{ color: '#FF6B00' }}>Voir toutes mes réalisations →</a>
           </p>
         </div>
       </div>

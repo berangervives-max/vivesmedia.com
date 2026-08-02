@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
@@ -41,7 +41,7 @@ export default function ProcessSection() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-16">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Mon processus</p>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Mon processus</p>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground max-w-xl leading-tight">
               De l'idée au site en{' '}
               <span className="italic font-normal text-foreground/50">3 semaines chrono</span>
@@ -82,7 +82,7 @@ export default function ProcessSection() {
                   <p className="text-sm text-muted-foreground leading-relaxed">{step.desc}</p>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#F4521E' }} />
+                  <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#FF6B00' }} />
                   <span className="text-xs text-muted-foreground font-medium">{step.duration}</span>
                 </div>
               </div>
@@ -94,7 +94,7 @@ export default function ProcessSection() {
           className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link href="/contact"
             className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full hover:opacity-90 transition-all shadow-lg"
-            style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.25)' }}>
+            style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.25)' }}>
             Lancer mon projet <ArrowUpRight className="w-4 h-4" />
           </Link>
           <Link href="/realisations"

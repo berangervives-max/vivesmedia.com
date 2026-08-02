@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useEffect, useState } from 'react'
@@ -28,7 +28,7 @@ export default function StickyMobileCta() {
         href="/contact"
         onClick={() => track('cta_clicked', { location: 'sticky_mobile', label: 'Devis gratuit', destination: '/contact' })}
         className="pointer-events-auto flex items-center justify-center gap-2 text-white font-semibold py-3.5 rounded-full"
-        style={{ backgroundColor: '#F4521E', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}
+        style={{ backgroundColor: '#FF6B00', boxShadow: '0 8px 30px rgba(244,82,30,0.4)' }}
       >
         Devis gratuit <ArrowUpRight className="w-4 h-4" />
       </Link>

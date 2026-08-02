@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -20,7 +20,7 @@ export type MagazineCard = {
 function Tag({ label }: { label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] leading-none text-muted-foreground">
-      <span className="h-1 w-1 rounded-full" style={{ backgroundColor: '#F4521E' }} />
+      <span className="h-1 w-1 rounded-full" style={{ backgroundColor: '#FF6B00' }} />
       {label}
     </span>
   )
@@ -72,7 +72,7 @@ export default function ProjectCardMagazine({
             {p.featured && (
               <span
                 className="absolute right-4 top-3.5 rounded-full px-2.5 py-1 text-[10px] font-bold uppercase tracking-widest text-white"
-                style={{ backgroundColor: '#F4521E' }}
+                style={{ backgroundColor: '#FF6B00' }}
               >
                 Dernier projet
               </span>
@@ -90,7 +90,7 @@ export default function ProjectCardMagazine({
         {/* ── Légende éditoriale ── */}
         <div className={big ? '' : 'px-1.5 pt-5'}>
           <div className="flex items-baseline justify-between gap-4">
-            <h3 className={`font-heading italic leading-tight text-foreground ${big ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl'}`}>
+            <h3 className={`font-accent leading-tight text-foreground ${big ? 'text-3xl sm:text-4xl lg:text-5xl' : 'text-2xl'}`}>
               {p.name}
             </h3>
             {p.year && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.year}</span>}

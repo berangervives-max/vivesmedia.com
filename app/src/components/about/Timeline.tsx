@@ -1,12 +1,13 @@
-'use client'
+﻿'use client'
 import { useRef } from 'react'
+import Image from 'next/image'
 import { motion, useScroll } from 'framer-motion'
 
 const TIMELINE = [
-  { num: '01', year: '2019–2021', title: 'BTS NDRC — Idelca Business School', desc: 'Négociation et digitalisation de la relation client. Les fondamentaux : vente, prospection, relation client.' },
-  { num: '02', year: '2021–2022', title: 'Community Manager — Hurier Moto', desc: 'Réseaux sociaux, veille, stratégie sociale et créations graphiques pour un concessionnaire moto (Cavaillon). En parallèle : Bachelor Marketing Digital.' },
-  { num: '03', year: '2022–2023', title: 'Webmaster & Community Manager — Ducati JMS Motos', desc: 'Image de marque et contenus web (Avignon), mise en ligne des annonces, satisfaction client (GarageScore), photo & vidéo produits.' },
-  { num: '04', year: '2023–2025', title: 'CM & Webmaster — Matos Import', desc: 'Gestion du site e-commerce PrestaShop (jet-ski & nautique, Cap d\'Agde), réseaux sociaux, événements & jeux concours, supports marketing. En parallèle : MBA Expert Marketing Digital (Bac+5).' },
+  { num: '01', year: '2019–2021', title: 'BTS NDRC — Idelca Business School', desc: 'Négociation et digitalisation de la relation client. Les fondamentaux : vente, prospection, relation client.', logo: '/images/about/logos/idelca.jpg' },
+  { num: '02', year: '2021–2022', title: 'Community Manager — Hurier Moto', desc: 'Réseaux sociaux, veille, stratégie sociale et créations graphiques pour un concessionnaire moto (Cavaillon). En parallèle : Bachelor Marketing Digital.', logo: '/images/about/logos/hurier-moto.jpg' },
+  { num: '03', year: '2022–2023', title: 'Webmaster & Community Manager — Ducati JMS Motos', desc: 'Image de marque et contenus web (Avignon), mise en ligne des annonces, satisfaction client (GarageScore), photo & vidéo produits.', logo: '/images/about/logos/ducati.png' },
+  { num: '04', year: '2023–2025', title: 'CM & Webmaster — Matos Import', desc: 'Gestion du site e-commerce PrestaShop (jet-ski & nautique, Cap d\'Agde), réseaux sociaux, événements & jeux concours, supports marketing. En parallèle : MBA Expert Marketing Digital (Bac+5).', logo: '/images/about/logos/matos-import.png' },
   { num: '05', year: 'oct. 2025 →', title: 'Fondation de vivesmedia.com', desc: 'Studio web freelance à Avignon. Des sites sur-mesure pensés pour convertir, avec IA et automatisation : Vives Reports, Sésame Informatique, Marine Caro, Stoop, CADENCE, Yannis Amielh.' },
 ]
 
@@ -25,10 +26,10 @@ export default function Timeline() {
         viewport={{ once: true }}
         className="mb-14"
       >
-        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Parcours</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Parcours</p>
         <h2 className="text-3xl sm:text-4xl font-bold text-foreground leading-tight">
           Les fondations de{' '}
-          <span className="font-heading italic font-normal text-foreground/50">ce que je construis</span>
+          <span className="font-accent text-foreground inline-block -rotate-1">ce que je construis</span>
         </h2>
       </motion.div>
 
@@ -42,7 +43,7 @@ export default function Timeline() {
           className="absolute top-2 bottom-2 left-[11px] sm:left-[120px] w-px origin-top"
           aria-hidden="true"
         >
-          <div className="w-full h-full" style={{ background: '#F4521E' }} />
+          <div className="w-full h-full" style={{ background: '#FF6B00' }} />
         </motion.div>
 
         <ol className="space-y-10">
@@ -67,22 +68,25 @@ export default function Timeline() {
                 viewport={{ once: true, margin: '-80px' }}
                 transition={{ type: 'spring', stiffness: 260, damping: 18, delay: i * 0.08 + 0.15 }}
                 className="absolute top-1 left-0 sm:left-[120px] sm:-translate-x-1/2 z-10 flex items-center justify-center w-6 h-6 rounded-full bg-white border-2 shadow-sm"
-                style={{ borderColor: '#F4521E' }}
+                style={{ borderColor: '#FF6B00' }}
                 aria-hidden="true"
               >
-                <span className="w-2 h-2 rounded-full" style={{ background: '#F4521E' }} />
+                <span className="w-2 h-2 rounded-full" style={{ background: '#FF6B00' }} />
               </motion.span>
 
-              {/* Contenu (carte) */}
-              <div className="pl-10">
-                <div className="rounded-2xl border border-border bg-white p-6 transition-all hover:shadow-md hover:-translate-y-0.5">
-                  <div className="flex items-center gap-3 mb-3">
-                    <span className="text-[11px] font-mono font-semibold tracking-widest rounded-full px-2.5 py-1" style={{ color: '#F4521E', background: 'rgba(244,82,30,0.08)' }}>{item.num}</span>
-                    <span className="sm:hidden text-lg font-bold text-foreground">{item.year}</span>
-                  </div>
-                  <h3 className="text-base font-semibold text-foreground mb-2 leading-tight">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
+              {/* Contenu — filet, plus de carte */}
+              <div className={`pl-10 ${i < TIMELINE.length - 1 ? 'pb-8 border-b border-border' : ''}`}>
+                <div className="flex items-center gap-3 mb-3">
+                  {item.logo && (
+                    <div className="w-10 h-10 flex items-center justify-center shrink-0">
+                      <Image src={item.logo} alt="" width={40} height={40} className="object-contain w-full h-full grayscale opacity-80 transition-all hover:grayscale-0 hover:opacity-100" />
+                    </div>
+                  )}
+                  <span className="font-mono text-xs font-semibold text-muted-foreground">{item.num}</span>
+                  <span className="sm:hidden text-lg font-bold text-foreground">{item.year}</span>
                 </div>
+                <h3 className="text-base font-semibold text-foreground mb-2 leading-tight">{item.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             </motion.li>
           ))}

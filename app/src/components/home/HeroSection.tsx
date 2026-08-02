@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ArrowUpRight, Star, CalendarClock } from 'lucide-react'
@@ -25,7 +25,7 @@ export default function HeroSection() {
         <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}
           className="text-5xl sm:text-6xl md:text-7xl lg:text-[88px] font-bold text-foreground leading-[1.05] tracking-tight">
           Des sites qui convertissent vos{' '}
-          <span className="font-heading italic font-normal text-foreground">visiteurs en clients</span>
+          <span className="font-accent font-normal text-foreground">visiteurs en clients</span>
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
           className="mt-7 text-foreground/75 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
@@ -36,14 +36,14 @@ export default function HeroSection() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link href="/contact" onClick={() => track('cta_clicked', { location: 'hero', label: 'Lancer mon projet', destination: '/contact' })}
               className="flex items-center gap-2 text-white font-semibold px-8 py-4 rounded-full btn-orange-glow"
-              style={{ backgroundColor: '#F4521E' }}>
+              style={{ backgroundColor: '#FF6B00' }}>
               Lancer mon projet <ArrowUpRight className="w-4 h-4" />
             </Link>
             <button type="button"
               onClick={() => { track('cta_clicked', { location: 'hero', label: 'Réserver un appel', destination: 'booking_modal' }); openBooking() }}
               className="flex items-center gap-2 font-semibold px-8 py-4 rounded-full border transition-colors hover:bg-foreground/5"
               style={{ borderColor: 'rgba(17,24,39,0.18)', color: '#111827' }}>
-              <CalendarClock className="w-4 h-4" style={{ color: '#F4521E' }} /> Réserver un appel
+              <CalendarClock className="w-4 h-4" style={{ color: '#FF6B00' }} /> Réserver un appel
             </button>
           </div>
           <a href="https://g.page/r/CVrzNHW-E9f0EAE/review" target="_blank" rel="noopener noreferrer"

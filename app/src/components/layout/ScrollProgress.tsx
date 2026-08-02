@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { motion, useScroll, useSpring } from 'framer-motion'
 
 // Barre de progression de lecture, fixée en haut de page (micro-détail premium).
@@ -10,7 +10,7 @@ export default function ScrollProgress() {
     <motion.div
       aria-hidden="true"
       className="fixed top-0 left-0 right-0 h-[3px] z-[100] origin-left"
-      style={{ scaleX, backgroundColor: '#F4521E' }}
+      style={{ scaleX, backgroundColor: '#FF6B00' }}
     />
   )
 }

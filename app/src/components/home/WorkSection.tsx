@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import Link from 'next/link'
 import { ArrowUpRight } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -22,9 +22,9 @@ export default function WorkSection() {
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-14 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#F4521E' }}>Réalisations</p>
+            <p className="mb-3 text-xs font-semibold uppercase tracking-widest" style={{ color: '#FF6B00' }}>Réalisations</p>
             <h2 className="max-w-xl text-3xl font-bold leading-tight text-foreground sm:text-4xl md:text-5xl">
-              Des projets pensés pour{' '}<span className="font-heading italic font-normal text-foreground/50">marquer les esprits</span>
+              Des projets pensés pour{' '}<span className="font-accent font-normal text-foreground/50">marquer les esprits</span>
             </h2>
           </motion.div>
           <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.15 }}>

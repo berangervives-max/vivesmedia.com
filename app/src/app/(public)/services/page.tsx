@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+﻿import type { Metadata } from 'next'
 import Link from 'next/link'
 import { ArrowUpRight, Check } from 'lucide-react'
 import { creationFormules, iaServices, recurrentServices, maintenancePlans } from '@/data/tarifs-data'
@@ -24,7 +24,7 @@ export default async function ServicesPage() {
 
         {/* Header */}
         <div className="mb-12 md:mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#F4521E' }}>Services & Tarifs</p>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-3" style={{ color: '#FF6B00' }}>Services & Tarifs</p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-foreground leading-tight max-w-2xl">
             Ce que je fais, <span className="italic font-normal">concrètement.</span>
           </h1>
@@ -34,7 +34,7 @@ export default async function ServicesPage() {
         </div>
 
         {/* ── SECTION 1 : CRÉATION DE SITES ── */}
-        <p className="text-xs font-semibold uppercase tracking-widest mb-8" style={{ color: '#F4521E' }}>Création de sites</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-8" style={{ color: '#FF6B00' }}>Création de sites</p>
 
         {/* E-Commerce — carte vedette */}
         <div className="rounded-2xl bg-foreground p-8 md:p-12 mb-4">
@@ -42,7 +42,7 @@ export default async function ServicesPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/40">01</span>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Le plus populaire</span>
+                <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Le plus populaire</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{ecommerce.title}</h2>
               <p className="text-4xl sm:text-5xl font-bold text-white mb-1">{ecommerce.price}</p>
@@ -64,7 +64,7 @@ export default async function ServicesPage() {
               <ul className="space-y-3">
                 {ecommerce.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-white/70">
-                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} /> {f}
+                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#FF6B00' }} /> {f}
                   </li>
                 ))}
               </ul>
@@ -78,14 +78,14 @@ export default async function ServicesPage() {
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <span className="text-xs font-mono text-muted-foreground mb-4">{s.num}</span>
               <h2 className="text-xl font-bold text-foreground mb-1">{s.title}</h2>
-              <p className="text-2xl font-bold mb-1" style={{ color: '#F4521E' }}>{s.price}</p>
+              <p className="text-2xl font-bold mb-1" style={{ color: '#FF6B00' }}>{s.price}</p>
               <p className="text-xs text-muted-foreground">paiement unique</p>
-              {s.sub && <p className="text-xs font-medium mt-1" style={{ color: '#F4521E' }}>{s.sub}</p>}
+              {s.sub && <p className="text-xs font-medium mt-1" style={{ color: '#FF6B00' }}>{s.sub}</p>}
               <p className="text-sm text-muted-foreground leading-relaxed mt-4 mb-6 flex-1">{s.desc}</p>
               <ul className="space-y-2 mb-6">
                 {s.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} /> {f}
+                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#FF6B00' }} /> {f}
                   </li>
                 ))}
               </ul>
@@ -102,7 +102,7 @@ export default async function ServicesPage() {
         </div>
 
         {/* ── SECTION 2 : NOUVEAUX SERVICES IA ── */}
-        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Nouveaux services</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Nouveaux services</p>
         <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
           L'IA, <span className="italic font-normal">au service de votre croissance.</span>
         </h2>
@@ -112,15 +112,15 @@ export default async function ServicesPage() {
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono text-muted-foreground">{s.num}</span>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Nouveau</span>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Nouveau</span>
               </div>
               <h2 className="text-lg font-bold text-foreground mb-1">{s.title}</h2>
-              <p className="text-xl font-bold mb-4" style={{ color: '#F4521E' }}>{s.price}</p>
+              <p className="text-xl font-bold mb-4" style={{ color: '#FF6B00' }}>{s.price}</p>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">{s.desc}</p>
               <ul className="space-y-2 mb-6">
                 {s.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} /> {f}
+                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#FF6B00' }} /> {f}
                   </li>
                 ))}
               </ul>
@@ -137,7 +137,7 @@ export default async function ServicesPage() {
         </div>
 
         {/* ── SECTION 3 : SERVICES RÉCURRENTS ── */}
-        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Abonnements</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Abonnements</p>
         <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
           Croissance, <span className="italic font-normal">mois après mois.</span>
         </h2>
@@ -147,12 +147,12 @@ export default async function ServicesPage() {
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <span className="text-xs font-mono text-muted-foreground mb-4">{s.num}</span>
               <h2 className="text-lg font-bold text-foreground mb-1">{s.title}</h2>
-              <p className="text-xl font-bold mb-4" style={{ color: '#F4521E' }}>{s.price}</p>
+              <p className="text-xl font-bold mb-4" style={{ color: '#FF6B00' }}>{s.price}</p>
               <p className="text-sm text-muted-foreground leading-relaxed mb-6 flex-1">{s.desc}</p>
               <ul className="space-y-2 mb-6">
                 {s.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} /> {f}
+                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#FF6B00' }} /> {f}
                   </li>
                 ))}
               </ul>
@@ -169,7 +169,7 @@ export default async function ServicesPage() {
         </div>
 
         {/* ── SECTION 4 : PLANS MAINTENANCE ── */}
-        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#F4521E' }}>Maintenance & Support</p>
+        <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Maintenance & Support</p>
         <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
           Votre site, <span className="italic font-normal">toujours à jour.</span>
         </h2>
@@ -177,13 +177,13 @@ export default async function ServicesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
           {maintenancePlans.map(m => (
             <div key={m.name} className={`rounded-2xl border p-7 bg-white flex flex-col ${m.recommended ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}>
-              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: '#F4521E', color: '#fff' }}>Recommandé</span>}
+              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: '#FF6B00', color: '#fff' }}>Recommandé</span>}
               <p className="font-bold text-foreground text-lg">{m.name}</p>
               <p className="text-3xl font-bold text-foreground mt-1 mb-6">{m.price}</p>
               <ul className="space-y-3 flex-1">
                 {m.features.map(f => (
                   <li key={f} className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#F4521E' }} />{f}
+                    <Check className="w-3.5 h-3.5 shrink-0" style={{ color: '#FF6B00' }} />{f}
                   </li>
                 ))}
               </ul>

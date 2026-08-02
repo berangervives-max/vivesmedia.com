@@ -3,6 +3,7 @@ import Script from 'next/script'
 import { GoogleAnalytics } from '@next/third-parties/google'
 import ConsentBanner from '@/components/ConsentBanner'
 import { Inter_Tight, Instrument_Serif } from 'next/font/google'
+import localFont from 'next/font/local'
 import './globals.css'
 import SmoothScroll from '@/components/layout/SmoothScroll'
 import { PostHogProvider } from './providers'
@@ -11,6 +12,7 @@ import { SITE_SCHEMA } from '@/lib/schema'
 
 const interTight = Inter_Tight({ subsets: ['latin'], variable: '--font-inter-tight', weight: ['400','500','600','700','800','900'] })
 const instrumentSerif = Instrument_Serif({ subsets: ['latin'], variable: '--font-instrument-serif', weight: '400', style: ['normal', 'italic'] })
+const bristol = localFont({ src: '../fonts/Bristol.otf', variable: '--font-bristol', display: 'swap' })
 
 export const metadata: Metadata = {
   title: { default: 'vivesmedia.com — Freelance web, design & marketing', template: '%s | vivesmedia.com' },
@@ -36,7 +38,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} antialiased`}>
+    <html lang="fr" className={`${interTight.variable} ${instrumentSerif.variable} ${bristol.variable} antialiased`}>
       <head>
         {/* Google Consent Mode v2 (mode avancé) — DOIT s'exécuter AVANT gtag :
             consentement par défaut « denied » tant que l'utilisateur n'a pas choisi
