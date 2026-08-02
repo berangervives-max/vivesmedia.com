@@ -40,7 +40,7 @@ export default function BuyButton({ offer, label, price, mode }: Props) {
     <button
       onClick={handleClick}
       disabled={loading}
-      className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3.5 rounded-full text-sm btn-orange-glow disabled:opacity-60"
+      className="flex items-center justify-center gap-2 text-white font-semibold px-6 py-3.5 rounded-xl text-sm btn-orange-glow disabled:opacity-60"
       style={{ backgroundColor: 'var(--brand-cta)' }}
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <>{label} <ArrowUpRight className="w-4 h-4" /></>}

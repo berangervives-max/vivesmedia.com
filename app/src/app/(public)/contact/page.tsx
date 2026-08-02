@@ -255,7 +255,7 @@ export default function ContactPage() {
           <div className="bg-white rounded-2xl border border-border p-8 space-y-5">
             <h3 className="font-semibold text-foreground">Vos coordonnées</h3>
             <div className="grid md:grid-cols-2 gap-5">
-              {[['Nom *', 'nom', 'text', true], ['Email *', 'email', 'email', true], ['Téléphone', 'telephone', 'tel', false]].map(([label, name, type, req]) => (
+              {[['Nom *', 'nom', 'text', true], ['Email *', 'email', 'email', true], ['Téléphone *', 'telephone', 'tel', true]].map(([label, name, type, req]) => (
                 <div key={String(name)}>
                   <label className="text-sm font-medium text-foreground block mb-1.5">{String(label)}</label>
                   <input required={Boolean(req)} type={String(type)} value={form[name as keyof typeof form]}
@@ -313,11 +313,12 @@ export default function ContactPage() {
             ))}
           </div>
 
-          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !codeSent || code.length !== 6}
-            className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-full transition-all hover:opacity-90 disabled:opacity-50"
+          <button type="submit" disabled={status === 'loading' || !form.nom || !form.email || !form.telephone || !codeSent || code.length !== 6}
+            className="w-full flex items-center justify-center gap-2 text-white font-semibold py-4 rounded-xl transition-all hover:opacity-90 disabled:opacity-50"
             style={{ backgroundColor: 'var(--brand-cta)' }}>
             {status === 'loading' ? 'Envoi en cours...' : !codeSent ? 'Vérifiez votre email d\'abord' : code.length !== 6 ? 'Saisissez le code reçu' : <><span>Envoyer ma demande</span><ArrowUpRight className="w-4 h-4" /></>}
           </button>
+          <p className="text-xs text-center text-muted-foreground -mt-4">Vous recevez une confirmation par email immédiatement après l'envoi.</p>
         </form>
 
         {/* Preuve : vraies réalisations (rassure au moment de décider) */}

@@ -34,6 +34,23 @@ export async function POST(req: NextRequest) {
       metadata: { service: item.slug, offer_name: item.name },
       allow_promotion_codes: true,
       billing_address_collection: 'auto',
+      // Capté une fois pour toutes à l'achat : évite de devoir recontacter le client
+      // juste pour récupérer son téléphone, le nom de son entreprise ou son site actuel.
+      phone_number_collection: { enabled: true },
+      custom_fields: [
+        {
+          key: 'entreprise',
+          label: { type: 'custom', custom: 'Nom de votre entreprise' },
+          type: 'text',
+          optional: true,
+        },
+        {
+          key: 'site_actuel',
+          label: { type: 'custom', custom: 'URL de votre site actuel (si vous en avez un)' },
+          type: 'text',
+          optional: true,
+        },
+      ],
     })
 
     return NextResponse.json({ url: session.url })
