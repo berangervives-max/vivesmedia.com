@@ -1,14 +1,17 @@
 ﻿'use client'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowRight, CreditCard } from 'lucide-react'
+import { ArrowUpRight, ArrowRight } from 'lucide-react'
 import { motion } from 'framer-motion'
 
 type Service = {
   num: string
   slug: string
   title: string
+  desc: string
   price: string
+  priceAlt?: string
   badge?: string
+  flag?: boolean
 }
 
 type ServiceGroup = {
@@ -20,25 +23,25 @@ const GROUPS: ServiceGroup[] = [
   {
     label: 'Créer',
     services: [
-      { num: '01', slug: 'site-ecommerce', title: 'Site E-Commerce', price: 'dès 3 840€ ou 149€/mois', badge: 'Populaire' },
-      { num: '02', slug: 'site-vitrine', title: 'Site Vitrine', price: 'dès 1 800€ ou 89€/mois' },
-      { num: '03', slug: 'site-catalogue', title: 'Site Catalogue', price: 'dès 2 740€' },
+      { num: '01', slug: 'site-ecommerce', title: 'Site E-Commerce', desc: 'Catalogue, paiement, gestion des commandes — pour vendre en ligne dès le lancement.', price: 'dès 3 840 €', priceAlt: 'ou 149 €/mois', badge: 'Le plus complet', flag: true },
+      { num: '02', slug: 'site-vitrine', title: 'Site Vitrine', desc: 'Présenter l’activité, être trouvé sur Google, convertir en demandes de contact.', price: 'dès 1 800 €', priceAlt: 'ou 89 €/mois' },
+      { num: '03', slug: 'site-catalogue', title: 'Site Catalogue', desc: 'Présenter une gamme de produits ou services, sans paiement en ligne.', price: 'dès 2 740 €' },
     ],
   },
   {
     label: 'Être visible',
     services: [
-      { num: '04', slug: 'seo', title: 'Référencement SEO', price: '274€/mois' },
-      { num: '05', slug: 'visibilite-ia', title: 'Visibilité IA (AEO/GEO)', price: '490€/mois', badge: 'Nouveau' },
-      { num: '06', slug: 'video-contenu-ia', title: 'Vidéo & Contenu IA', price: 'dès 490€/mois', badge: 'Nouveau' },
+      { num: '04', slug: 'seo', title: 'Référencement SEO', desc: 'Remonter dans Google sur les recherches qui amènent de vrais clients.', price: '274 €/mois' },
+      { num: '05', slug: 'visibilite-ia', title: 'Visibilité IA (AEO/GEO)', desc: 'Être cité par ChatGPT, Claude et Perplexity quand on cherche votre métier.', price: '490 €/mois', badge: 'Nouveau' },
+      { num: '06', slug: 'video-contenu-ia', title: 'Vidéo & Contenu IA', desc: 'Vidéos et visuels générés et montés pour vos réseaux, sans tournage.', price: 'dès 490 €/mois', badge: 'Nouveau' },
     ],
   },
   {
     label: 'Automatiser',
     services: [
-      { num: '07', slug: 'crm-automatisation', title: 'CRM & Automatisation IA', price: 'Sur devis' },
-      { num: '08', slug: 'formation-ia', title: 'Formation IA', price: 'dès 290€', badge: 'Nouveau' },
-      { num: '09', slug: 'maintenance', title: 'Maintenance', price: 'dès 55€/mois' },
+      { num: '07', slug: 'crm-automatisation', title: 'CRM & Automatisation IA', desc: 'Automatiser les relances, devis et suivi client — sans y passer vos soirées.', price: 'Sur devis' },
+      { num: '08', slug: 'formation-ia', title: 'Formation IA', desc: 'Prendre en main l’IA au quotidien dans votre activité, en une session.', price: 'dès 290 €', badge: 'Nouveau' },
+      { num: '09', slug: 'maintenance', title: 'Maintenance', desc: 'Mises à jour, sauvegardes et support — le site reste en bon état sans y penser.', price: 'dès 55 €/mois' },
     ],
   },
 ]
@@ -55,24 +58,35 @@ function ServiceRow({ s, index }: { s: Service; index: number }) {
     >
       <Link
         href={`/services/${s.slug}`}
-        className="group flex items-center gap-4 sm:gap-8 py-4.5 sm:py-5 border-t border-border/70 transition-colors duration-300 hover:bg-white/70"
+        className={`group flex items-center gap-4 sm:gap-8 py-4.5 sm:py-5 transition-colors duration-300 ${
+          s.flag
+            ? 'rounded-lg px-3 -mx-3 sm:px-4 sm:-mx-4 border-t border-transparent'
+            : 'border-t border-border/70 hover:bg-white/70'
+        }`}
+        style={s.flag ? { background: '#FFF4ED' } : undefined}
       >
         <span className="text-[11px] font-mono text-muted-foreground/50 w-6 shrink-0 transition-colors duration-300 group-hover:text-muted-foreground">
           {s.num}
         </span>
 
-        <span className="flex items-baseline gap-2.5 flex-1 min-w-0">
-          <span className="text-base sm:text-lg font-semibold text-foreground tracking-tight transition-transform duration-300 group-hover:translate-x-1 truncate">
-            {s.title}
-          </span>
-          {s.badge && (
-            <span className="hidden sm:inline text-[10px] font-medium uppercase tracking-wider shrink-0" style={{ color: '#FF6B00' }}>
-              {s.badge}
+        <span className="flex-1 min-w-0">
+          <span className="flex items-baseline gap-2.5 flex-wrap">
+            <span className="text-base sm:text-lg font-semibold text-foreground tracking-tight transition-transform duration-300 group-hover:translate-x-1">
+              {s.title}
             </span>
-          )}
+            {s.badge && (
+              <span className="text-[10px] font-semibold uppercase tracking-wider shrink-0" style={{ color: '#FF6B00' }}>
+                {s.badge}
+              </span>
+            )}
+          </span>
+          <span className="block mt-0.5 text-xs text-muted-foreground truncate">{s.desc}</span>
         </span>
 
-        <span className="text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
+        <span className="text-right shrink-0">
+          <span className="block text-sm font-medium text-foreground whitespace-nowrap">{s.price}</span>
+          {s.priceAlt && <span className="block text-[11px] text-muted-foreground whitespace-nowrap">{s.priceAlt}</span>}
+        </span>
 
         <span className="relative w-4 h-4 shrink-0 overflow-hidden">
           <ArrowUpRight className="absolute inset-0 w-4 h-4 text-muted-foreground/40 transition-all duration-300 group-hover:translate-x-4 group-hover:-translate-y-4 group-hover:opacity-0" />
@@ -127,14 +141,14 @@ export default function ServicesSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6, delay: 0.25, ease }}
-            className="mt-8 flex items-center gap-4 rounded-xl px-6 py-5"
-            style={{ background: '#FFF4ED' }}
+            className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 pt-5 border-t border-border/70"
           >
-            <CreditCard className="w-7 h-7 shrink-0" style={{ color: '#FF6B00' }} />
-            <p className="text-lg sm:text-xl font-bold leading-snug" style={{ color: '#B8460A' }}>
-              Paiement en 1 fois ou en abonnement dès 89&nbsp;€/mois
-              <span className="block text-sm font-medium opacity-80 mt-0.5">sur tous les types de sites</span>
-            </p>
+            {['Prix fixes affichés', 'Aucun frais caché', '1 fois ou en mensualités'].map(t => (
+              <span key={t} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#FF6B00' }} />
+                {t}
+              </span>
+            ))}
           </motion.div>
         </div>
 
@@ -160,13 +174,28 @@ export default function ServicesSection() {
           ))}
         </div>
 
+        {/* Réassurance */}
+        <motion.p
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mt-14 sm:mt-16 text-xs sm:text-sm text-muted-foreground flex flex-wrap items-center gap-x-3 gap-y-1.5"
+        >
+          <span>Interlocuteur unique, du brief à la mise en ligne</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
+          <span>Devis sous 24h</span>
+          <span className="w-1 h-1 rounded-full bg-border" />
+          <span>Full remote, partout en France</span>
+        </motion.p>
+
         {/* CTA — une ligne discrète */}
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, ease }}
-          className="mt-14 sm:mt-16 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
+          className="mt-6 sm:mt-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
         >
           <p className="text-base sm:text-lg text-muted-foreground">
             Vous hésitez entre plusieurs services ?{' '}
