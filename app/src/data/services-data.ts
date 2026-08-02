@@ -22,7 +22,7 @@ export const SERVICES_DATA: ServiceData[] = [
   {
     slug: 'site-ecommerce',
     num: '01',
-    badge: 'Le plus populaire',
+    badge: 'Le plus complet',
     title: 'Site E-Commerce',
     heroImage: '/images/services/hero-ecommerce.png',
     price: 'dès 3 840€',
@@ -89,13 +89,13 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Formation & livraison', desc: "2h de formation sur votre admin (produits, commandes, promotions), puis mise en ligne. Vous êtes autonome dès le premier jour." },
     ],
     testimonials: [
-      { name: 'Sophie Vidal', company: 'Fleurs de Vigne', text: 'Refonte complète en 3 semaines. Notre taux de conversion a augmenté de 34% en 60 jours. On avait peur du digital, maintenant on ne pourrait plus s\'en passer.' },
-      { name: 'Marie Lauzon', company: 'La Maison du Terroir', text: '12 000€ de chiffre d\'affaires dès le premier mois. L\'intégration Stripe était parfaite, zéro problème technique.' },
-      { name: 'David Arnaud', company: 'Cycles Arnaud', text: 'Le dashboard admin est vraiment simple. Ma femme gère les commandes toute seule maintenant, sans moi.' },
+      { name: 'Gérante d’une boutique de fleurs', company: 'Site e-commerce, Provence', text: 'Refonte complète en 3 semaines. Notre taux de conversion a augmenté de 34% en 60 jours. On avait peur du digital, maintenant on ne pourrait plus s\'en passer.' },
+      { name: 'Gérante d’une épicerie fine', company: 'Site e-commerce, produits du terroir', text: '12 000€ de chiffre d\'affaires dès le premier mois. L\'intégration Stripe était parfaite, zéro problème technique.' },
+      { name: 'Gérant d’un magasin de cycles', company: 'Site e-commerce, vente d’équipement', text: 'Le dashboard admin est vraiment simple. Ma femme gère les commandes toute seule maintenant, sans moi.' },
     ],
     stats: [
       { value: '3 sem', label: 'de A à Z, livraison garantie' },
-      { value: '+34%', label: 'conversion (ex. Fleurs de Vigne)' },
+      { value: '+34%', label: 'conversion, cas type observé' },
       { value: '50', label: 'produits inclus au lancement' },
       { value: '6 mois', label: 'de support inclus post-livraison' },
     ],
@@ -175,9 +175,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Livraison & formation', desc: 'Mise en ligne + 45 minutes de formation pour ajouter et modifier des produits vous-même.' },
     ],
     testimonials: [
-      { name: 'Pierre Merle', company: 'Méca3D Industries', text: 'Nos commerciaux utilisent le catalogue depuis 6 mois en rendez-vous client. Les fiches PDF automatiques sont un gain de temps énorme.' },
-      { name: 'Laurent Faure', company: 'Faure Menuiserie', text: 'On a enfin une vitrine professionnelle. Les clients arrivent au showroom en ayant déjà sélectionné leurs finitions.' },
-      { name: 'Isabelle Cros', company: 'Studio Textile Sud', text: 'Mise en ligne en 12 jours. Les filtres fonctionnent parfaitement même avec 180 références.' },
+      { name: 'Responsable commercial, industrie mécanique', company: 'Site catalogue B2B', text: 'Nos commerciaux utilisent le catalogue depuis 6 mois en rendez-vous client. Les fiches PDF automatiques sont un gain de temps énorme.' },
+      { name: 'Artisan menuisier', company: 'Site catalogue, showroom', text: 'On a enfin une vitrine professionnelle. Les clients arrivent au showroom en ayant déjà sélectionné leurs finitions.' },
+      { name: 'Fondatrice, atelier textile', company: 'Site catalogue, 180 références', text: 'Mise en ligne en 12 jours. Les filtres fonctionnent parfaitement même avec 180 références.' },
     ],
     stats: [
       { value: '12j', label: 'délai moyen livraison' },
@@ -262,9 +262,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Mise en ligne', desc: 'Votre site est live. Je reste disponible 30 jours après pour toute correction.' },
     ],
     testimonials: [
-      { name: 'Thomas Durand', company: 'Cabinet Durand Expertises', text: 'Site livré en 9 jours, exactement comme prévu. Nos appels entrants ont doublé le mois suivant.' },
-      { name: 'Camille Roux', company: 'Studio Forma Yoga', text: 'Enfin un site qui me ressemble. Mes clients me disent souvent qu\'ils ont pris rendez-vous à cause du site.' },
-      { name: 'Nicolas Blanc', company: 'Blanc Plomberie', text: 'Je voulais quelque chose de simple et professionnel. C\'est exactement ce que j\'ai eu, sans surprise sur la facture.' },
+      { name: 'Expert-comptable', company: 'Site vitrine, cabinet indépendant', text: 'Site livré en 9 jours, exactement comme prévu. Nos appels entrants ont doublé le mois suivant.' },
+      { name: 'Professeure de yoga', company: 'Site vitrine, studio indépendant', text: 'Enfin un site qui me ressemble. Mes clients me disent souvent qu\'ils ont pris rendez-vous à cause du site.' },
+      { name: 'Artisan plombier', company: 'Site vitrine, activité locale', text: 'Je voulais quelque chose de simple et professionnel. C\'est exactement ce que j\'ai eu, sans surprise sur la facture.' },
     ],
     stats: [
       { value: '10j', label: 'délai moyen garanti' },
@@ -308,9 +308,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Suivi 30 jours', desc: 'Questions par email pendant 30 jours. Vous n\'êtes pas seul face aux blocages.' },
     ],
     testimonials: [
-      { name: 'Camille Roux', company: 'Studio Forma Yoga', text: 'En 2h j\'ai automatisé mes relances clients et mes posts Instagram. Je gagnais déjà 3h par semaine le lendemain.', avatar: '/images/social-proof/avatar-1.png' },
-      { name: 'Marc Tissier', company: 'Tissier Immobilier', text: 'Je savais vaguement ce qu\'était ChatGPT. Après la session, j\'ai un système de rédaction d\'annonces en 5 minutes.' },
-      { name: 'Julie Fontaine', company: 'Coach Fontaine', text: 'Le replay m\'a été précieux. Je l\'ai revu 3 fois pour bien intégrer les automatisations.' },
+      { name: 'Professeure de yoga', company: 'Formation IA, session individuelle', text: 'En 2h j\'ai automatisé mes relances clients et mes posts Instagram. Je gagnais déjà 3h par semaine le lendemain.' },
+      { name: 'Agent immobilier indépendant', company: 'Formation IA, rédaction d’annonces', text: 'Je savais vaguement ce qu\'était ChatGPT. Après la session, j\'ai un système de rédaction d\'annonces en 5 minutes.' },
+      { name: 'Coach professionnelle', company: 'Formation IA, pack sessions', text: 'Le replay m\'a été précieux. Je l\'ai revu 3 fois pour bien intégrer les automatisations.' },
     ],
     stats: [
       { value: '3h', label: 'gagnées/semaine en moyenne' },
@@ -352,9 +352,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Livraison hebdomadaire', desc: 'MP4 + textes de publication dans votre boîte mail chaque lundi.' },
     ],
     testimonials: [
-      { name: 'Anaïs Morel', company: 'Morel Cosmétiques', text: 'Mes Reels ont triplé en portée organique en 6 semaines. Et je n\'y passe plus aucun temps.' },
-      { name: 'Kevin Salles', company: 'KS Personal Training', text: 'Avant je postais une fois par mois parce que filmer c\'était trop long. Maintenant j\'ai du contenu toutes les semaines.' },
-      { name: 'Elodie Vernet', company: 'Vernet Architecture', text: 'Les vidéos background de mes projets sont vraiment cinématiques. Mes clients pensent que j\'ai engagé une équipe de production.' },
+      { name: 'Fondatrice, marque de cosmétiques', company: 'Vidéo & Contenu IA, Reels Instagram', text: 'Mes Reels ont triplé en portée organique en 6 semaines. Et je n\'y passe plus aucun temps.' },
+      { name: 'Coach sportif indépendant', company: 'Vidéo & Contenu IA, contenu hebdomadaire', text: 'Avant je postais une fois par mois parce que filmer c\'était trop long. Maintenant j\'ai du contenu toutes les semaines.' },
+      { name: 'Architecte indépendante', company: 'Vidéo & Contenu IA, vidéos projet', text: 'Les vidéos background de mes projets sont vraiment cinématiques. Mes clients pensent que j\'ai engagé une équipe de production.' },
     ],
     stats: [
       { value: '×3', label: 'portée organique moyenne' },
@@ -396,9 +396,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Rapport mensuel', desc: 'Évolution de votre présence dans les IA, nouvelles citations, prochaines actions du mois.' },
     ],
     testimonials: [
-      { name: 'Rémi Gautier', company: 'Gautier Conseil RH', text: 'En 2 mois, quand on demande à ChatGPT un consultant RH en Provence, mon nom apparaît dans les suggestions.' },
-      { name: 'Nathalie Serra', company: 'Clinique Serra', text: 'Le rapport mensuel est très clair. On voit exactement où on progresse et ce qui reste à faire.' },
-      { name: 'Julien Fabre', company: 'Fabre & Associés', text: 'Perplexity nous citait déjà mais dans un mauvais contexte. Après optimisation, le contexte est exactement celui qu\'on voulait.' },
+      { name: 'Consultant RH indépendant', company: 'Visibilité IA, AEO/GEO', text: 'En 2 mois, quand on demande à ChatGPT un consultant RH en Provence, mon nom apparaît dans les suggestions.' },
+      { name: 'Praticienne en clinique privée', company: 'Visibilité IA, suivi mensuel', text: 'Le rapport mensuel est très clair. On voit exactement où on progresse et ce qui reste à faire.' },
+      { name: 'Avocat associé', company: 'Visibilité IA, citations Perplexity', text: 'Perplexity nous citait déjà mais dans un mauvais contexte. Après optimisation, le contexte est exactement celui qu\'on voulait.' },
     ],
     stats: [
       { value: '50+', label: 'requêtes testées/mois' },
@@ -451,12 +451,12 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Rapport & ajustements', desc: 'Bilan mensuel, recalibrage de la stratégie si besoin, plan du mois suivant.' },
     ],
     testimonials: [
-      { name: 'Amandine Gros', company: 'Gros Traiteur', text: '+420% de trafic organique en 8 mois. On est maintenant premier sur "traiteur Montpellier" et les demandes de devis ont explosé.' },
-      { name: 'Franck Meyer', company: 'Meyer Électricité', text: 'J\'avais un site mais personne ne le trouvait. En 4 mois j\'étais sur la première page pour mes 3 mots-clés prioritaires.' },
-      { name: 'Céline Arnal', company: 'Arnal Kinésithérapie', text: 'Le rapport mensuel est très pédagogique. Je comprends ce qui est fait et pourquoi.' },
+      { name: 'Traiteur événementiel', company: 'SEO, trafic organique local', text: '+420% de trafic organique en 8 mois. On est maintenant premier sur "traiteur Montpellier" et les demandes de devis ont explosé.' },
+      { name: 'Artisan électricien', company: 'SEO, positionnement local', text: 'J\'avais un site mais personne ne le trouvait. En 4 mois j\'étais sur la première page pour mes 3 mots-clés prioritaires.' },
+      { name: 'Kinésithérapeute', company: 'SEO, rapport mensuel', text: 'Le rapport mensuel est très pédagogique. Je comprends ce qui est fait et pourquoi.' },
     ],
     stats: [
-      { value: '+420%', label: 'trafic max observé (Gros Traiteur)' },
+      { value: '+420%', label: 'trafic max observé, cas type' },
       { value: '274€', label: 'par mois tout inclus' },
       { value: '4 mois', label: 'pour des positions page 1' },
       { value: '20', label: 'mots-clés suivis/mois' },
@@ -545,9 +545,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Formation & suivi', desc: "Formation sur votre nouveau système. Documentation. 1 mois de suivi post-livraison." },
     ],
     testimonials: [
-      { name: 'Alexandre Pont', company: 'Pont Consulting', text: 'Mon pipeline de prospection est entièrement automatisé. Je reçois chaque matin une liste de leads qualifiés avec les angles d\'approche.' },
-      { name: 'Sandrine Levy', company: 'Levy Formation', text: 'Les relances automatiques après inscription ont multiplié par 2 notre taux de présence aux formations.' },
-      { name: 'Christophe Vial', company: 'Vial & Partners', text: '3 semaines de mise en place pour économiser 2 jours de travail par semaine. Le ROI était là au premier mois.' },
+      { name: 'Consultant indépendant', company: 'CRM & Automatisation IA, prospection', text: 'Mon pipeline de prospection est entièrement automatisé. Je reçois chaque matin une liste de leads qualifiés avec les angles d\'approche.' },
+      { name: 'Organisme de formation', company: 'CRM & Automatisation IA, relances inscriptions', text: 'Les relances automatiques après inscription ont multiplié par 2 notre taux de présence aux formations.' },
+      { name: 'Associé, cabinet de conseil', company: 'CRM & Automatisation IA, ROI premier mois', text: '3 semaines de mise en place pour économiser 2 jours de travail par semaine. Le ROI était là au premier mois.' },
     ],
     stats: [
       { value: '2j', label: 'économisés/semaine en moyenne' },
@@ -639,9 +639,9 @@ export const SERVICES_DATA: ServiceData[] = [
       { step: '04', title: 'Modifications', desc: "Vous m'envoyez vos demandes, je les intègre dans vos heures incluses selon votre plan." },
     ],
     testimonials: [
-      { name: 'Bernard Chaix', company: 'Chaix Plomberie Chauffage', text: 'Mon site est tombé une nuit — j\'ai reçu un SMS à 3h du matin et il était remonté avant mon réveil.' },
-      { name: 'Virginie Sorel', company: 'Cabinet Sorel Notaires', text: 'Je n\'ai plus à me préoccuper des mises à jour. Je sais que c\'est géré, et ça n\'a pas de prix.' },
-      { name: 'Maxime Aubert', company: 'Aubert Auto', text: 'Les 3h de modifications mensuelles sont très utiles. Je change mes offres et promos sans avoir à appeler un développeur.' },
+      { name: 'Artisan plombier-chauffagiste', company: 'Maintenance, plan Pro', text: 'Mon site est tombé une nuit — j\'ai reçu un SMS à 3h du matin et il était remonté avant mon réveil.' },
+      { name: 'Notaire associée', company: 'Maintenance, sérénité au quotidien', text: 'Je n\'ai plus à me préoccuper des mises à jour. Je sais que c\'est géré, et ça n\'a pas de prix.' },
+      { name: 'Garagiste indépendant', company: 'Maintenance, modifications mensuelles', text: 'Les 3h de modifications mensuelles sont très utiles. Je change mes offres et promos sans avoir à appeler un développeur.' },
     ],
     stats: [
       { value: '99.9%', label: 'uptime garanti' },

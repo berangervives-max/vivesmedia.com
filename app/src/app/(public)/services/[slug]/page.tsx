@@ -2,7 +2,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowUpRight, Check, Star, Phone, CalendarDays, X } from 'lucide-react'
+import { ArrowUpRight, Check, Quote, Phone, CalendarDays, X } from 'lucide-react'
 import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
 import { getServiceDetail } from '@/data/services-detail'
 import JsonLd from '@/components/seo/JsonLd'
@@ -57,7 +57,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/30">{s.num}</span>
                 {s.badge && (
-                  <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>{s.badge}</span>
+                  <span className="text-xs font-semibold px-3 py-1 rounded-xl" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>{s.badge}</span>
                 )}
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white leading-tight mb-4">{s.title}</h1>
@@ -79,13 +79,13 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             {buyable && <BuyButton offer={buyable.slug} mode={buyable.mode} price={buyable.amountCents / 100} label={buyLabel} />}
             <Link
               href={`/contact?service=${s.slug}`}
-              className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-full text-sm hover:bg-white/90 transition-colors"
+              className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
             >
               <CalendarDays className="w-4 h-4" /> Réserver un appel découverte gratuit
             </Link>
             <Link
               href="/contact"
-              className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-full text-sm hover:border-white/40 transition-colors"
+              className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-xl text-sm hover:border-white/40 transition-colors"
             >
               <Phone className="w-4 h-4" /> Demander un devis par email
             </Link>
@@ -219,7 +219,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   className={`rounded-2xl border p-6 flex flex-col ${plan.highlighted ? 'bg-foreground border-foreground' : 'bg-white border-border'}`}
                 >
                   {plan.highlighted && (
-                    <span className="text-xs font-semibold px-3 py-1 rounded-full self-start mb-4" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>
+                    <span className="text-xs font-semibold px-3 py-1 rounded-xl self-start mb-4" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>
                   )}
                   <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white/60' : 'text-muted-foreground'}`}>{plan.name}</p>
                   <p className={`text-2xl font-bold mb-0.5 ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>{plan.price}</p>
@@ -234,7 +234,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                   </ul>
                   <Link
                     href={`/contact?service=${s.slug}&formule=${encodeURIComponent(`${plan.name} · ${plan.price}`)}`}
-                    className={`mt-6 flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-full text-sm transition-colors ${plan.highlighted ? 'bg-white text-foreground hover:bg-white/90' : 'border border-border text-foreground hover:border-foreground'}`}
+                    className={`mt-6 flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-xl text-sm transition-colors ${plan.highlighted ? 'bg-white text-foreground hover:bg-white/90' : 'border border-border text-foreground hover:border-foreground'}`}
                   >
                     Choisir cette formule →
                   </Link>
@@ -268,27 +268,20 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
 
         {/* ── TESTIMONIALS ── */}
         <div className="mb-16">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Avis clients</p>
-          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-8">
-            Ce qu'ils en disent, <span className="italic font-normal">vraiment.</span>
+          <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Retours représentatifs</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-2">
+            Le type de retour qu'on <span className="italic font-normal">reçoit.</span>
           </h2>
+          <p className="text-xs text-muted-foreground mb-8">Exemples représentatifs, reformulés à partir de retours reçus — non attribués nommément pour préserver l'anonymat des clients.</p>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {s.testimonials.map(t => (
               <div key={t.name} className="bg-white rounded-2xl border border-border p-6 flex flex-col">
-                <div className="flex gap-0.5 mb-4">
-                  {[1,2,3,4,5].map(n => <Star key={n} className="w-4 h-4 fill-current" style={{ color: '#FF6B00' }} />)}
-                </div>
+                <Quote className="w-5 h-5 mb-4" style={{ color: '#FF6B00' }} />
                 <p className="text-sm text-muted-foreground leading-relaxed flex-1 mb-4">"{t.text}"</p>
                 <div className="flex items-center gap-3">
-                  {t.avatar ? (
-                    <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 relative">
-                      <Image src={t.avatar} alt={t.name} fill className="object-cover" />
-                    </div>
-                  ) : (
-                    <div className="w-10 h-10 rounded-full bg-secondary shrink-0 flex items-center justify-center text-sm font-bold text-muted-foreground">
-                      {t.name[0]}
-                    </div>
-                  )}
+                  <div className="w-10 h-10 rounded-full bg-secondary shrink-0 flex items-center justify-center text-sm font-bold text-muted-foreground">
+                    {t.name[0]}
+                  </div>
                   <div>
                     <p className="text-sm font-semibold text-foreground">{t.name}</p>
                     <p className="text-xs text-muted-foreground">{t.company}</p>
@@ -330,13 +323,13 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
             <div className="flex flex-col sm:flex-row gap-3 shrink-0">
               <Link
                 href={`/contact?service=${s.slug}`}
-                className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-full text-sm hover:bg-white/90 transition-colors"
+                className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
               >
                 <CalendarDays className="w-4 h-4" /> Réserver un appel gratuit
               </Link>
               <Link
                 href="/services"
-                className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-full text-sm hover:border-white/40 transition-colors"
+                className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-xl text-sm hover:border-white/40 transition-colors"
               >
                 Voir tous les services <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>

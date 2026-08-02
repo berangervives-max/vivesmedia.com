@@ -31,6 +31,14 @@ export default async function ServicesPage() {
           <p className="mt-4 text-muted-foreground max-w-xl text-sm sm:text-base">
             Pas d'agence intermédiaire. Pas de template revendu. Chaque projet est fait à la main, de A à Z.
           </p>
+          <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 pt-5 border-t border-border/70">
+            {['Prix fixes affichés', 'Aucun frais caché', '1 fois ou en mensualités'].map(t => (
+              <span key={t} className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-foreground">
+                <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: '#FF6B00' }} />
+                {t}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* ── SECTION 1 : CRÉATION DE SITES ── */}
@@ -42,7 +50,7 @@ export default async function ServicesPage() {
             <div className="flex-1">
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-xs font-mono text-white/40">01</span>
-                <span className="text-xs font-semibold px-3 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Le plus populaire</span>
+                <span className="text-xs font-semibold px-3 py-1 rounded-xl" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Le plus complet</span>
               </div>
               <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">{ecommerce.title}</h2>
               <p className="text-4xl sm:text-5xl font-bold text-white mb-1">{ecommerce.price}</p>
@@ -52,10 +60,10 @@ export default async function ServicesPage() {
                 {ecommerce.desc}
               </p>
               <div className="flex flex-wrap gap-3">
-                <Link href="/services/site-ecommerce" className="flex items-center gap-2 bg-white text-foreground font-semibold px-6 py-3 rounded-full text-sm hover:bg-white/90 transition-colors">
+                <Link href="/services/site-ecommerce" className="flex items-center gap-2 bg-white text-foreground font-semibold px-6 py-3 rounded-xl text-sm hover:bg-white/90 transition-colors">
                   En savoir plus <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
-                <Link href="/contact?service=site-ecommerce" className="flex items-center gap-2 border border-white/20 text-white font-medium px-6 py-3 rounded-full text-sm hover:border-white/40 transition-colors">
+                <Link href="/contact?service=site-ecommerce" className="flex items-center gap-2 border border-white/20 text-white font-medium px-6 py-3 rounded-xl text-sm hover:border-white/40 transition-colors">
                   Demander un devis
                 </Link>
               </div>
@@ -90,10 +98,10 @@ export default async function ServicesPage() {
                 ))}
               </ul>
               <div className="flex flex-col gap-2">
-                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-foreground/90 transition-colors">
+                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-foreground/90 transition-colors">
                   En savoir plus <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
-                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-full text-sm hover:border-foreground hover:text-foreground transition-colors">
+                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-xl text-sm hover:border-foreground hover:text-foreground transition-colors">
                   Demander un devis
                 </Link>
               </div>
@@ -112,7 +120,7 @@ export default async function ServicesPage() {
             <div key={s.num} className="rounded-2xl border border-border bg-white p-7 flex flex-col">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-xs font-mono text-muted-foreground">{s.num}</span>
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Nouveau</span>
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-xl" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Nouveau</span>
               </div>
               <h2 className="text-lg font-bold text-foreground mb-1">{s.title}</h2>
               <p className="text-xl font-bold mb-4" style={{ color: '#FF6B00' }}>{s.price}</p>
@@ -125,10 +133,10 @@ export default async function ServicesPage() {
                 ))}
               </ul>
               <div className="flex flex-col gap-2">
-                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-foreground/90 transition-colors">
+                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-foreground/90 transition-colors">
                   En savoir plus <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
-                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-full text-sm hover:border-foreground hover:text-foreground transition-colors">
+                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-xl text-sm hover:border-foreground hover:text-foreground transition-colors">
                   Demander un devis
                 </Link>
               </div>
@@ -157,10 +165,10 @@ export default async function ServicesPage() {
                 ))}
               </ul>
               <div className="flex flex-col gap-2">
-                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-foreground/90 transition-colors">
+                <Link href={`/services/${s.slug}`} className="flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-foreground/90 transition-colors">
                   En savoir plus <ArrowUpRight className="w-3.5 h-3.5" />
                 </Link>
-                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-full text-sm hover:border-foreground hover:text-foreground transition-colors">
+                <Link href={`/contact?service=${s.slug}`} className="flex items-center justify-center gap-2 border border-border text-muted-foreground font-medium px-5 py-2.5 rounded-xl text-sm hover:border-foreground hover:text-foreground transition-colors">
                   Demander un devis
                 </Link>
               </div>
@@ -177,7 +185,7 @@ export default async function ServicesPage() {
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-16">
           {maintenancePlans.map(m => (
             <div key={m.name} className={`rounded-2xl border p-7 bg-white flex flex-col ${m.recommended ? 'border-foreground ring-1 ring-foreground' : 'border-border'}`}>
-              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-full mb-4 inline-block w-fit" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>}
+              {m.recommended && <span className="text-xs font-semibold px-3 py-1 rounded-xl mb-4 inline-block w-fit" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>}
               <p className="font-bold text-foreground text-lg">{m.name}</p>
               <p className="text-3xl font-bold text-foreground mt-1 mb-6">{m.price}</p>
               <ul className="space-y-3 flex-1">
@@ -187,7 +195,7 @@ export default async function ServicesPage() {
                   </li>
                 ))}
               </ul>
-              <Link href="/contact?service=maintenance" className="mt-8 flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-full text-sm hover:bg-foreground/90 transition-colors">
+              <Link href="/contact?service=maintenance" className="mt-8 flex items-center justify-center gap-2 bg-foreground text-white font-semibold px-5 py-2.5 rounded-xl text-sm hover:bg-foreground/90 transition-colors">
                 Choisir ce plan <ArrowUpRight className="w-3.5 h-3.5" />
               </Link>
             </div>
@@ -198,7 +206,7 @@ export default async function ServicesPage() {
         <div className="rounded-2xl bg-foreground p-8 md:p-10 text-center">
           <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">Quel service vous convient ?</h3>
           <p className="text-white/60 mb-6 text-sm">Devis gratuit sous 24h — je vous guide vers la meilleure solution.</p>
-          <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-full hover:bg-white/90 transition-all text-sm sm:text-base">
+          <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-6 sm:px-8 py-3 sm:py-4 rounded-xl hover:bg-white/90 transition-all text-sm sm:text-base">
             Demander un devis <ArrowUpRight className="w-4 h-4" />
           </Link>
         </div>
