@@ -104,24 +104,18 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      {/* ── 2. LE PROBLÈME (citation éditoriale, pas de carte) ── */}
-      {s.problem && (
-        <section className="py-20 sm:py-24">
-          <div className="max-w-3xl mx-auto px-4 sm:px-6">
+      {/* ── 2. LE PROBLÈME + STATS — un seul bloc compact (bandeau sombre) ── */}
+      <section className="bg-foreground py-20 sm:py-28">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          {s.problem && (
             <Reveal>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] mb-5" style={{ color: '#FF6B00' }}>Le problème qu'on règle</p>
-              <p className="border-l-2 pl-6 md:pl-8 font-heading italic text-2xl sm:text-3xl leading-snug text-foreground" style={{ borderColor: '#FF6B00' }}>
+              <p className="border-l-2 pl-6 md:pl-8 font-heading italic text-xl sm:text-2xl leading-snug text-white/90 max-w-3xl" style={{ borderColor: '#FF6B00' }}>
                 {s.problem}
               </p>
             </Reveal>
-          </div>
-        </section>
-      )}
-
-      {/* ── 3. STATS (bandeau sombre, chiffres XXL, sans carte) ── */}
-      <section className="bg-foreground py-20 sm:py-28">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-12">
+          )}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-10 mt-14">
             {s.stats.map((stat, i) => (
               <Reveal key={stat.label} delay={i * 0.06}>
                 <div className="border-t border-white/15 pt-5">
@@ -134,57 +128,27 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 4. DESCRIPTION + INCLUS ── */}
+      {/* ── 3. DESCRIPTION + INCLUS — lignes courtes, une colonne, pas de paragraphe séparé ── */}
       <section className="py-20 sm:py-28">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <SectionHead eyebrow="Le service" title="En quoi ça consiste," accent="concrètement." />
-          <div className="mt-12 grid md:grid-cols-2 gap-12">
-            <Reveal>
-              <p className="text-foreground text-base sm:text-lg leading-relaxed">{s.description}</p>
-            </Reveal>
-            <div>
-              <ul className="space-y-4">
-                {s.features.map((f, i) => (
-                  <Reveal key={f.title} delay={i * 0.05}>
-                    <li className="flex gap-3">
-                      <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#FF6B00' }} />
-                      <div>
-                        <p className="text-sm font-semibold text-foreground">{f.title}</p>
-                        <p className="text-sm text-muted-foreground">{f.desc}</p>
-                      </div>
-                    </li>
-                  </Reveal>
-                ))}
-              </ul>
-            </div>
+          <Reveal>
+            <p className="mt-8 text-foreground text-base sm:text-lg leading-relaxed">{s.description}</p>
+          </Reveal>
+          <div className="mt-10 border-t border-border">
+            {s.features.map((f, i) => (
+              <Reveal key={f.title} delay={i * 0.04}>
+                <div className="flex gap-3 py-3.5 border-b border-border">
+                  <Check className="w-4 h-4 shrink-0 mt-0.5" style={{ color: '#FF6B00' }} />
+                  <p className="text-sm sm:text-base text-foreground"><span className="font-semibold">{f.title}.</span> <span className="text-muted-foreground">{f.desc}</span></p>
+                </div>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* ── PREUVE — un vrai projet livré, jamais une image décorative ── */}
-      {s.proof && (
-        <section className="py-4 sm:py-8">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <Reveal>
-              <Link href={s.proof.href} className="group grid md:grid-cols-[1.3fr_1fr] gap-6 md:gap-10 items-center">
-                <div className="rounded-lg overflow-hidden bg-secondary relative aspect-[16/10]">
-                  <Image src={s.proof.src} alt={s.proof.projectName} fill className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" />
-                </div>
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Exemple réel livré</p>
-                  <p className="font-accent text-2xl text-foreground">{s.proof.projectName}</p>
-                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.proof.caption}</p>
-                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground group-hover:gap-2.5 transition-all">
-                    Voir le projet <ArrowUpRight className="w-3.5 h-3.5" />
-                  </span>
-                </div>
-              </Link>
-            </Reveal>
-          </div>
-        </section>
-      )}
-
-      {/* ── 5. EN DÉTAIL — replié par défaut (« nice to know », pas « need to know ») ── */}
+      {/* ── 4. EN DÉTAIL — replié par défaut (« nice to know », pas « need to know ») ── */}
       {detail && detail.length > 0 && (
         <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -225,13 +189,19 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      {/* ── 6. POUR QUI (sans carte, filet vertical desktop) ── */}
+      {/* ── 5. POUR QUI — replié par défaut (nice to know, même réflexe que « En détail ») ── */}
       {s.forWhom && (
         <section className="py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <SectionHead eyebrow="Pour qui" title="Ce service est fait pour vous" accent="si :" />
-            <div className="mt-12 grid sm:grid-cols-2 gap-10 sm:gap-12">
-              <Reveal>
+            <details className="group">
+              <summary className="cursor-pointer list-none select-none">
+                <SectionHead eyebrow="Pour qui" title="Ce service est fait pour vous" accent="si :" />
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: '#FF6B00' }}>
+                  Voir qui est concerné
+                  <span className="w-5 h-5 rounded-full border flex items-center justify-center group-open:rotate-45 transition-transform text-base leading-none" style={{ borderColor: '#FF6B00' }}>+</span>
+                </span>
+              </summary>
+              <div className="mt-10 grid sm:grid-cols-2 gap-10 sm:gap-12">
                 <ul className="space-y-3.5">
                   {s.forWhom.yes.map(item => (
                     <li key={item} className="flex items-start gap-2.5">
@@ -240,9 +210,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                     </li>
                   ))}
                 </ul>
-              </Reveal>
-              {s.forWhom.no && s.forWhom.no.length > 0 && (
-                <Reveal delay={0.08}>
+                {s.forWhom.no && s.forWhom.no.length > 0 && (
                   <ul className="space-y-3.5 sm:border-l sm:border-border sm:pl-10">
                     {s.forWhom.no.map(item => (
                       <li key={item.text} className="flex items-start gap-2.5">
@@ -255,9 +223,9 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                       </li>
                     ))}
                   </ul>
-                </Reveal>
-              )}
-            </div>
+                )}
+              </div>
+            </details>
           </div>
         </section>
       )}
@@ -321,6 +289,29 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
+      {/* ── PREUVE — un vrai projet livré, jamais une image décorative ; positionnée juste avant la clôture (preuve + FAQ + CTA) ── */}
+      {s.proof && (
+        <section className="py-4 sm:py-8">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <Reveal>
+              <Link href={s.proof.href} className="group grid md:grid-cols-[1.3fr_1fr] gap-6 md:gap-10 items-center">
+                <div className="rounded-lg overflow-hidden bg-secondary relative aspect-[16/10]">
+                  <Image src={s.proof.src} alt={s.proof.projectName} fill sizes="(max-width: 768px) 100vw, 55vw" className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Exemple réel livré</p>
+                  <p className="font-accent text-2xl text-foreground">{s.proof.projectName}</p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.proof.caption}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground group-hover:gap-2.5 transition-all">
+                    Voir le projet <ArrowUpRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
       {/* ── 9. RETOURS REPRÉSENTATIFS ── */}
       <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
@@ -375,18 +366,23 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                 <h2 className="text-xl sm:text-2xl font-bold text-white mb-2">{s.title} — {s.price}</h2>
                 <p className="text-white/60 text-sm">{s.priceNote}</p>
               </div>
-              <div className="flex flex-col sm:flex-row gap-3 shrink-0">
-                <Link
-                  href={`/contact?service=${s.slug}`}
-                  className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
-                >
-                  <CalendarDays className="w-4 h-4" /> Réserver un appel gratuit
-                </Link>
+              {/* Même action, même libellé qu'en hero — un seul verbe répété, pas une nouvelle formulation. */}
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-x-6 gap-y-3 shrink-0">
+                {buyable ? (
+                  <BuyButton offer={buyable.slug} mode={buyable.mode} price={buyable.amountCents / 100} label={buyLabel} />
+                ) : (
+                  <Link
+                    href={`/contact?service=${s.slug}`}
+                    className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
+                  >
+                    <CalendarDays className="w-4 h-4" /> Réserver un appel découverte gratuit
+                  </Link>
+                )}
                 <Link
                   href="/services"
-                  className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-xl text-sm hover:border-white/40 transition-colors"
+                  className="text-sm font-medium text-white/60 hover:text-white transition-colors underline underline-offset-4"
                 >
-                  Voir tous les services <ArrowUpRight className="w-3.5 h-3.5" />
+                  Voir tous les services →
                 </Link>
               </div>
             </div>
