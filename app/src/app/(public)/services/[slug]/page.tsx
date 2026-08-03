@@ -104,7 +104,47 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </div>
 
-      {/* ── 2. LE PROBLÈME + STATS — un seul bloc compact (bandeau sombre) ── */}
+      {/* ── 2. FORMULES — remontées juste après le hero (F5 Studio / WP Relieve : un forfait
+           à prix fixe se vend en montrant l'offre concrète tout de suite, pas après l'argumentaire) ── */}
+      {s.pricing && (
+        <section className="py-16 sm:py-20">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <SectionHead eyebrow="Formules" title="Choisissez votre" accent="niveau." />
+            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              {s.pricing.map((plan, i) => (
+                <Reveal key={plan.name} delay={i * 0.06}>
+                  <div
+                    className={`h-full rounded-2xl border p-6 flex flex-col ${plan.highlighted ? 'bg-foreground border-foreground' : 'bg-white border-border'}`}
+                  >
+                    {plan.highlighted && (
+                      <span className="text-xs font-semibold px-3 py-1 rounded-xl self-start mb-4" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>
+                    )}
+                    <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white/60' : 'text-muted-foreground'}`}>{plan.name}</p>
+                    <p className={`text-2xl font-bold mb-0.5 ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>{plan.price}</p>
+                    {plan.note && <p className={`text-xs mb-5 ${plan.highlighted ? 'text-white/40' : 'text-muted-foreground'}`}>{plan.note}</p>}
+                    <ul className="space-y-2.5 flex-1 mt-2">
+                      {plan.features.map(f => (
+                        <li key={f} className="flex items-start gap-2">
+                          <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.highlighted ? 'text-white/60' : ''}`} style={plan.highlighted ? {} : { color: '#FF6B00' }} />
+                          <span className={`text-sm ${plan.highlighted ? 'text-white/80' : 'text-foreground'}`}>{f}</span>
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href={`/contact?service=${s.slug}&formule=${encodeURIComponent(`${plan.name} · ${plan.price}`)}`}
+                      className={`mt-6 flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-xl text-sm transition-colors ${plan.highlighted ? 'bg-white text-foreground hover:bg-white/90' : 'border border-border text-foreground hover:border-foreground'}`}
+                    >
+                      Choisir cette formule →
+                    </Link>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 3. LE PROBLÈME + STATS — un seul bloc compact (bandeau sombre) ── */}
       <section className="bg-foreground py-20 sm:py-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           {s.problem && (
@@ -128,7 +168,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 3. DESCRIPTION + INCLUS — lignes courtes, une colonne, pas de paragraphe séparé ── */}
+      {/* ── 4. DESCRIPTION + INCLUS — lignes courtes, une colonne, pas de paragraphe séparé ── */}
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <SectionHead eyebrow="Le service" title="En quoi ça consiste," accent="concrètement." />
@@ -148,7 +188,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 4. EN DÉTAIL — replié par défaut (« nice to know », pas « need to know ») ── */}
+      {/* ── 5. EN DÉTAIL — replié par défaut (« nice to know », pas « need to know ») ── */}
       {detail && detail.length > 0 && (
         <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -189,7 +229,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      {/* ── 5. POUR QUI — replié par défaut (nice to know, même réflexe que « En détail ») ── */}
+      {/* ── 6. POUR QUI — replié par défaut (nice to know, même réflexe que « En détail ») ── */}
       {s.forWhom && (
         <section className="py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -230,47 +270,8 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      {/* ── 7. FORMULES ── */}
-      {s.pricing && (
-        <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <SectionHead eyebrow="Formules" title="Choisissez votre" accent="niveau." />
-            <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {s.pricing.map((plan, i) => (
-                <Reveal key={plan.name} delay={i * 0.06}>
-                  <div
-                    className={`h-full rounded-2xl border p-6 flex flex-col ${plan.highlighted ? 'bg-foreground border-foreground' : 'bg-white border-border'}`}
-                  >
-                    {plan.highlighted && (
-                      <span className="text-xs font-semibold px-3 py-1 rounded-xl self-start mb-4" style={{ backgroundColor: 'var(--brand-cta)', color: '#fff' }}>Recommandé</span>
-                    )}
-                    <p className={`text-sm font-semibold mb-1 ${plan.highlighted ? 'text-white/60' : 'text-muted-foreground'}`}>{plan.name}</p>
-                    <p className={`text-2xl font-bold mb-0.5 ${plan.highlighted ? 'text-white' : 'text-foreground'}`}>{plan.price}</p>
-                    {plan.note && <p className={`text-xs mb-5 ${plan.highlighted ? 'text-white/40' : 'text-muted-foreground'}`}>{plan.note}</p>}
-                    <ul className="space-y-2.5 flex-1 mt-2">
-                      {plan.features.map(f => (
-                        <li key={f} className="flex items-start gap-2">
-                          <Check className={`w-3.5 h-3.5 shrink-0 mt-0.5 ${plan.highlighted ? 'text-white/60' : ''}`} style={plan.highlighted ? {} : { color: '#FF6B00' }} />
-                          <span className={`text-sm ${plan.highlighted ? 'text-white/80' : 'text-foreground'}`}>{f}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Link
-                      href={`/contact?service=${s.slug}&formule=${encodeURIComponent(`${plan.name} · ${plan.price}`)}`}
-                      className={`mt-6 flex items-center justify-center gap-2 font-semibold px-5 py-3 rounded-xl text-sm transition-colors ${plan.highlighted ? 'bg-white text-foreground hover:bg-white/90' : 'border border-border text-foreground hover:border-foreground'}`}
-                    >
-                      Choisir cette formule →
-                    </Link>
-                  </div>
-                </Reveal>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── 8. LE PROCESSUS (liste verticale éditoriale, sans carte) ── */}
-      <section className="py-20 sm:py-28">
+      {/* ── 7. LE PROCESSUS (liste verticale éditoriale, sans carte) ── */}
+      <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
         <div className="max-w-4xl mx-auto px-4 sm:px-6">
           <SectionHead eyebrow="Comment ça se passe" title="Simple," accent="du début à la fin." />
           <div className="mt-14 sm:mt-16">
@@ -312,7 +313,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </section>
       )}
 
-      {/* ── 9. RETOURS REPRÉSENTATIFS ── */}
+      {/* ── 8. RETOURS REPRÉSENTATIFS ── */}
       <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
         <div className="max-w-5xl mx-auto px-4 sm:px-6">
           <SectionHead eyebrow="Retours représentatifs" title="Le type de retour qu'on" accent="reçoit." />
@@ -339,7 +340,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 10. FAQ (liste divisée, sans carte par item) ── */}
+      {/* ── 9. FAQ (liste divisée, sans carte par item) ── */}
       <section className="py-20 sm:py-28">
         <div className="max-w-3xl mx-auto px-4 sm:px-6">
           <SectionHead eyebrow="Questions fréquentes" title="Tout ce que vous" accent="voulez savoir." />
@@ -357,7 +358,7 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 11. CTA FINAL ── */}
+      {/* ── 10. CTA FINAL ── */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-16 sm:pb-20">
         <Reveal>
           <div className="rounded-2xl bg-foreground p-8 md:p-12">
