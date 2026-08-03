@@ -8,7 +8,8 @@ export type ServiceData = {
   tagline: string
   problem?: string
   description: string
-  heroImage?: string
+  /** Preuve par l'exemple : UNIQUEMENT un vrai projet livré et documenté dans /realisations — jamais une image générique. */
+  proof?: { src: string; projectName: string; caption: string; href: string }
   features: { title: string; desc: string }[]
   forWhom?: { yes: string[]; no?: { text: string; link?: string }[] }
   pricing?: { name: string; price: string; note?: string; features: string[]; highlighted?: boolean }[]
@@ -24,7 +25,6 @@ export const SERVICES_DATA: ServiceData[] = [
     num: '01',
     badge: 'Le plus complet',
     title: 'Site E-Commerce',
-    heroImage: '/images/services/hero-ecommerce.png',
     price: 'dès 3 840€',
     priceNote: 'paiement unique ou en abonnement dès 149€/mois · livraison en 3 semaines',
     tagline: 'Votre boutique en ligne prête à vendre dès le premier jour.',
@@ -112,7 +112,6 @@ export const SERVICES_DATA: ServiceData[] = [
     slug: 'site-catalogue',
     num: '02',
     title: 'Site Catalogue',
-    heroImage: '/images/services/hero-site-catalogue.png',
     price: 'dès 2 740€',
     priceNote: 'paiement unique ou en abonnement dès 119€/mois · livraison en 2 semaines',
     tagline: 'Présentez vos produits professionnellement, sans vendre en ligne.',
@@ -197,13 +196,18 @@ export const SERVICES_DATA: ServiceData[] = [
     slug: 'site-vitrine',
     num: '03',
     title: 'Site Vitrine',
-    heroImage: '/images/services/hero-site-vitrine.png',
     price: 'dès 1 800€',
     priceNote: 'paiement unique ou en abonnement dès 89€/mois · livraison en 10 jours',
     tagline: 'Votre première impression en ligne, irréprochable.',
     problem: 'Votre site actuel ne vous rapporte rien. Les visiteurs arrivent, ne comprennent pas ce que vous faites, et repartent. Vous perdez des devis tous les jours — sans même le savoir.',
     description:
       "Un site vitrine qui donne confiance et génère des contacts. 5 pages sur-mesure, SEO local intégré, formulaire de contact, hébergement 1 an offert. Livré en 10 jours. Aucun template revendu — chaque page est créée pour vous, de A à Z.",
+    proof: {
+      src: '/images/realisations/marine-desktop.jpg',
+      projectName: 'Marine Caro — Architecte en Provence',
+      caption: 'Un site vitrine livré sur cette base : direction artistique éditoriale, parcours orienté prise de contact.',
+      href: '/realisations/marine-caro',
+    },
     features: [
       { title: 'Design 100% sur-mesure', desc: 'Aucun template revendu. Chaque page est créée pour votre activité, vos clients et vos objectifs.' },
       { title: 'SEO local optimisé', desc: 'Votre entreprise visible sur Google quand un client cherche votre métier dans votre ville.' },
@@ -286,7 +290,6 @@ export const SERVICES_DATA: ServiceData[] = [
     num: '07',
     badge: 'Nouveau',
     title: 'Formation & Accompagnement IA',
-    heroImage: '/images/services/hero-formation-ia.png',
     price: 'dès 290€/session',
     priceNote: 'session individuelle 2h · pack 5 sessions à 1 290€',
     tagline: 'Apprenez à utiliser l\'IA comme un professionnel, pas comme un amateur.',
@@ -330,7 +333,6 @@ export const SERVICES_DATA: ServiceData[] = [
     num: '05',
     badge: 'Nouveau',
     title: 'Vidéo & Contenu IA',
-    heroImage: '/images/services/hero-video-ia.png',
     price: 'dès 490€/mois',
     priceNote: '8 vidéos/mois · livraison chaque semaine',
     tagline: 'Des Reels qui scrollent pas, qui arrêtent.',
@@ -374,7 +376,6 @@ export const SERVICES_DATA: ServiceData[] = [
     num: '06',
     badge: 'Nouveau',
     title: 'Visibilité IA (AEO/GEO)',
-    heroImage: '/images/services/hero-visibilite-ia.png',
     price: '490€/mois',
     priceNote: 'abonnement mensuel · rapport chaque mois',
     tagline: 'Quand quelqu\'un interroge ChatGPT sur votre secteur, c\'est votre nom qui doit apparaître.',
@@ -423,6 +424,12 @@ export const SERVICES_DATA: ServiceData[] = [
     problem: 'Votre site existe depuis 2 ans et vous n\'apparaissez pas sur Google. Vos concurrents sont devant vous sur tous les mots-clés qui comptent — et leurs clients vous passent sous le nez.',
     description:
       "Le SEO n'est pas de la magie — c'est de la méthode. Audit technique, optimisation on-page, articles ciblés et suivi mensuel des positions. Je travaille sur votre référencement comme si c'était mon propre site, avec un rapport transparent chaque mois.",
+    proof: {
+      src: '/images/realisations/vivesreports-desktop.png',
+      projectName: 'Vives Reports — Guide touristique Rome',
+      caption: 'Positionné page 1 sur "guide touristique Rome" en 4 mois, sans publicité — la méthode SEO appliquée à un projet réel.',
+      href: '/realisations/vives-reports',
+    },
     features: [
       { title: 'Audit SEO complet (mois 1)', desc: 'Audit technique, analyse des mots-clés, audit des 3 concurrents principaux sur Google. Rapport avec feuille de route.' },
       { title: 'Optimisation technique', desc: 'Vitesse, Core Web Vitals, balises title/meta, structure des URL, liens internes.' },
@@ -473,7 +480,6 @@ export const SERVICES_DATA: ServiceData[] = [
     slug: 'crm-automatisation',
     num: '04',
     title: 'CRM & Automatisation IA',
-    heroImage: '/images/services/hero-crm-automatisation.png',
     price: 'Sur Devis',
     priceNote: 'projet sur mesure · devis sous 48h',
     tagline: 'Transformez votre business en machine de croissance qui tourne sans vous.',
@@ -567,7 +573,6 @@ export const SERVICES_DATA: ServiceData[] = [
     slug: 'maintenance',
     num: '09',
     title: 'Maintenance',
-    heroImage: '/images/services/hero-maintenance.png',
     price: 'dès 55€/mois',
     priceNote: 'sans engagement · résiliable à tout moment',
     tagline: 'Votre site en bonne santé, sans y penser.',

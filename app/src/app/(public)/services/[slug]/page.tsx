@@ -1,7 +1,8 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowUpRight, Check, Quote, Phone, CalendarDays, X } from 'lucide-react'
+import { ArrowUpRight, Check, Quote, CalendarDays, X } from 'lucide-react'
 import { SERVICES_DATA, getServiceBySlug } from '@/data/services-data'
 import { getServiceDetail } from '@/data/services-detail'
 import JsonLd from '@/components/seo/JsonLd'
@@ -73,19 +74,23 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
           </Reveal>
 
           <Reveal delay={0.15}>
-            <div className="flex flex-col sm:flex-row gap-3 mt-10">
-              {buyable && <BuyButton offer={buyable.slug} mode={buyable.mode} price={buyable.amountCents / 100} label={buyLabel} />}
+            {/* Une seule action dominante ; l'alternative reste disponible mais discrète (choix unique = moins de friction). */}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-10">
+              {buyable ? (
+                <BuyButton offer={buyable.slug} mode={buyable.mode} price={buyable.amountCents / 100} label={buyLabel} />
+              ) : (
+                <Link
+                  href={`/contact?service=${s.slug}`}
+                  className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
+                >
+                  <CalendarDays className="w-4 h-4" /> Réserver un appel découverte gratuit
+                </Link>
+              )}
               <Link
                 href={`/contact?service=${s.slug}`}
-                className="flex items-center justify-center gap-2 bg-white text-foreground font-semibold px-6 py-3.5 rounded-xl text-sm hover:bg-white/90 transition-colors"
+                className="text-sm font-medium text-white/60 hover:text-white transition-colors underline underline-offset-4"
               >
-                <CalendarDays className="w-4 h-4" /> Réserver un appel découverte gratuit
-              </Link>
-              <Link
-                href="/contact"
-                className="flex items-center justify-center gap-2 border border-white/20 text-white font-medium px-6 py-3.5 rounded-xl text-sm hover:border-white/40 transition-colors"
-              >
-                <Phone className="w-4 h-4" /> Demander un devis par email
+                {buyable ? 'Ou réserver un appel / demander un devis par email' : 'Ou demander un devis par email'} →
               </Link>
             </div>
             {buyable && (
@@ -156,15 +161,44 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
         </div>
       </section>
 
-      {/* ── 5. EN DÉTAIL (deep dive — liste verticale éditoriale, sans carte) ── */}
+      {/* ── PREUVE — un vrai projet livré, jamais une image décorative ── */}
+      {s.proof && (
+        <section className="py-4 sm:py-8">
+          <div className="max-w-5xl mx-auto px-4 sm:px-6">
+            <Reveal>
+              <Link href={s.proof.href} className="group grid md:grid-cols-[1.3fr_1fr] gap-6 md:gap-10 items-center">
+                <div className="rounded-lg overflow-hidden bg-secondary relative aspect-[16/10]">
+                  <Image src={s.proof.src} alt={s.proof.projectName} fill className="object-cover object-top transition-transform duration-500 group-hover:scale-[1.02]" />
+                </div>
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-widest mb-2" style={{ color: '#FF6B00' }}>Exemple réel livré</p>
+                  <p className="font-accent text-2xl text-foreground">{s.proof.projectName}</p>
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.proof.caption}</p>
+                  <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground group-hover:gap-2.5 transition-all">
+                    Voir le projet <ArrowUpRight className="w-3.5 h-3.5" />
+                  </span>
+                </div>
+              </Link>
+            </Reveal>
+          </div>
+        </section>
+      )}
+
+      {/* ── 5. EN DÉTAIL — replié par défaut (« nice to know », pas « need to know ») ── */}
       {detail && detail.length > 0 && (
         <section className="border-t border-border bg-secondary/30 py-20 sm:py-28">
           <div className="max-w-4xl mx-auto px-4 sm:px-6">
-            <SectionHead eyebrow="En détail" title="Comment ça marche," accent="concrètement." />
-            <div className="mt-14 sm:mt-16">
-              {detail.map((sec, i) => (
-                <Reveal key={sec.title}>
-                  <div className="grid gap-4 border-t border-border py-9 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-12">
+            <details className="group">
+              <summary className="cursor-pointer list-none select-none">
+                <SectionHead eyebrow="En détail" title="Comment ça marche," accent="concrètement." />
+                <span className="mt-5 inline-flex items-center gap-2 text-sm font-semibold" style={{ color: '#FF6B00' }}>
+                  Voir le détail complet
+                  <span className="w-5 h-5 rounded-full border flex items-center justify-center group-open:rotate-45 transition-transform text-base leading-none" style={{ borderColor: '#FF6B00' }}>+</span>
+                </span>
+              </summary>
+              <div className="mt-10">
+                {detail.map((sec, i) => (
+                  <div key={sec.title} className="grid gap-4 border-t border-border py-9 sm:grid-cols-[5rem_1fr] sm:gap-10 sm:py-12">
                     <span className="font-mono text-3xl font-bold leading-none text-foreground/15 sm:text-4xl">0{i + 1}</span>
                     <div>
                       <h3 className="text-xl sm:text-2xl font-bold text-foreground">{sec.title}</h3>
@@ -184,9 +218,9 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
                       )}
                     </div>
                   </div>
-                </Reveal>
-              ))}
-            </div>
+                ))}
+              </div>
+            </details>
           </div>
         </section>
       )}
