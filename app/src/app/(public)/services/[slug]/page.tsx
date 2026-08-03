@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { ArrowUpRight, Check, Quote, Phone, CalendarDays, X } from 'lucide-react'
@@ -72,14 +71,6 @@ export default async function ServicePage({ params }: { params: Promise<{ slug: 
               </div>
             </div>
           </Reveal>
-
-          {s.heroImage && (
-            <Reveal delay={0.1}>
-              <div className="mt-10 rounded-2xl overflow-hidden h-64 md:h-80 relative">
-                <Image src={s.heroImage} alt={s.title} fill className="object-cover" />
-              </div>
-            </Reveal>
-          )}
 
           <Reveal delay={0.15}>
             <div className="flex flex-col sm:flex-row gap-3 mt-10">
