@@ -1,11 +1,14 @@
 ﻿import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowUpRight, ArrowLeft } from 'lucide-react'
+import { ArrowUpRight, ArrowLeft, Clock } from 'lucide-react'
 import { articlesService } from '@/services/supabase.service'
 import JsonLd from '@/components/seo/JsonLd'
 import { breadcrumbSchema, articleSchema, faqSchema, faqFromArticleHtml, SITE_URL } from '@/lib/schema'
-import { enhanceArticleHtml } from '@/lib/article-html'
+import { processArticleHtml, estimateReadingTime } from '@/lib/article-html'
+import ReadingProgress from '@/components/blog/ReadingProgress'
+import TableOfContents from '@/components/blog/TableOfContents'
+import ShareLinks from '@/components/blog/ShareLinks'
 
 // Articles de secours, servis si Supabase est injoignable. Typés explicitement
 // (la règle projet est 0 `any`) et alignés sur la table `articles`.
@@ -87,63 +90,146 @@ export default async function BlogArticlePage({ params }: Props) {
   // invisible pour l'utilisateur). S'applique automatiquement à tous les articles,
   // existants comme futurs, puisque ce fichier est le gabarit partagé.
   const articleFaq = faqFromArticleHtml(article.contenu)
+  // headings alimente le sommaire (desktop sticky + accordéon mobile) ; les `id`
+  // injectés dans le HTML sont les MÊMES slugs (un seul walk, cf. article-html.ts)
+  // donc les ancres #slug pointent toujours sur le bon titre.
+  const { html: articleHtml, headings } = processArticleHtml(article.contenu)
+  const readingTime = estimateReadingTime(article.contenu)
+  const articleUrl = `${SITE_URL}/blog/${slug}`
+  const dateLabel = article.date_pub
+    ? new Date(article.date_pub).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+    : null
 
   return (
-    <article className="min-h-screen bg-background pt-28 pb-20">
+    <article className="min-h-screen bg-background pb-20">
+      <ReadingProgress />
       <JsonLd data={articleSchema({ ...article, slug })} />
       {articleFaq.length > 0 && <JsonLd data={faqSchema(articleFaq)} />}
       <JsonLd data={breadcrumbSchema([
         { name: 'Accueil', url: SITE_URL },
         { name: 'Blog', url: `${SITE_URL}/blog` },
-        { name: article.titre, url: `${SITE_URL}/blog/${slug}` },
+        { name: article.titre, url: articleUrl },
       ])} />
-      <div className="max-w-3xl mx-auto px-6">
-        <Link href="/blog" className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-8">
-          <ArrowLeft className="w-4 h-4" /> Retour au blog
-        </Link>
-        <div className="mb-6">
-          {article.categorie && (
-            <span className="text-xs font-semibold uppercase tracking-wider px-3 py-1 rounded-full bg-secondary text-muted-foreground">{article.categorie}</span>
-          )}
-          {/* Sans ce garde, un article sans date_pub affichait « Invalid Date » en clair
-              sur la page (new Date(undefined)). Le `any` d'origine masquait le cas. */}
-          {article.date_pub && (
-            <p className="mt-3 text-xs text-muted-foreground">{new Date(article.date_pub).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
-          )}
-        </div>
-        <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground leading-tight mb-6">{article.titre}</h1>
-        <p className="text-lg text-muted-foreground leading-relaxed mb-10 pb-10 border-b border-border">{article.extrait}</p>
-        {article.image_url && (
-          <div className="rounded-2xl overflow-hidden mb-10">
-            <img src={article.image_url} alt={article.titre} className="w-full h-auto object-cover" />
+
+      <div className="max-w-6xl mx-auto px-6">
+        {/* Ligne fine : retour + méta — remplit la largeur dès le haut plutôt
+            que de laisser la colonne centrale flotter seule sur grand écran. */}
+        <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-3 border-b border-border pt-28 pb-6 text-sm">
+          <Link href="/blog" className="inline-flex items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
+            <ArrowLeft className="w-4 h-4" /> Retour au blog
+          </Link>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+            {article.categorie && <span className="font-semibold uppercase tracking-wider text-foreground/70">{article.categorie}</span>}
+            {article.categorie && dateLabel && <span aria-hidden="true">·</span>}
+            {dateLabel && <span>{dateLabel}</span>}
+            <span aria-hidden="true">·</span>
+            <span className="inline-flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {readingTime} min de lecture</span>
           </div>
+        </div>
+
+        {/* Titre — pleine largeur, au-dessus du bloc image+chapô */}
+        <h1 className="max-w-4xl pt-10 pb-8 text-3xl font-bold leading-[1.1] tracking-tight text-foreground sm:text-4xl lg:text-[2.75rem]">
+          {article.titre}
+        </h1>
+
+        {/* Hero en 2 blocs : image contenue + chapô/byline/partage à côté,
+            plutôt qu'image pleine largeur puis texte dessous — remplit la
+            largeur du haut de page sans bleed ni carte (cf. recherche
+            concurrentielle blog-article-deep/SYNTHESE.md, pattern B/C). */}
+        <div className="grid gap-8 pb-14 md:grid-cols-2 md:gap-12 md:items-center lg:pb-16">
+          <div className={article.image_url ? 'order-2 md:order-1' : 'order-1 md:col-span-2'}>
+            {article.image_url && (
+              <div className="aspect-[4/3] overflow-hidden rounded-2xl border border-border">
+                <img src={article.image_url} alt={article.titre} className="h-full w-full object-cover" />
+              </div>
+            )}
+          </div>
+          <div className={article.image_url ? 'order-1 md:order-2' : 'order-2'}>
+            {article.extrait && (
+              <p className="text-lg leading-relaxed text-muted-foreground">{article.extrait}</p>
+            )}
+            <div className="mt-6 flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-foreground text-xs font-semibold text-white">BV</span>
+              <div className="text-sm">
+                <p className="font-semibold text-foreground">Béranger Vives</p>
+                <p className="text-muted-foreground">Fondateur, vivesmedia.com</p>
+              </div>
+            </div>
+            <div className="mt-6">
+              <ShareLinks url={articleUrl} title={article.titre} />
+            </div>
+          </div>
+        </div>
+
+        {/* Sommaire mobile — encart dépliable entre le hero et le corps de
+            texte (jamais une sidebar identique réduite : sur les 10 sites
+            étudiés, aucun ne garde la sidebar telle quelle en mobile).
+            Masqué sous 3 titres : pas assez de structure pour justifier un
+            sommaire, cf. pattern Attio/Ahrefs. */}
+        {headings.length >= 3 && (
+          <details className="group mb-10 border-y border-border py-1 lg:hidden">
+            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-3 select-none">
+              <span className="text-sm font-semibold text-foreground">Sommaire</span>
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-border text-lg leading-none text-muted-foreground transition-transform group-open:rotate-45">+</span>
+            </summary>
+            <div className="pb-4">
+              <TableOfContents headings={headings} />
+            </div>
+          </details>
         )}
-        {/* La mise en forme vit dans .article-content (globals.css) : le HTML
-            vient de Supabase sans aucune classe, il faut donc styler les balises
-            elles-mêmes. Les classes `prose`/`prose-lg` qui étaient ici étaient
-            mortes (@tailwindcss/typography n'est pas installé). */}
-        <div className="article-content"
-          dangerouslySetInnerHTML={{ __html: enhanceArticleHtml(article.contenu) }} />
-        {/* Maillage interne — diffuse l'autorité de l'article vers les pages services */}
-        <div className="mt-14 pt-10 border-t border-border">
-          <p className="text-xs font-semibold uppercase tracking-widest mb-4" style={{ color: '#FF6B00' }}>Aller plus loin</p>
-          <h2 className="text-xl font-bold text-foreground mb-5">Les services liés à cet article</h2>
-          <div className="grid sm:grid-cols-2 gap-3">
+
+        {/* Corps de l'article + sommaire sticky (desktop uniquement).
+            La mesure de lecture (--measure, 550px) reste gérée par
+            .article-content dans globals.css : ici on ne fixe que la largeur
+            de la CELLULE de grille, pas celle du texte. */}
+        <div className="grid grid-cols-1 gap-x-16 gap-y-10 lg:grid-cols-[minmax(0,1fr)_280px]">
+          {/* La mise en forme vit dans .article-content (globals.css) : le HTML
+              vient de Supabase sans aucune classe, il faut donc styler les balises
+              elles-mêmes. Les classes `prose`/`prose-lg` qui étaient ici étaient
+              mortes (@tailwindcss/typography n'est pas installé). */}
+          <div className="article-content" dangerouslySetInnerHTML={{ __html: articleHtml }} />
+
+          <aside className="hidden lg:block">
+            <div className="sticky top-28">
+              {headings.length >= 2 && (
+                <>
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-widest text-muted-foreground">Sommaire</p>
+                  <TableOfContents headings={headings} />
+                </>
+              )}
+              <div className={headings.length >= 2 ? 'mt-8 border-t border-border pt-6' : ''}>
+                <p className="mb-1.5 text-sm font-semibold text-foreground">Un projet en tête ?</p>
+                <p className="mb-4 text-sm leading-relaxed text-muted-foreground">Devis gratuit sous 24h, sans engagement.</p>
+                <Link href="/contact" className="group inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                  Demander un devis
+                  <ArrowUpRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </Link>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* Maillage interne — diffuse l'autorité de l'article vers les pages services.
+            Liste divisée par filets, pas de cards (doctrine éditoriale du site). */}
+        <div className="mt-16 border-t border-border pt-10">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-widest" style={{ color: '#FF6B00' }}>Aller plus loin</p>
+          <h2 className="mb-2 text-xl font-bold text-foreground">Les services liés à cet article</h2>
+          <div className="mt-4 border-t border-border">
             {relatedServices(article).map((s) => (
               <Link key={s.slug} href={`/services/${s.slug}`}
-                className="group flex items-center justify-between rounded-xl border border-border bg-white px-5 py-4 transition-colors hover:border-foreground/30">
+                className="group flex items-center justify-between border-b border-border py-4 transition-colors">
                 <span className="text-sm font-semibold text-foreground">{s.label}</span>
-                <ArrowUpRight className="w-4 h-4 text-muted-foreground transition-colors group-hover:text-foreground" />
+                <ArrowUpRight className="w-4 h-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
               </Link>
             ))}
           </div>
         </div>
 
-        <div className="mt-10 pt-10 border-t border-border">
-          <div className="rounded-2xl bg-foreground p-8 text-center">
-            <h3 className="text-xl font-bold text-white mb-2">Prêt à transformer votre présence en ligne ?</h3>
-            <p className="text-white/70 text-sm mb-6">Devis gratuit sous 24h — sans engagement.</p>
-            <Link href="/contact" className="inline-flex items-center gap-2 bg-white text-foreground font-semibold px-6 py-3 rounded-full hover:bg-white/90 transition-colors text-sm">
+        <div className="mt-10 pt-10">
+          <div className="rounded-2xl bg-foreground p-8 text-center md:p-12">
+            <h3 className="mb-2 text-xl font-bold text-white">Prêt à transformer votre présence en ligne ?</h3>
+            <p className="mb-6 text-sm text-white/70">Devis gratuit sous 24h — sans engagement.</p>
+            <Link href="/contact" className="inline-flex items-center gap-2 rounded-xl bg-white px-6 py-3 text-sm font-semibold text-foreground transition-colors hover:bg-white/90">
               Demander un devis <ArrowUpRight className="w-4 h-4" />
             </Link>
           </div>
