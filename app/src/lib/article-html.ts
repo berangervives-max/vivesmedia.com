@@ -28,6 +28,23 @@ export type ArticleHeading = { id: string; text: string; level: 2 | 3 }
 // éviter tout risque d'encodage silencieux d'un caractère combinant littéral en source.
 const DIACRITICS_RE = new RegExp('[' + String.fromCharCode(0x0300) + '-' + String.fromCharCode(0x036f) + ']', 'g')
 
+// Le HTML stocké en base peut venir d'une conversion Markdown→HTML (entités
+// échappées : &#x27;, &amp;...) ou avoir été tapé à la main dans le /cms (texte
+// brut). Sans ce décodage, un titre avec apostrophe produisait un id "qu-x27-"
+// ET un texte de sommaire affiché « Qu&#x27;est-ce... » (double échappement :
+// React ré-échappe le `&` littéral en l'insérant comme enfant JSX).
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#x([0-9a-f]+);/gi, (_m, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_m, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&apos;/g, "'")
+    .replace(/&nbsp;/g, ' ')
+}
+
 function slugifyHeading(text: string): string {
   return text
     .toLowerCase()
@@ -46,7 +63,7 @@ export function processArticleHtml(html: string | null | undefined): { html: str
   const headings: ArticleHeading[] = []
   const seen = new Map<string, number>()
   const withIds = html.replace(/<h([23])((?:\s[^>]*)?)>([\s\S]*?)<\/h\1>/gi, (_m, lvl: string, attrs: string, inner: string) => {
-    const text = inner.replace(/<[^>]+>/g, '').trim()
+    const text = decodeHtmlEntities(inner.replace(/<[^>]+>/g, '')).trim()
     if (!text) return `<h${lvl}${attrs}>${inner}</h${lvl}>`
     let slug = slugifyHeading(text)
     const count = seen.get(slug) ?? 0
