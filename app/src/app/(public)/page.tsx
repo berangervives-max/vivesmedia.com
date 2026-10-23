@@ -3,7 +3,7 @@ import HeroSection from '@/components/home/HeroSection'
 import LogoMarquee from '@/components/home/LogoMarquee'
 import AboutSection from '@/components/home/AboutSection'
 import ServicesSection from '@/components/home/ServicesSection'
-import LeadCaptureSection from '@/components/home/LeadCaptureSection'
+// import LeadCaptureSection from '@/components/home/LeadCaptureSection' // réactiver avec le composant ci-dessous une fois supabase/leads.sql exécuté
 import ProcessSection from '@/components/home/ProcessSection'
 import WorkSection from '@/components/home/WorkSection'
 import TestimonialsSection from '@/components/home/TestimonialsSection'
@@ -22,7 +22,7 @@ export default function HomePage() {
       <HeroSection />
       <LogoMarquee />
       <ServicesSection />
-      <LeadCaptureSection />
+      {/* LeadCaptureSection : réactiver dès que supabase/leads.sql est exécuté en prod (sinon /api/leads répond 500) */}
       <ProcessSection />
       <WorkSection />
       <TestimonialsSection />
