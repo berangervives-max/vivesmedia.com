@@ -5,8 +5,9 @@ create table if not exists public.leads (
   id              uuid primary key default gen_random_uuid(),
   email           text not null unique, -- normalisé (trim+lower) à l'écriture, une ligne par email
   source          text not null default 'accueil', -- emplacement du formulaire sur le site
-  statut          text not null default 'nouveau',  -- nouveau | contacte | sans_suite
-  created_at      timestamptz not null default now()
+  statut          text not null default 'nouveau',  -- nouveau | contacte | sans_suite — géré depuis le CMS, jamais réécrit par une resoumission publique
+  created_at      timestamptz not null default now(), -- date de création, posée une fois, jamais réécrite
+  last_seen_at    timestamptz not null default now()  -- dernière resoumission publique — seule colonne que le formulaire peut mettre à jour, sert au anti-doublon/rate-limit
 );
 
 create index if not exists leads_email_idx on public.leads (email);
@@ -21,10 +22,14 @@ create policy "admin all leads" on public.leads
 -- (security definer) via /api/leads avec la clé service_role, jamais par un
 -- client anon direct.
 
--- Capture atomique : une seule ligne par email, ré-écrite si elle a plus de
--- 10 minutes. Renvoie true seulement quand l'appelant doit envoyer l'email de
--- confirmation (évite la fenêtre de course d'un "vérifier puis insérer" côté
--- application, et le double-envoi sur deux requêtes quasi simultanées).
+-- Capture atomique : une seule ligne par email. Un premier passage crée la
+-- ligne (statut 'nouveau', géré ensuite depuis le CMS). Une resoumission ne
+-- touche QUE last_seen_at, jamais statut/source/created_at — un visiteur qui
+-- resoumet son email ne doit jamais pouvoir remettre à zéro un lead que
+-- Béranger a déjà traité dans le CMS. Renvoie true seulement quand l'appelant
+-- doit envoyer l'email de confirmation (évite la fenêtre de course d'un
+-- "vérifier puis insérer" côté application, et le double-envoi sur deux
+-- requêtes quasi simultanées).
 create or replace function public.try_capture_lead(p_email text, p_source text)
 returns boolean
 language plpgsql
@@ -35,14 +40,14 @@ declare
   v_email text := lower(trim(p_email));
   v_row public.leads;
 begin
-  insert into public.leads (email, source, statut)
-  values (v_email, p_source, 'nouveau')
+  insert into public.leads (email, source, statut, last_seen_at)
+  values (v_email, p_source, 'nouveau', now())
   on conflict (email) do update
-    set source = excluded.source, statut = 'nouveau', created_at = now()
-    where public.leads.created_at < now() - interval '10 minutes'
+    set last_seen_at = now()
+    where public.leads.last_seen_at < now() - interval '10 minutes'
   returning * into v_row;
 
-  return v_row.id is not null; -- une ligne est revenue → insert ou update accepté → notifier
+  return v_row.id is not null; -- une ligne est revenue → insert ou doublon hors fenêtre → notifier
 end;
 $$;
 

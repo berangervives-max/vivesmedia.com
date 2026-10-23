@@ -195,4 +195,5 @@ export interface Lead {
   source: string
   statut: 'nouveau' | 'contacte' | 'sans_suite'
   created_at: string
+  last_seen_at: string
 }
