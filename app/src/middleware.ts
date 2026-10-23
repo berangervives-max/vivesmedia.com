@@ -14,7 +14,7 @@ function isLimited(ip: string): boolean {
   return arr.length > MAX_HITS
 }
 
-const RATE_LIMITED = ['/api/devis', '/api/rappel', '/api/newsletter', '/api/checkout', '/api/track']
+const RATE_LIMITED = ['/api/devis', '/api/rappel', '/api/newsletter', '/api/checkout', '/api/track', '/api/leads']
 const HUB_PUBLIC = ['/hub/login', '/hub/auth']
 
 // Client Supabase SSR partagé (lecture des cookies de session, rafraîchissement).
@@ -79,5 +79,6 @@ export const config = {
     '/api/newsletter/:path*',
     '/api/checkout/:path*',
     '/api/track/:path*',
+    '/api/leads/:path*',
   ],
 }

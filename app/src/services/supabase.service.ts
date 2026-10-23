@@ -370,6 +370,17 @@ export const crmService = {
 // ── NEWSLETTER ────────────────────────────────────────────────
 // ── LEADS (capture rapide accueil, B14) ─────────────────────────
 export const leadsService = {
+  // Anti-doublon : un même email ne redéclenche pas un envoi tant qu'une
+  // demande reçue dans les 10 dernières minutes n'a pas expiré (évite qu'une
+  // boucle de requêtes — même sous le seuil de rate-limit par IP — spamme
+  // la même boîte de confirmation ou noie l'admin de doublons).
+  async hasRecent(email: string, withinMs = 10 * 60_000) {
+    const sb = createServiceClient()
+    const since = new Date(Date.now() - withinMs).toISOString()
+    const { data, error } = await sb.from('leads').select('id').eq('email', email).gte('created_at', since).limit(1)
+    if (error) throw error
+    return (data?.length ?? 0) > 0
+  },
   async create(email: string, source: string = 'accueil') {
     const sb = createServiceClient()
     const { data, error } = await sb.from('leads').insert({ email, source, statut: 'nouveau' }).select().single()

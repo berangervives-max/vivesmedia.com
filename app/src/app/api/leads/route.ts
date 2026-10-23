@@ -17,6 +17,12 @@ export async function POST(req: NextRequest) {
     const ALLOWED_SOURCES = ['accueil'] as const
     const safeSource = ALLOWED_SOURCES.includes(source) ? source : 'accueil'
 
+    // Anti-doublon : même email déjà reçu il y a moins de 10 min → succès
+    // silencieux, aucune nouvelle ligne ni email renvoyé (voir leadsService.hasRecent).
+    if (await leadsService.hasRecent(email)) {
+      return NextResponse.json({ success: true })
+    }
+
     const lead = await leadsService.create(email, safeSource)
     await sendLeadConfirmation({ email, source: safeSource })
 
