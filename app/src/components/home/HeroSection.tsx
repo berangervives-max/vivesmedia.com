@@ -29,7 +29,7 @@ export default function HeroSection() {
         </motion.h1>
         <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.15 }}
           className="mt-7 text-foreground/75 text-base md:text-lg max-w-xl mx-auto leading-relaxed">
-          Sites sur-mesure, rapides, pensés pour convertir. Livraison en 3 semaines, full remote, partout en France.
+          Sites sur-mesure pour artisans, commerces et marques à Avignon et dans le Vaucluse. Dès 1 800€, livraison en 3 semaines, full remote partout en France.
         </motion.p>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.3 }}
           className="mt-10 flex flex-col items-center gap-6">

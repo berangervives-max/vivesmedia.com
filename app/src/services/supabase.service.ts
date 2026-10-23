@@ -1,5 +1,5 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
-import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation, SocialPost, Proposal } from '@/types'
+import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Lead, Realisation, SocialPost, Proposal } from '@/types'
 import type { RealisationData } from '@/data/realisations-data'
 
 // ── PROPOSITIONS À VALIDER (cockpit) ────────────────────────────
@@ -368,6 +368,22 @@ export const crmService = {
 }
 
 // ── NEWSLETTER ────────────────────────────────────────────────
+// ── LEADS (capture rapide accueil, B14) ─────────────────────────
+export const leadsService = {
+  async create(email: string, source: string = 'accueil') {
+    const sb = createServiceClient()
+    const { data, error } = await sb.from('leads').insert({ email, source, statut: 'nouveau' }).select().single()
+    if (error) throw error
+    return data as Lead
+  },
+  async getAll() {
+    const sb = createClient()
+    const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Lead[]
+  },
+}
+
 export const newsletterService = {
   async subscribe(email: string) {
     const sb = createServiceClient()

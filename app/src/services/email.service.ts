@@ -1,3 +1,10 @@
+// Échappe une valeur avant de l'interpoler dans du HTML d'email — toute donnée
+// saisie par un visiteur (lead, devis...) doit passer par ici avant d'atterrir
+// dans un template, sinon injection HTML possible dans la boîte de réception.
+function esc(s: unknown): string {
+  return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] as string))
+}
+
 const RESEND_API_KEY = process.env.RESEND_API_KEY
 // Domaine vivesmedia.com vérifié dans Resend (DKIM + SPF + DMARC, 20/06/2026)
 // → envoi possible vers n'importe quel destinataire depuis contact@vivesmedia.com.
@@ -35,6 +42,37 @@ export async function sendDevisReceived(devis: { nom: string; email: string; ser
       <p>Merci pour votre demande. Je reviendrai vers vous dans les 24h.</p>
       <p>— Béranger Vives · <a href="https://vivesmedia.com">vivesmedia.com</a></p>
     `),
+  ])
+}
+
+export async function sendLeadConfirmation(lead: { email: string; source?: string }) {
+  await Promise.all([
+    send(ADMIN, `Nouveau lead (capture rapide) — ${esc(lead.email)}`, `
+      <h2>Nouveau lead</h2>
+      <p><strong>Email :</strong> ${esc(lead.email)}</p>
+      <p><strong>Source :</strong> ${esc(lead.source || 'accueil')}</p>
+      <p>À recontacter sous 24h (promesse envoyée au visiteur).</p>
+    `),
+    send(lead.email, "C'est noté, je reviens vers vous sous 24h — vivesmedia.com", `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,sans-serif;max-width:480px;margin:0 auto;padding:32px 24px;text-align:center;color:#17150f">
+      <p style="font-weight:700;font-size:14px;margin:0 0 20px">vivesmedia<span style="color:#FF6B00">.com</span></p>
+      <h2 style="font-size:24px;margin:0 0 14px">C'est noté.</h2>
+      <p style="font-size:14px;line-height:1.6;color:rgba(23,21,15,.75);max-width:380px;margin:0 auto 18px">
+        Merci pour votre message. Je l'ai bien reçu et je vous recontacte personnellement sous 24h, du lundi au vendredi.
+        En attendant, vous pouvez réserver un créneau directement dans mon agenda.
+      </p>
+      <div style="display:flex;justify-content:center;gap:20px;margin:20px 0">
+        <div><div style="font-weight:700;font-size:16px">5+</div><div style="font-size:10px;color:rgba(23,21,15,.5)">ans d'expérience</div></div>
+        <div><div style="font-weight:700;font-size:16px">100%</div><div style="font-size:10px;color:rgba(23,21,15,.5)">full remote, France</div></div>
+        <div><div style="font-weight:700;font-size:16px">Vives Reports</div><div style="font-size:10px;color:rgba(23,21,15,.5)">client réel, en ligne</div></div>
+      </div>
+      <a href="https://vivesmedia.com/contact" style="display:inline-block;background:#FF6B00;color:#fff;font-weight:600;font-size:13px;padding:12px 24px;border-radius:999px;text-decoration:none;margin-top:6px">Réserver un appel de 30 min</a>
+      <p style="font-size:10px;color:rgba(23,21,15,.42);margin-top:28px;line-height:1.6">
+        vivesmedia.com · Béranger Vives, entrepreneur individuel · RCS Avignon<br>
+        Vous recevez cet email car vous avez laissé votre contact sur vivesmedia.com
+      </p>
+    </div>
+  `),
   ])
 }
 
