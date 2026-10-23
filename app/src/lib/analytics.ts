@@ -19,6 +19,7 @@ export type FunnelEvent =
   | 'devis_submitted'      // devis envoyé (props: service, budget, has_message, has_phone)
   | 'devis_failed'         // échec d'envoi (props: reason)
   | 'newsletter_subscribed'// inscription newsletter (props: location)
+  | 'lead_captured'        // capture email rapide, bloc accueil B14 (props: location, source)
   | 'checkout_started'     // clic Souscrire/Acheter (props: offer, price, mode)
   | 'checkout_completed'   // retour de paiement réussi (props: offer)
   | 'checkout_failed'      // échec création checkout (props: reason)

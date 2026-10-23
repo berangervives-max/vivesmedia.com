@@ -1,5 +1,5 @@
 import { createClient, createServiceClient } from '@/lib/supabase'
-import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Realisation, SocialPost, Proposal } from '@/types'
+import type { Client, Devis, Facture, Commande, Article, Service, Temoignage, Newsletter, Lead, Realisation, SocialPost, Proposal } from '@/types'
 import type { RealisationData } from '@/data/realisations-data'
 
 // ── PROPOSITIONS À VALIDER (cockpit) ────────────────────────────
@@ -368,6 +368,28 @@ export const crmService = {
 }
 
 // ── NEWSLETTER ────────────────────────────────────────────────
+// ── LEADS (capture rapide accueil, B14) ─────────────────────────
+export const leadsService = {
+  // Capture atomique via la fonction Postgres try_capture_lead (voir
+  // supabase/leads.sql) : une seule ligne par email (normalisé trim+lower côté
+  // SQL), ré-écrite seulement si la précédente a plus de 10 minutes. Le
+  // insert/update et la décision anti-doublon se font dans la même requête
+  // SQL — pas de fenêtre de course entre un "vérifier" et un "écrire" côté
+  // application. Renvoie true seulement si l'appelant doit notifier.
+  async capture(email: string, source: string = 'accueil'): Promise<boolean> {
+    const sb = createServiceClient()
+    const { data, error } = await sb.rpc('try_capture_lead', { p_email: email, p_source: source })
+    if (error) throw error
+    return data === true
+  },
+  async getAll() {
+    const sb = createClient()
+    const { data, error } = await sb.from('leads').select('*').order('created_at', { ascending: false })
+    if (error) throw error
+    return data as Lead[]
+  },
+}
+
 export const newsletterService = {
   async subscribe(email: string) {
     const sb = createServiceClient()

@@ -188,3 +188,12 @@ export interface Newsletter {
   actif: boolean
   date_inscription: string
 }
+
+export interface Lead {
+  id: string
+  email: string
+  source: string
+  statut: 'nouveau' | 'contacte' | 'sans_suite'
+  created_at: string
+  last_seen_at: string
+}

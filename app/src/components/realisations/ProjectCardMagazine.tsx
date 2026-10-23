@@ -14,6 +14,12 @@ export type MagazineCard = {
   href: string
   num?: string
   featured?: boolean
+  status?: 'livre' | 'concept'
+}
+
+const STATUS_LABEL: Record<'livre' | 'concept', string> = {
+  livre: 'Client livré',
+  concept: 'Concept',
 }
 
 /** Chip de tag façon magazine : petit point orange + libellé. */
@@ -96,6 +102,19 @@ export default function ProjectCardMagazine({
             {p.year && <span className="shrink-0 font-mono text-xs text-muted-foreground">{p.year}</span>}
           </div>
           <p className={`mt-1.5 text-muted-foreground ${big ? 'text-base' : 'text-sm'}`}>{p.type}</p>
+
+          {p.status && (
+            <span
+              className="mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider"
+              style={
+                p.status === 'livre'
+                  ? { backgroundColor: '#E4F3E9', color: '#1E6B3C' }
+                  : { backgroundColor: '#F1EEE7', color: 'var(--muted-foreground)' }
+              }
+            >
+              {STATUS_LABEL[p.status]}
+            </span>
+          )}
 
           {p.tags && p.tags.length > 0 && (
             <div className="mt-4 flex flex-wrap gap-2">
